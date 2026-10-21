@@ -45,11 +45,11 @@ backend ──HTTP POST /v1/execute──▶ FastAPI handler (async)
                                         │ for each test case, sequentially:
                                         ▼
                          asyncio.create_subprocess_exec(
-                             sys.executable, -I, harness.py, solution.py, limits…)
+                             sys.executable, -P -s -B, harness.py, solution.py, limits…)
                                         │ stdin  ← test.stdin
                                         │ stdout → captured (capped)
                                         │ stderr → captured (capped)
-                                        │ fd 3   → harness report (JSON)
+                                        │ report pipe fd → harness report (JSON)
                                         ▼
                          classify → compare output → stop on first failure
 ```
@@ -273,8 +273,9 @@ memory budget.
 
 ```python
 proc = await asyncio.create_subprocess_exec(
-    sys.executable, "-I", "-X", "utf8", HARNESS_PATH,
+    sys.executable, "-P", "-s", "-B", "-X", "utf8", HARNESS_PATH,
     "solution.py", str(time_limit_ms), str(memory_limit_mb),
+    str(AS_OVERHEAD_MB), str(FSIZE_LIMIT_BYTES), str(report_w),
     stdin=PIPE, stdout=PIPE, stderr=PIPE,
     pass_fds=(report_w,),          # harness writes its JSON report here
     cwd=workdir,
@@ -283,8 +284,9 @@ proc = await asyncio.create_subprocess_exec(
 )
 ```
 
-- `-I` (isolated mode): ignore `PYTHON*` env vars and user site-packages, and don't put the
-  script's directory on `sys.path` (so a user can't shadow modules).
+- `-P -s -B`: don't put the script's directory on `sys.path` (so a user can't shadow modules),
+  ignore user site-packages, don't write `.pyc` files. This is `-I` minus `-E`: `-I` would also
+  ignore `PYTHONHASHSEED`, and the env is already a fresh dict we control.
 - `env` is a fresh minimal dict — **never** inherit the server's env (it holds `EXECUTOR_TOKEN`
   and any other secrets).
 - `start_new_session=True` so `os.killpg(proc.pid, SIGKILL)` kills any processes the user spawned.
@@ -308,8 +310,9 @@ proc = await asyncio.create_subprocess_exec(
      SystemExit(other)        → print message to stderr, report {"status": "exit", "code": n}, exit 1
      BaseException            → traceback.print_exc() to stderr, report {"status": "exception"}, exit 1
 5. Flush stdout (a failure to flush, e.g. BrokenPipe, → exception).
-6. Report {"status": "ok", "peak_rss_kb": getrusage(RUSAGE_SELF).ru_maxrss}; exit 0.
-   Every report path includes peak_rss_kb.
+6. Report {"status": "ok", "peak_rss_kb": VmHWM from /proc/self/status}; os._exit(0).
+   Every report path includes peak_rss_kb. (Not ru_maxrss: on Linux it survives exec, so it
+   would include the forked server's RSS.)
 ```
 
 Running user code via `exec` *inside the child* is fine — the isolation boundary is the process,
@@ -328,6 +331,8 @@ fall back to exit code/signal.
   - stderr cap = 64 KiB
   - On exceeding a cap: kill the process group, mark `output_limit_exceeded`.
   - Writing stdin: ignore `BrokenPipeError`/`ConnectionResetError` (program may not read all input).
+- Detect exit with a `pidfd` (`os.pidfd_open` + `loop.add_reader`), not `proc.wait()`: asyncio's
+  `wait()` also waits for the pipes to close, which leftover descendants keep open.
 - Wall timeout: `asyncio.timeout(time_limit_ms / 1000 + WALL_GRACE_S)` (default grace 0.5 s,
   absorbs interpreter start-up ≈ 20–40 ms). On timeout → `os.killpg(pgid, SIGKILL)`, `await proc.wait()`.
 - `time_ms` = `time.monotonic()` from this test's spawn to its exit (includes interpreter start-up; documented).
@@ -405,7 +410,7 @@ Container hardening (Dockerfile / compose):
 ## 8. Project layout
 
 ```
-code-executor/
+code-execution/
 ├── app/
 │   ├── main.py
 │   ├── config.py
@@ -422,6 +427,7 @@ code-executor/
 │   ├── test_security.py
 │   └── test_concurrency.py
 ├── Dockerfile
+├── README.md          # run commands, incl. the hardened `docker run` flags
 └── pyproject.toml
 ```
 
