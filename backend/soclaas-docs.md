@@ -1,0 +1,491 @@
+# SoCLaaS API Reference
+
+This document is the user-facing API reference for SoCLaaS as currently implemented.
+
+SoCLaaS exposes an OpenAI-compatible gateway API for inference plus a separate self-service portal API for API-key lifecycle and budget visibility.
+
+## Authentication
+
+Gateway requests to `/v1/*` require:
+
+```http
+Authorization: Bearer <soclaas-api-key>
+```
+
+SoCLaaS API keys use this format:
+
+```text
+clsk_<prefix>_<secret>
+```
+
+If the bearer token is missing, the gateway returns `401` with:
+
+```json
+{
+  "error": "missing bearer token"
+}
+```
+
+If the API key is invalid or revoked, the gateway returns `401` with:
+
+```json
+{
+  "error": "invalid API key"
+}
+```
+
+## Endpoints
+
+| Method | Path |
+| --- | --- |
+| `GET` | `/v1/models` |
+| `POST` | `/v1/chat/completions` |
+| `POST` | `/v1/responses` |
+| `POST` | `/v1/embeddings` |
+| `POST` | `/v1/audio/transcriptions` |
+
+Only the `/v1/*` endpoints are intended for application users.
+
+## Common gateway behavior
+
+- Public model names are operator-managed aliases. Clients should use the `id` values returned by `GET /v1/models`.
+- Model access rules apply both to `GET /v1/models` and to generation requests. If a key cannot use a model, it will not appear in the model list.
+- Requests may be rejected with `429` for either rate limits or budget limits.
+- Daily and monthly spend windows reset on UTC boundaries.
+- Usage and accounting are recorded against the authenticated SoCLaaS API key.
+
+## API endpoints
+
+The `SOCLAAS_BASE_URL` in the following examples is the gateway origin, such as `https://gateway.example.com`.
+
+### `GET /v1/models`
+
+Returns the model catalog visible to the calling API key.
+
+Example:
+
+```bash
+curl \
+  -H "Authorization: Bearer $SOCLAAS_API_KEY" \
+  "${SOCLAAS_BASE_URL}/v1/models"
+```
+
+Example response:
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "llama3.1:8b",
+      "object": "model",
+      "created": 0,
+      "owned_by": "soclaas",
+      "context_length": 65536,
+      "context_window": 65536,
+      "max_context_length": 65536,
+      "max_model_len": 65536,
+      "soclaas": {
+        "display_name": "Llama 3.1 8B",
+        "description": "Capable small-model experimentation",
+        "capabilities": ["chat"],
+        "input_microdollars_per_million_tokens": 74250,
+        "output_microdollars_per_million_tokens": 86750,
+        "audio_microdollars_per_minute": 0
+      }
+    }
+  ]
+}
+```
+
+Notes:
+
+- Standard OpenAI-style model fields are preserved.
+- SoCLaaS-specific catalog metadata is namespaced under `soclaas`.
+- `soclaas.display_name` and `soclaas.description` may be blank if operators have not set them.
+
+#### Verified model catalog
+
+On 2026-10-21, an authenticated `curl` request to `https://soclaas-api.comp.nus.edu.sg/v1/models` returned `HTTP 200` with 17 model entries. This snapshot reflects the models visible to the provided API key; availability and metadata may change. Refresh it with `GET /v1/models` when needed.
+
+| Model ID | Display name | Capability | Context tokens | Alias of |
+| --- | --- | --- | ---: | --- |
+| `bge-m3` | bge-m3 | `embeddings` | 131,072 | — |
+| `gemma4:26b` | Gemma 4 26B | `chat` | 131,072 | — |
+| `llama3.1:8b` | Llama 3.1 8B | `chat` | 65,536 | — |
+| `ornith1.5:35b` | Ornith 1.5 35B A3B | `chat` | 262,144 | — |
+| `qwen3.5:9b` | Qwen 3.5 9B | `chat` | 65,536 | — |
+| `qwen3.6:35b` | Qwen 3.6 35B A3B | `chat` | 262,144 | — |
+| `qwen3.8:27b` | Qwen 3.8 27B | `chat` | 262,144 | — |
+| `qwen3-coder-next` | Qwen 3 Coder Next 80B A3B | `chat` | 262,144 | — |
+| `qwen3-vl:32b` | Qwen 3 VL 32B | `chat` | 80,000 | — |
+| `whisper-large-v3` | Whisper Large v3 | `audio-transcription` | 131,072 | — |
+| `x-test-1` | Testing GLM 5.3 Flash | `chat` | 1,048,576 | — |
+| `x-test-2` | Testing DeepSeek V4.1 Flash 1017 | `chat` | 1,048,576 | — |
+| `coder` | Qwen 3.8 27B | `chat` | 262,144 | `qwen3.8:27b` |
+| `coding` | Qwen 3.8 27B | `chat` | 262,144 | `qwen3.8:27b` |
+| `default` | Qwen 3.6 35B A3B | `chat` | 262,144 | `qwen3.6:35b` |
+| `ornith1.0:35b` | Ornith 1.5 35B A3B | `chat` | 262,144 | `ornith1.5:35b` |
+| `qwen3.6:27b` | Qwen 3.8 27B | `chat` | 262,144 | `qwen3.8:27b` |
+
+For every returned entry, `context_length`, `context_window`, `max_context_length`, and `max_model_len` have the same value shown above. Alias targets come from `soclaas.alias_of`. The catalog reports only `chat` for the chat models, including models whose descriptions mention vision or multimodal tasks.
+
+### `POST /v1/chat/completions`
+
+This is the primary low-transformation inference endpoint. It is intended to behave like the OpenAI Chat Completions API while routing to SoCLaaS-managed backends.
+
+Minimum request:
+
+```json
+{
+  "model": "llama3.1:8b",
+  "messages": [
+    {"role": "user", "content": "Say hello in one sentence."}
+  ]
+}
+```
+
+Example:
+
+```bash
+curl "${SOCLAAS_BASE_URL}/v1/chat/completions" \
+  -H "Authorization: Bearer $SOCLAAS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama3.1:8b",
+    "messages": [
+      {"role": "system", "content": "Be concise."},
+      {"role": "user", "content": "Say hello in one sentence."}
+    ]
+  }'
+```
+
+Streaming is supported with standard server-sent events:
+
+```json
+{
+  "model": "llama3.1:8b",
+  "messages": [
+    {"role": "user", "content": "Stream a short answer."}
+  ],
+  "stream": true
+}
+```
+
+Notes:
+
+- `model` is required. Missing `model` returns `400`.
+- For streaming requests, SoCLaaS ensures upstream `stream_options.include_usage=true`.
+- For non-streaming requests, `stream_options` is stripped before proxying upstream.
+- This path does not execute tools in the gateway. It is the best choice for plain chat-completions clients.
+
+Observed behavior (verified 2026-10-21):
+
+- The response `model` field contains the upstream model, not the public ID you sent. For example, `default` returns `qwen3.6:35b` and `x-test-1` returns `glm-5.3-flash`. Track the requested model on the client side instead of reading it from the response.
+- The response body passes through from the backend, so its extra fields depend on the backend. vLLM-backed models (such as `qwen3.6:35b`) add fields like `reasoning`, `refusal`, `token_ids`, `routed_experts`, and `kv_transfer_params`. Ollama-backed models (such as `llama3.1:8b`) return a minimal body. Rely only on the standard OpenAI fields: `choices[].message.content`, `choices[].finish_reason`, and `usage`.
+- Some models (`ornith1.5:35b`, `qwen3.8:27b`, and its aliases such as `coder`) begin their content with `\n\n`. Trim content before using it.
+- When streaming, the final chunk before `data: [DONE]` has an empty `choices` array and carries `usage`. Guard against empty `choices` when reading chunks. Ollama-backed models repeat `"role": "assistant"` in every delta, not only the first one.
+- Latency varies widely by model. For a trivial prompt, most models answered in under 1 s, `gemma4:26b`, `qwen3.5:9b`, and `x-test-2` took 2–3 s, and `x-test-1` took about 10 s.
+
+### `POST /v1/responses`
+
+This endpoint is a compatibility shim for clients that expect the OpenAI Responses API. Internally, SoCLaaS translates the request into chat-completions traffic and translates the result back into Responses-shaped JSON or SSE.
+
+> **Observed 2026-10-21, cause unconfirmed:** the gateway appears to add context that the client did not send. The same one-sentence prompt used 20 input tokens on `/v1/chat/completions`, but 119 input tokens (`llama3.1:8b`) and 495 input tokens (`default`) on `/v1/responses`, with no `tools` in the request. `llama3.1:8b` replied "Based on the search results…", which suggests that web tools or a system prompt are added on the gateway side. These hidden tokens are billed and can change answers. Prefer `/v1/chat/completions` unless you need Responses-specific features.
+>
+> Unlike chat completions, the response `model` field echoes the public ID you sent (for example, `default`). The format of the response `id` depends on the backend (for example, `resp_327` or `resp_826190a0aebb6f35`).
+
+Minimum request:
+
+```json
+{
+  "model": "llama3.1:8b",
+  "input": "Say hello in one sentence."
+}
+```
+
+Example:
+
+```bash
+curl "${SOCLAAS_BASE_URL}/v1/responses" \
+  -H "Authorization: Bearer $SOCLAAS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama3.1:8b",
+    "input": "Summarize SoCLaaS in one sentence."
+  }'
+```
+
+Example response:
+
+```json
+{
+  "id": "resp_123",
+  "object": "response",
+  "created_at": 1783900000,
+  "status": "completed",
+  "model": "llama3.1:8b",
+  "output": [
+    {
+      "id": "msg_123",
+      "type": "message",
+      "status": "completed",
+      "role": "assistant",
+      "content": [
+        {
+          "type": "output_text",
+          "text": "SoCLaaS is an OpenAI-compatible gateway for controlled access to internal LLM backends.",
+          "annotations": []
+        }
+      ]
+    }
+  ],
+  "output_text": "SoCLaaS is an OpenAI-compatible gateway for controlled access to internal LLM backends.",
+  "usage": {
+    "input_tokens": 12,
+    "output_tokens": 18,
+    "total_tokens": 30
+  }
+}
+```
+
+Supported request fields:
+
+- `model`
+- `input`
+- `instructions`
+- `stream`
+- `max_output_tokens`
+- `temperature`
+- `top_p`
+- `tools`
+- `tool_choice`
+- `parallel_tool_calls`
+- `previous_response_id`
+
+Current limitations:
+
+- `background=true` is not supported and returns `400`.
+- Response state is not durable. `previous_response_id` is kept in one gateway process only.
+- The in-memory response-state cache currently has a 15-minute TTL and does not survive gateway restarts.
+- Persisted response retrieval, response cancellation, and hosted OpenAI built-in tools are not implemented.
+
+#### Responses input rules
+
+- String `input` is treated as one user message.
+- `instructions` becomes a system message.
+- Array `input` is supported for message-style items and tool outputs.
+- `previous_response_id` can be used for follow-up turns after tool execution, but only within the temporary gateway cache window.
+
+If `previous_response_id` is unknown or expired, the gateway returns `400`.
+
+#### Responses tool behavior
+
+SoCLaaS supports two categories of tools on `/v1/responses`:
+
+- Client-executed tools, which are returned to the caller for local execution.
+- Gateway-executed web tools, when enabled and permitted.
+
+Client-executed tools:
+
+- OpenAI-style function tools
+- custom tools
+- `shell` and `local_shell`
+- `apply_patch`
+
+These are translated through the shim, but SoCLaaS does not execute them.
+
+Gateway-executed web tools:
+
+- `web_fetch`
+- `web_search`
+- `web_search_preview`
+
+These tools are optional. They work only when:
+
+- The gateway has the feature enabled globally.
+- The authenticated API key policy allows the tool.
+
+If a client forces a disabled or disallowed web tool through `tool_choice`, SoCLaaS returns `403`.
+
+### `POST /v1/embeddings`
+
+Creates vector embeddings through a SoCLaaS-managed embedding backend. The endpoint accepts and returns the OpenAI Embeddings API shape; SoCLaaS passes the compatible request fields and the upstream response through without transforming the embedding vectors.
+
+`model` must be an active public model ID returned by `GET /v1/models`, be permitted by the API key, and have the embeddings capability. The gateway resolves aliases and rewrites the public model ID to its configured provider model before dispatching the request. A chat-only model cannot be used for embeddings.
+
+Required fields:
+
+- `model`: The public embedding model ID.
+- `input`: One input string or an array of input strings. Token-ID input is also forwarded when supported by the selected backend.
+
+Common optional OpenAI-compatible fields are forwarded unchanged:
+
+- `encoding_format` (for example, `float` or `base64`)
+- `dimensions`
+- `user`
+
+Support for optional fields, accepted input sizes, vector dimensions, and the embedding encoding ultimately depends on the selected backend and model.
+
+The only embedding model in the current catalog is `bge-m3`. It returns 1024-dimensional vectors, and its response `model` field is `bge-m3`.
+
+Example with one input:
+
+```bash
+curl --fail-with-body \
+  -X POST "${SOCLAAS_BASE_URL}/v1/embeddings" \
+  -H "Authorization: Bearer $SOCLAAS_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "bge-m3",
+    "input": "SoCLaaS provides controlled access to LLM backends.",
+    "encoding_format": "float"
+  }'
+```
+
+Example with a batch of inputs:
+
+```json
+{
+  "model": "bge-m3",
+  "input": [
+    "First document to index.",
+    "Second document to index."
+  ]
+}
+```
+
+Example response:
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "embedding",
+      "index": 0,
+      "embedding": [0.0123, -0.0456, 0.0789]
+    }
+  ],
+  "model": "nomic-embed-text",
+  "usage": {
+    "prompt_tokens": 9,
+    "total_tokens": 9
+  }
+}
+```
+
+The response `model` field is supplied by the upstream backend and can contain the provider model ID rather than the SoCLaaS public model ID. Do not infer model access from that field; use `GET /v1/models` for the public catalog.
+
+SoCLaaS applies API-key rate and concurrency limits, dispatch queueing, backend capacity controls, timeout handling, and model pricing/accounting to embedding requests. When an upstream response provides token usage, the gateway records it for accounting.
+
+### `POST /v1/audio/transcriptions`
+
+Transcribes one audio file through a SoCLaaS-managed whisper backend. The endpoint is OpenAI-compatible and accepts `multipart/form-data` rather than a JSON body.
+
+The requested model is a SoCLaaS public model. It must be active, permitted by the API key, and have the audio-transcription capability. The gateway rewrites that field to the configured provider model before forwarding the request. For example, an operator can map public model `whisper-large-v3` to provider model `Systran/faster-whisper-large-v3`.
+
+Required fields:
+
+- `file`: One audio file upload.
+- `model`: The public model ID returned by `GET /v1/models`.
+
+Common optional fields are forwarded unchanged to the Whisper backend:
+
+- `language`
+- `prompt`
+- `response_format` (`json`, `text`, `verbose_json`, `srt`, or `vtt`, when supported by the backend)
+- `temperature`
+- `timestamp_granularities[]`
+- `stream`
+
+Example:
+
+```bash
+SOCLAAS_BASE_URL="https://gateway.example.com"
+SOCLAAS_API_KEY="clsk_your_api_key"
+SOCLAAS_MODEL="whisper-large-v3"
+SOCLAAS_AUDIO_FILE="./recording.mp3"
+
+curl --fail-with-body \
+  -X POST "${SOCLAAS_BASE_URL}/v1/audio/transcriptions" \
+  -H "Authorization: Bearer ${SOCLAAS_API_KEY}" \
+  -F "model=${SOCLAAS_MODEL}" \
+  -F "file=@${SOCLAAS_AUDIO_FILE}" \
+  -F "language=en" \
+  -F "response_format=json"
+```
+
+Example JSON response:
+
+```json
+{
+  "text": "Transcribed speech appears here."
+}
+```
+
+The gateway applies its existing request-body limit (50 MiB by default), API-key rate and concurrency limits, queueing, backend capacity controls, and backend timeout. It records byte counts and request metadata but does not token-charge transcription responses that do not contain token usage.
+
+#### Streaming transcriptions
+
+When the selected faster-whisper-server supports it, set `stream=true` to receive its server-sent events without response transformation:
+
+```bash
+curl --no-buffer --fail-with-body \
+  -X POST "${SOCLAAS_BASE_URL}/v1/audio/transcriptions" \
+  -H "Authorization: Bearer ${SOCLAAS_API_KEY}" \
+  -H "Accept: text/event-stream" \
+  -F "model=${SOCLAAS_MODEL}" \
+  -F "file=@${SOCLAAS_AUDIO_FILE}" \
+  -F "stream=true"
+```
+
+Common client errors are `400` for a missing model, missing or multiple file parts, malformed multipart data, or a model without the audio-transcription capability; `403` for a model denied by policy; and `413` when the upload exceeds the gateway limit.
+
+## Common gateway errors
+
+Typical gateway error responses use this shape:
+
+```json
+{
+  "error": "message"
+}
+```
+
+Common statuses:
+
+| Status | Meaning |
+| --- | --- |
+| `400 Bad Request` | Invalid JSON, missing model, unsupported Responses feature, expired `previous_response_id`. |
+| `401 Unauthorized` | Missing bearer token, invalid API key. |
+| `403 Forbidden` | Model not allowed, username mapping failed, forced web tool not allowed. |
+| `429 Too Many Requests` | Rate limit exceeded, quota exceeded. |
+| `503 Service Unavailable` | Server-side issue, commonly authentication backend unavailable, policy enforcement unavailable, or web search provider not configured. |
+
+#### Observed error responses
+
+The following errors were verified on 2026-10-21:
+
+| Request | Status | Body |
+| --- | --- | --- |
+| No `Authorization` header | `401` | `{"error":"missing bearer token"}` |
+| Invalid key | `401` | `{"error":"invalid API key"}` |
+| Missing `model` | `400` | `{"error":"model is required"}` |
+| Unknown model ID | **`503`** | `{"error":"public model \"nope\" is not configured"}` |
+| Chat model on `/v1/embeddings` | `400` | `{"error":"model \"llama3.1:8b\" does not support embeddings"}` |
+| `background: true` on `/v1/responses` | `400` | `{"error":"background responses are not supported by this gateway"}` |
+| Unknown `previous_response_id` | `400` | `{"error":{"code":"previous_response_not_found","message":"previous_response_id is unknown or expired","type":"invalid_request_error"}}` |
+
+Two points matter for client code:
+
+- **There are two error shapes.** Most errors use `{"error": "string"}`, but Responses-state errors use the OpenAI-style `{"error": {"code", "message", "type"}}`. Parse both.
+- **An unknown model returns `503`, not `400` or `404`.** A blanket retry-on-5xx policy will therefore retry a typo indefinitely. Validate model IDs against `GET /v1/models` (for example, at startup), and retry only `429` and `503` responses for models known to exist, with backoff.
+
+## Integration checklist
+
+- Use `/v1/chat/completions` for features; it passes requests through with the least transformation (see the Responses warning above).
+- Make `SOCLAAS_BASE_URL` the gateway origin without `/v1` (`https://soclaas-api.comp.nus.edu.sg`) and add `/v1/...` to each path. A request to `/models` without `/v1` returns `404`.
+- Read model IDs from `GET /v1/models`, not from the response `model` field, and don't hard-code test models (`x-test-*`), which may disappear.
+- Trim content, guard against empty `choices` in stream chunks, and parse both error shapes.
+- Handle `429` (rate or budget limit) with backoff. Budgets reset at UTC day and month boundaries.
+- Set client timeouts with the slowest model in mind. `x-test-1` took about 10 s for a trivial prompt, and long generations will take longer.
