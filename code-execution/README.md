@@ -38,6 +38,3 @@ docker run -d -p 8001:8001 --env-file .env -e WORK_ROOT=/work \
   --cap-drop ALL --security-opt no-new-privileges:true \
   --pids-limit 512 --memory 16g --cpus 8 code-executor
 ```
-
-In prod, block outbound internet for this container (host firewall / Docker network rules); it only
-needs inbound requests from the backend.
