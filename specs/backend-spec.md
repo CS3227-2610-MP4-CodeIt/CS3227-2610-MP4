@@ -67,7 +67,8 @@ backend/
 │   │   ├── question_gen.py
 │   │   ├── summary.py
 │   │   └── prompts/       # system prompts as .md files (hint.md, question_gen.md, summary.md)
-│   └── judging.py         # run / submit job handlers
+│   ├── judging.py         # run / submit job handlers
+│   └── seed.py            # dev-only demo accounts and classes (§4)
 ├── tests/
 ├── Dockerfile
 └── pyproject.toml
@@ -95,6 +96,8 @@ Rules enforced by the app (not expressible as simple constraints):
 - A question always has ≥1 visible **and** ≥1 hidden test case (checked on create and update).
 - An assignment always has 1–3 distinct questions, all created by the teacher creating it.
 - A teacher can create an assignment only for a class they are a member of.
+- Only the teacher who created an assignment (`created_by`) can edit or delete it. Other teachers
+  of the class can view it; their `PATCH` / `DELETE` → `404`.
 - A question used by any assignment cannot be deleted (`409`; the FK is `RESTRICT`).
 - A question cannot be removed from an assignment once it has submissions for it (`409`).
 - The last remaining admin cannot be deleted, and an admin cannot delete themself (`409`).
@@ -121,6 +124,11 @@ Test-case content is stored in the DB as text (≤ 1 MiB each, the executor's li
   wrong password.
 - **Bootstrap admin:** on startup, if no admin exists, create one from `BOOTSTRAP_ADMIN_USERNAME`
   / `BOOTSTRAP_ADMIN_PASSWORD`.
+- **Demo accounts (dev only):** when `APP_ENV=dev`, startup runs `app/seed.py` after the
+  bootstrap step. Through the repos, it creates `admin` (only if no admin exists), `teacher1`,
+  `teacher2` and `student01`–`student20`, all with password `demo1234`, plus class
+  `Demo Class A` (teacher1, student01–10) and `Demo Class B` (teacher2, student11–20). Existing
+  usernames and classes are skipped, so restarts are safe. It never runs in `prod`.
 
 ---
 
@@ -351,7 +359,7 @@ async def _finish(job, status, *, result=None, error=None):
 - `job_input` holds everything the handler needs (ids, code, prompt) and is stored in
   `jobs.input_json`, so the job does not depend on later edits by the user.
 - Raw exception text, upstream bodies and stack traces never go into `error`.
-- Timeouts: `LLM_JOB_TIMEOUT_S` (default 180 s) for AI jobs; for run/submit, the executor timeout
+- Timeouts: `LLM_JOB_TIMEOUT_S` (default 300 s) for AI jobs; for run/submit, the executor timeout
   formula from the executor spec §10 plus 10 s.
 
 ### 6.5 Startup and shutdown
@@ -445,8 +453,9 @@ Flow (`/v1/chat/completions` with OpenAI-style `tools`; SoCLaaS passes tool call
 does not execute them):
 
 1. Messages: `system` = `prompts/hint.md` (with canary, §8); `user` =
-   `"The student is stuck on the question \"<title>\" and asks for a hint. Use the tools to read
-   the question and/or their code if you need them."`
+   `"The student is stuck on the question <title> and asks for a hint. Use the tools to read
+   the question and/or their code if you need them."`, where `<title>` is
+   `guards.wrap_untrusted("title", title)` (§8 #4; titles are teacher-written).
 2. Call the model with `tools=[get_question, get_code]`, `tool_choice="auto"`, `max_tokens=800`.
 3. If the reply has `tool_calls`, run each (unknown tool name → tool result `"unknown tool"`),
    append the results as `tool` messages wrapped by `guards.wrap_untrusted` (§8), and call again.
@@ -518,9 +527,9 @@ history, to keep the context small. The teacher repeats until happy, then **appr
    rules as `QuestionIn` (plus `reference_solution`: 1 B – 64 KiB). If it fails, retry **once**
    with the validation error appended; if it fails again → `failed` ("The AI returned an invalid
    question. Try again.").
-4. **Verify the test cases:** send `reference_solution` with the generated test cases to the
-   executor. LLM-written expected outputs are often wrong, so the result records whether the
-   reference solution agrees with them.
+
+The backend does **not** run the generated tests. LLM-written expected outputs are often wrong,
+so the teacher checks them (e.g. against `reference_solution`) before or after approving.
 
 **Result:**
 
@@ -528,13 +537,9 @@ history, to keep the context small. The teacher repeats until happy, then **appr
 {
   "draft": { "title": "...", "statement_md": "...", "difficulty": "medium", "topics": ["bfs", "trees"],
              "time_limit_ms": 2000, "memory_limit_mb": 256, "float_tolerance": null,
-             "test_cases": [...], "reference_solution": "..." },
-  "verification": { "verdict": "ACCEPTED", "passed": 2, "total": 2, "error_message": null }
+             "test_cases": [...], "reference_solution": "..." }
 }
 ```
-
-`verification` is `null` if the executor was unavailable. The frontend shows a warning unless
-`verdict = ACCEPTED`.
 
 **Approve** (`POST /teacher/question-generations/{job_id}/approve`): the job must be the
 teacher's own, `success`, and not yet approved. Creates the question and test cases from
@@ -632,7 +637,7 @@ and possibly AI-written), teacher prompts and feedback (generation), assignment 
 | 6 | **Output checks.** Hint: trimmed, ≤ 4000 chars; fenced code blocks with more than 5 lines are replaced with `_[code removed — hints don't include full solutions]_`. Generation: strict JSON schema (§7.2); unknown fields dropped. Summary: ≤ 2000 chars. | all |
 | 7 | **Bounded tool loop.** ≤ 3 tool rounds, `max_tokens` on every call, job timeout. | hints |
 | 8 | **Safe rendering.** All LLM output is Markdown. The backend never returns HTML; the frontend renders Markdown with raw HTML disabled and sanitised links. | all |
-| 9 | **Secrets.** `SOCLAAS_API_KEY` and `EXECUTOR_TOKEN` live only in backend env; never sent to the browser or put in a prompt. The reference solution from generation runs only in the sandboxed executor. | all |
+| 9 | **Secrets.** `SOCLAAS_API_KEY` and `EXECUTOR_TOKEN` live only in backend env; never sent to the browser or put in a prompt. The generated reference solution is stored in the draft only; the backend never runs it. | all |
 
 The scan (#3) is a cheap first filter and will miss things; #1, #4–#6 are what make an injection
 harmless.
@@ -650,7 +655,7 @@ harmless.
 - Parse both error shapes (`{"error": "..."}` and `{"error": {"message": ...}}`).
 - Retry `429` and `503` up to 2 times with backoff (2 s, 5 s). Other errors → `UserFacingError`
   ("The AI service is unavailable. Try again later.").
-- HTTP timeout 120 s per call.
+- HTTP timeout 300 s per call (SoCLaaS can be slow; the job timeout `LLM_JOB_TIMEOUT_S` still caps the whole job).
 
 No request limits are applied by the backend: SoCLaaS enforces its own rate and budget limits.
 
@@ -676,7 +681,7 @@ No request limits are applied by the backend: SoCLaaS enforces its own rate and 
 | `BOOTSTRAP_ADMIN_USERNAME` / `BOOTSTRAP_ADMIN_PASSWORD` | — | First admin (§4) |
 | `SOCLAAS_BASE_URL` / `SOCLAAS_API_KEY` | — (required) | LLM gateway |
 | `LLM_MODEL` | `coder` | Model ID for all AI features |
-| `LLM_JOB_TIMEOUT_S` | `180` | Timeout for AI jobs |
+| `LLM_JOB_TIMEOUT_S` | `300` | Timeout for AI jobs |
 | `CODE_EXECUTION_SERVER` | — (required) | Executor base URL, e.g. `https://executor.example.com` (`http://localhost:8001` in dev) |
 | `EXECUTOR_TOKEN` | — (required) | Shared secret with the executor |
 
@@ -690,9 +695,11 @@ files are git-ignored.
 - `Dockerfile`: `python:3.14.4-slim`, install from `pyproject.toml`, run as a non-root user,
   `CMD uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1`.
 - On startup the app runs `backend-schema.sql` if the DB has no tables (no migration tool).
-- `backend/docker-compose.yml`: the `backend` service only (published port, volume `/data`).
+- The backend is a single container, so there is no compose file. The image is built from the repo
+  root (it copies `specs/backend-schema.sql`) and run with `docker run` (published port, volume
+  `/data`, `--env-file`). `backend/README.md` has the exact commands.
   The executor is deployed on its own (see its spec) and reached at `CODE_EXECUTION_SERVER`.
-  For local dev, both can run on one machine, each from its own compose file.
+  For local dev, both can run on one machine, each in its own container.
 
 ---
 
@@ -735,6 +742,7 @@ files are git-ignored.
 | Student calls `/admin/*` or `/teacher/*` | `403` |
 | Student opens an assignment of another class | `404` |
 | Teacher edits another teacher's question | `404` |
+| Co-teacher (same class) edits / deletes another teacher's assignment | `404`; can still view it |
 | Teacher creates an assignment for a class they are not in | `404` |
 | Reading another user's job via `/jobs/{id}` | `404` |
 | Reading another student's submission via `.../submissions/{sid}` | `404` |
@@ -751,6 +759,8 @@ files are git-ignored.
 | Delete the last admin / self | `409` |
 | Submit after `due_at` | `409` |
 | Approve the same draft twice | `409` |
+| Dev startup twice (demo seed) | 23 users, 2 classes, 10 students in each |
+| Prod startup | No demo accounts |
 
 ### 12.5 Judging
 
@@ -777,7 +787,6 @@ files are git-ignored.
 | Hint output with a 30-line code block | Block replaced with the placeholder |
 | Generation: invalid JSON twice | Job `failed` after exactly 2 LLM calls |
 | Generation: no hidden test in the draft | Treated as invalid JSON (retry, then fail) |
-| Generation: reference solution disagrees with the tests | `success` with `verification.verdict != ACCEPTED` |
 | Generation iteration | Second call gets parent draft + feedback, not earlier history |
 | Summary | LLM request contains the computed stats and no student code or names; result includes `stats` |
 | SoCLaaS `429` then `200` | Job succeeds after a retry |
