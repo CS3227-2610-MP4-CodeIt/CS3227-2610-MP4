@@ -12,7 +12,7 @@ from app.jobs.runner import UserFacingError
 from app.schemas import QuestionDraft, QuestionGenResult
 
 INVALID_QUESTION = "The AI returned an invalid question. Try again."
-MAX_TOKENS = 4000
+MAX_TOKENS = 16384
 _PROMPT = (Path(__file__).parent / "prompts" / "question_gen.md").read_text(encoding="utf-8")
 
 
