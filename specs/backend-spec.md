@@ -457,7 +457,7 @@ does not execute them):
    `"The student is stuck on the question <title> and asks for a hint. Use the tools to read
    the question and/or their code if you need them."`, where `<title>` is
    `guards.wrap_untrusted("title", title)` (§8 #4; titles are teacher-written).
-2. Call the model with `tools=[get_question, get_code]`, `tool_choice="auto"`, `max_tokens=800`.
+2. Call the model with `tools=[get_question, get_code]`, `tool_choice="auto"`, `max_tokens=1024`.
 3. If the reply has `tool_calls`, run each (unknown tool name → tool result `"unknown tool"`),
    append the results as `tool` messages wrapped by `guards.wrap_untrusted` (§8), and call again.
 4. Stop when the reply has no tool calls, or after **3** tool rounds (then one last call with

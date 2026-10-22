@@ -9,7 +9,7 @@ from app.jobs.runner import UserFacingError
 from app.repos import questions as questions_repo
 
 MAX_TOOL_ROUNDS = 3
-MAX_TOKENS = 800
+MAX_TOKENS = 1024
 _BASE_PROMPT = (Path(__file__).parent / "prompts" / "hint.md").read_text()
 
 TOOLS: list[dict[str, Any]] = [
