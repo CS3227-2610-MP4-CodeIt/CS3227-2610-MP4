@@ -6,7 +6,7 @@ from app.config import AppContext
 from app.jobs.runner import UserFacingError
 from app.repos import submissions as submissions_repo
 
-SUMMARY_MAX_TOKENS = 500
+SUMMARY_MAX_TOKENS = 512
 _PROMPT = Path(__file__).parent / "prompts" / "summary.md"
 
 
