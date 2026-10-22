@@ -33,14 +33,11 @@ The hardening flags (spec §6) are runtime options, so they go on `docker run`:
 
 ```
 docker build -t code-executor .
-docker run -d -p 8001:8001 --env-file .env -e WORK_ROOT=/work -e MAX_CONCURRENT_JOBS=8 \
+docker run -d -p 8001:8001 --env-file .env -e WORK_ROOT=/work \
   --read-only --tmpfs /work:size=256m,mode=1777 --tmpfs /tmp:size=16m \
   --cap-drop ALL --security-opt no-new-privileges:true \
-  --pids-limit 512 --memory 5g --cpus 4 code-executor
+  --pids-limit 512 --memory 16g --cpus 8 code-executor
 ```
-
-Sizing: 8 jobs × (512 MB + 32 MB overhead) ≈ 4.3 GB, hence `--memory 5g`. The API allows
-`memory_limit_mb` up to 1024, so keep problems at ≤ 512 MB or raise both numbers together.
 
 In prod, block outbound internet for this container (host firewall / Docker network rules); it only
 needs inbound requests from the backend.
