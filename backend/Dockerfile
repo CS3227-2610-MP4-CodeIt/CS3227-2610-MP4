@@ -1,12 +1,11 @@
-# Build from the repo root so the schema in specs/ can be copied:
-#   docker build -f backend/Dockerfile -t backend .
+# Build from this folder:
+#   docker build -t backend .
 FROM python:3.14.4-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /srv
-COPY backend/pyproject.toml ./
-COPY backend/app ./app
-COPY specs/backend-schema.sql ./backend-schema.sql
+COPY pyproject.toml backend-schema.sql ./
+COPY app ./app
 RUN pip install --no-cache-dir . \
     && useradd --uid 10002 --no-create-home appuser \
     && mkdir -p /data && chown appuser /data

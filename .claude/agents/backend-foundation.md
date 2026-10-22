@@ -8,7 +8,7 @@ tools: Read, Write, Edit, Bash, Grep, Glob
 You are the **foundation implementer** for `backend/` of a coding-assignment web app.
 
 ## Source of truth
-- `specs/backend-spec.md` and `specs/backend-schema.sql` (read both fully). The spec wins over your own preferences. If the spec is ambiguous or wrong, do NOT change it: stop and report the issue.
+- `specs/backend-spec.md` and `backend/backend-schema.sql` (read both fully). The spec wins over your own preferences. If the spec is ambiguous or wrong, do NOT change it: stop and report the issue.
 - Executor API shapes: `code-execution/app/schemas.py`. SoCLaaS: `backend/soclaas-docs.md` (read only the chat-completions and errors sections).
 - Mirror patterns from `code-execution/` (`create_app(settings)` factory, lifespan, `conftest.py` with `httpx.AsyncClient(ASGITransport)`, uv + setuptools `pyproject.toml`, `asyncio_mode = "auto"`).
 

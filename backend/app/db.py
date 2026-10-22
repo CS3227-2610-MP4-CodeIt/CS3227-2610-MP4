@@ -5,9 +5,8 @@ from pathlib import Path
 
 import aiosqlite
 
-_APP_DIR = Path(__file__).resolve().parent
-# Docker image: /srv/backend-schema.sql; repo checkout: <repo>/specs/backend-schema.sql
-_SCHEMA_CANDIDATES = [_APP_DIR.parent / "backend-schema.sql", _APP_DIR.parent.parent / "specs" / "backend-schema.sql"]
+# backend/backend-schema.sql (/srv/backend-schema.sql in the Docker image)
+_SCHEMA_PATH = Path(__file__).resolve().parent.parent / "backend-schema.sql"
 
 
 def to_iso(dt: datetime) -> str:
@@ -22,10 +21,9 @@ def now_iso(offset: timedelta = timedelta()) -> str:
 
 
 def schema_path() -> Path:
-    for path in _SCHEMA_CANDIDATES:
-        if path.exists():
-            return path
-    raise FileNotFoundError("backend-schema.sql not found")
+    if not _SCHEMA_PATH.exists():
+        raise FileNotFoundError("backend-schema.sql not found")
+    return _SCHEMA_PATH
 
 
 class Database:

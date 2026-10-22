@@ -5,7 +5,7 @@ assignments and submissions; calls the **code-execution service** (`specs/code-e
 to judge code; and calls the **SoCLaaS** LLM gateway (`backend/soclaas-docs.md`) for the AI features.
 
 - **Runtime:** Python **3.14.4** (Docker base image `python:3.14.4-slim`), FastAPI, Uvicorn
-- **Database:** SQLite (file on a Docker volume), accessed with `aiosqlite`. Schema: `specs/backend-schema.sql`
+- **Database:** SQLite (file on a Docker volume), accessed with `aiosqlite`. Schema: `backend/backend-schema.sql`
 - **HTTP clients:** one shared `httpx.AsyncClient` per upstream (SoCLaaS, executor)
 - **Callers:** the frontend (browser) only
 
@@ -70,6 +70,7 @@ backend/
 │   ├── judging.py         # run / submit job handlers
 │   └── seed.py            # dev-only demo accounts and classes (§4)
 ├── tests/
+├── backend-schema.sql
 ├── Dockerfile
 └── pyproject.toml
 ```
@@ -78,7 +79,7 @@ backend/
 
 ## 3. Data model
 
-The full DDL is in `specs/backend-schema.sql`. Summary:
+The full DDL is in `backend/backend-schema.sql`. Summary:
 
 | Table | Purpose |
 |---|---|
@@ -695,8 +696,8 @@ files are git-ignored.
 - `Dockerfile`: `python:3.14.4-slim`, install from `pyproject.toml`, run as a non-root user,
   `CMD uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1`.
 - On startup the app runs `backend-schema.sql` if the DB has no tables (no migration tool).
-- The backend is a single container, so there is no compose file. The image is built from the repo
-  root (it copies `specs/backend-schema.sql`) and run with `docker run` (published port, volume
+- The backend is a single container, so there is no compose file. The image is built from `backend/`
+  alone (the folder is self-contained, including `backend-schema.sql`) and run with `docker run` (published port, volume
   `/data`, `--env-file`). `backend/README.md` has the exact commands.
   The executor is deployed on its own (see its spec) and reached at `CODE_EXECUTION_SERVER`.
   For local dev, both can run on one machine, each in its own container.

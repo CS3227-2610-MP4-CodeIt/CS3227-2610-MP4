@@ -31,11 +31,11 @@ uv run pytest tests/test_student.py    # one file
 
 ## Docker
 
-Build from the **repo root**, because the image copies `specs/backend-schema.sql`:
+Build and run from this folder (it is self-contained):
 
 ```
-docker build -f backend/Dockerfile -t backend .
-docker run -d -p 8000:8000 --env-file backend/.env -v backend-data:/data \
+docker build -t backend .
+docker run -d -p 8000:8000 --env-file .env -v backend-data:/data \
   --restart unless-stopped backend
 ```
 
