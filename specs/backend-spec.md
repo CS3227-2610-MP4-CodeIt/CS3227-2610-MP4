@@ -657,7 +657,8 @@ harmless.
 - Parse both error shapes (`{"error": "..."}` and `{"error": {"message": ...}}`).
 - Retry `429` and `503` up to 2 times with backoff (2 s, 5 s). Other errors → `UserFacingError`
   ("The AI service is unavailable. Try again later.").
-- HTTP timeout 300 s per call (SoCLaaS can be slow; the job timeout `LLM_JOB_TIMEOUT_S` still caps the whole job).
+- HTTP timeout for chat completions = `LLM_JOB_TIMEOUT_S` (SoCLaaS can be slow; the job timeout still caps
+  the whole job). Other calls (`GET /v1/models` at startup) use 30 s.
 
 No request limits are applied by the backend: SoCLaaS enforces its own rate and budget limits.
 

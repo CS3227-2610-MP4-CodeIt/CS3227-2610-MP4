@@ -335,7 +335,7 @@ async def test_llm_urls_have_a_single_v1(base_url: str) -> None:
     with respx.mock(assert_all_mocked=True) as router:  # exact URLs: a doubled /v1 is unmocked and fails
         models = router.get("https://gw.test/v1/models").respond(json={"data": [{"id": "coder"}]})
         chat = router.post("https://gw.test/v1/chat/completions").respond(json=chat_completion("hi"))
-        llm = LLMClient(base_url, "key", "coder", retry_delays_s=())
+        llm = LLMClient(base_url, "key", "coder", 300, retry_delays_s=())
         try:
             await llm.check_model()
             assert (await llm.chat([{"role": "user", "content": "x"}])).content == "hi"

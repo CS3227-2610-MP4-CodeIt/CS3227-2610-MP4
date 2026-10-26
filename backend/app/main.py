@@ -41,7 +41,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if s.app_env == "dev":
             await seed_demo(db)
 
-        llm = LLMClient(s.soclaas_base_url, s.soclaas_api_key, s.llm_model)
+        llm = LLMClient(s.soclaas_base_url, s.soclaas_api_key, s.llm_model, s.llm_job_timeout_s)
         executor = ExecutorClient(s.code_execution_server, s.executor_token)
         try:
             await llm.check_model()

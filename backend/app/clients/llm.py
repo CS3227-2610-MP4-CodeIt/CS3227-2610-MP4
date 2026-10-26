@@ -11,7 +11,7 @@ from app.jobs.runner import UserFacingError
 UNAVAILABLE = "The AI service is unavailable. Try again later."
 RETRY_STATUSES = (429, 503)
 DEFAULT_RETRY_DELAYS_S = (2.0, 5.0)
-HTTP_TIMEOUT_S = 300.0
+HTTP_TIMEOUT_S = 30.0  # non-chat calls (GET /v1/models); chat completions use chat_timeout_s
 
 
 @dataclass
@@ -51,9 +51,11 @@ class LLMClient:
         base_url: str,
         api_key: str,
         model: str,
+        chat_timeout_s: float,
         retry_delays_s: tuple[float, ...] = DEFAULT_RETRY_DELAYS_S,
     ) -> None:
         self.model = model
+        self.chat_timeout_s = chat_timeout_s
         self.retry_delays_s = retry_delays_s
         self._http = httpx.AsyncClient(
             base_url=gateway_origin(base_url),
@@ -99,7 +101,7 @@ class LLMClient:
         delays = list(self.retry_delays_s)
         while True:
             try:
-                response = await self._http.post("/v1/chat/completions", json=body)
+                response = await self._http.post("/v1/chat/completions", json=body, timeout=self.chat_timeout_s)
             except httpx.HTTPError as e:
                 raise UserFacingError(UNAVAILABLE) from e
             if response.status_code in RETRY_STATUSES and delays:
