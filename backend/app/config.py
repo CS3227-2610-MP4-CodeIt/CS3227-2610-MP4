@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     soclaas_base_url: str
     soclaas_api_key: str
     llm_model: str = "coder"
-    llm_job_timeout_s: float = 600
+    llm_job_timeout_s: float = 300
     code_execution_server: str
     executor_token: str
 
