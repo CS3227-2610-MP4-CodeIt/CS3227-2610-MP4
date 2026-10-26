@@ -67,3 +67,50 @@ session (abort before cache clear, storage removed, `keepStorage`, corrupt entry
 ## Next
 
 Teacher and student pages (`frontend-teacher.md`, `frontend-student.md`), reusing `jobs/` and `events/`.
+
+---
+
+# Round 2 — Teacher pages
+
+Spec: `specs/frontend/frontend-teacher.md`. Checked with `tsc -b`, `oxlint`, Vitest, `vite build`
+and a read-only curl smoke test as `teacher1` (classes / questions / assignments / generation check,
+422 shape). No spec changes.
+
+## What was built (`src/features/teacher/`)
+
+- `api.ts` — queries and mutations with the §1.3 cache updates (approve `409` → invalidate
+  `teacherQuestions()`).
+- Questions: list (AI badge), new / edit form with Markdown preview, topics normalised on blur,
+  limits, optional float tolerance, test-case rows (add / remove / move / hidden), delete (`409` inline).
+- `GeneratePage` — request form, draft view (status, statement, tests, reference solution + copy,
+  AI-output warning), revise, approve (derived from `source_job_id`), session draft history.
+- Assignments: list with `?class_id=` filter, new form (class + 1–3 ordered questions + local
+  due date → UTC), detail with edit / delete only for `created_by === me` (`404` → creator message).
+- Shared: `jobs/useJobById.ts` (`GET /jobs/{id}`, `staleTime: Infinity` once final),
+  `toLocalInput` / `fromLocalInput` in `dates.ts`, teacher nav links, prefixes for assignment keys.
+
+## Decisions
+
+- Pure logic split out for unit tests: `questionForm.ts` (client checks, `toQuestionIn`, 422 `loc`
+  → field / row mapping, `moveItem`) and `draftHistory.ts` (`sessionStorage["qgen:{user_id}"]`).
+- Draft history: the latest job id is merged in at render (`withJob`) instead of `setState` in an
+  effect; the effect only writes `sessionStorage`.
+- Generate and Revise are two `useStartJob` instances on the same key so each shows its own error.
+- Assignment `PATCH` sends only changed fields; clearing the due date sends `due_at: null`.
+- Co-teachers see question titles without links (the questions are the creator's, so they would 404).
+
+## Tests — 36 passing (+16)
+
+`parseTopics`, `checkQuestion` (visible / hidden, 2–50 rows, title / statement / topics / limits /
+tolerance), `toQuestionIn`, `questionErrors` (row / field / other), `moveItem`, draft history
+(storage round-trip, corrupt entry, append once, start selects), `datetime-local` round-trip.
+
+## Follow-up — co-teachers can read assignment questions (spec change asked for by the user)
+
+- Specs: `backend-spec.md` §3 / §5.3 / §12.3, `frontend-spec.md` §3.2 key, `frontend-teacher.md` §1.
+- Backend: `GET /teacher/assignments/{id}/questions/{qid}` → full `QuestionOut` for any teacher of
+  the class; question not in the assignment / class not theirs → `404`. Test added (131 passing).
+- Frontend: read-only page `/teacher/assignments/:id/questions/:qid`; co-teachers' question links
+  go there, the creator's still go to the editor. Shared `QuestionPreview` (also used by draft view).
+  The key sits under `["teacher", "assignment", aid]`, so question edits and assignment deletes
+  already refresh / remove it.
