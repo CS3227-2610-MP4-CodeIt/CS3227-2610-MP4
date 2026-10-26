@@ -1,0 +1,1 @@
+Just keep it simple. No need for complex animation, artisan level UI.
