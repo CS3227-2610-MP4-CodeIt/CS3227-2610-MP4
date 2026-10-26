@@ -18,11 +18,11 @@ notifications. The pages of each role are in:
 
 | Concern | Choice |
 |---|---|
-| Language / UI | TypeScript (strict), **React 19.3** |
+| Language / UI | TypeScript, **React 19.3** |
 | Build | Vite (already set up in `frontend/`), `tsc -b` type check, `oxlint` |
 | Styling | **Tailwind CSS v4** via `@tailwindcss/vite`; `@import "tailwindcss";` in `src/index.css`. `@tailwindcss/typography` (`prose`) for rendered Markdown. No other CSS files (delete `App.css`) |
 | Server state | **TanStack Query v5** (`@tanstack/react-query`) — the only cache of server data |
-| Routing | React Router v7 (declarative mode: `<BrowserRouter>`, `<Routes>`) |
+| Routing | React Router v8 (declarative mode: `<BrowserRouter>`, `<Routes>`) |
 | SSE | `@microsoft/fetch-event-source` (needed to send the `Authorization` header, backend §6.6) |
 | Markdown | `react-markdown` + `remark-gfm`, **no** `rehype-raw` (raw HTML stays disabled, backend §8 #8) |
 | Code editor | CodeMirror 6 via `@uiw/react-codemirror` + `@codemirror/lang-python` |
@@ -420,10 +420,14 @@ The backend still checks every call; the guard is only for UX.
 
 | Variable | Purpose |
 |---|---|
-| `VITE_API_BASE_URL` | Backend origin, e.g. `http://localhost:8000` (`.env.development`) or the prod URL (`.env.production`) |
+| `VITE_API_BASE_URL` | Backend origin without `/api`. Default `http://localhost:8000` (the backend Docker container run locally) |
+
+The value is read from `frontend/.env` (git-ignored). `frontend/.env.example` is committed with the
+default; copy it to `.env` and change the URL to point at another backend.
 
 `npm run build` outputs a static `dist/` that is deployed to any static host (with fallback to
-`index.html` for client-side routes). Dev and prod builds point at their own backend.
+`index.html` for client-side routes). The URL is baked in at build time, so set `.env` before
+building for production.
 
 ---
 
