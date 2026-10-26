@@ -361,7 +361,7 @@ async def _finish(job, status, *, result=None, error=None):
 - `job_input` holds everything the handler needs (ids, code, prompt) and is stored in
   `jobs.input_json`, so the job does not depend on later edits by the user.
 - Raw exception text, upstream bodies and stack traces never go into `error`.
-- Timeouts: `LLM_JOB_TIMEOUT_S` (default 300 s) for AI jobs; for run/submit, the executor timeout
+- Timeouts: `LLM_JOB_TIMEOUT_S` (default 600 s) for AI jobs; for run/submit, the executor timeout
   formula from the executor spec §10 plus 10 s.
 
 ### 6.5 Startup and shutdown
@@ -684,7 +684,7 @@ No request limits are applied by the backend: SoCLaaS enforces its own rate and 
 | `BOOTSTRAP_ADMIN_USERNAME` / `BOOTSTRAP_ADMIN_PASSWORD` | — | First admin (§4) |
 | `SOCLAAS_BASE_URL` / `SOCLAAS_API_KEY` | — (required) | LLM gateway |
 | `LLM_MODEL` | `coder` | Model ID for all AI features |
-| `LLM_JOB_TIMEOUT_S` | `300` | Timeout for AI jobs |
+| `LLM_JOB_TIMEOUT_S` | `600` | Timeout for AI jobs |
 | `CODE_EXECUTION_SERVER` | — (required) | Executor base URL, e.g. `https://executor.example.com` (`http://localhost:8001` in dev) |
 | `EXECUTOR_TOKEN` | — (required) | Shared secret with the executor |
 
