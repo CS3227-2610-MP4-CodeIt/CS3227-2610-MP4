@@ -310,7 +310,8 @@ async def test_co_teacher_cannot_edit_or_delete_but_can_view(client, teacher, st
     q = await make_question(teacher)
     a = await make_assignment(teacher, c.id, [q.id])
     h = co.headers
-    assert (await client.get(f"/api/teacher/assignments/{a.id}", headers=h)).status_code == 200
+    r = await client.get(f"/api/teacher/assignments/{a.id}", headers=h)
+    assert r.status_code == 200 and r.json()["created_by"] == teacher.id
     assert [x["id"] for x in (await client.get("/api/teacher/assignments", headers=h)).json()] == [a.id]
     assert (await client.patch(f"/api/teacher/assignments/{a.id}", json={"title": "z"}, headers=h)).status_code == 404
     assert (await client.delete(f"/api/teacher/assignments/{a.id}", headers=h)).status_code == 404

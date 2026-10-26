@@ -42,9 +42,9 @@ in order (add / remove / reorder). `409` when removing a question that already h
 `detail` inline.
 
 On `/teacher/assignments/:id`, only the teacher who created the assignment may edit or delete it
-(backend §3). `AssignmentOut` does not include the creator, so the controls are always shown and a
-`404` on `PATCH` / `DELETE` is shown as "Only the teacher who created this assignment can change
-it."
+(backend §3). The edit / delete controls are shown only when `assignment.created_by` equals the
+logged-in user's id from the auth context (`frontend-spec.md` §5), so never when it is `null`. A `404` on `PATCH` / `DELETE` (e.g. a stale page)
+is still shown as "Only the teacher who created this assignment can change it."
 
 ### 1.3 Mutations and cache updates
 

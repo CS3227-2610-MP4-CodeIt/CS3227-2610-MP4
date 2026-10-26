@@ -185,7 +185,7 @@ automatically, so `allow_credentials` stays `False` (it can't be combined with `
 | `POST` | `/teacher/question-generations/{job_id}/approve` | Creates a question from a successful draft → `201` question. Already approved → `409` |
 | `GET` | `/teacher/assignments?class_id=` | Assignments of the teacher's classes |
 | `POST` | `/teacher/assignments` | `{class_id, title, description_md?, due_at?, question_ids: [1..3]}` |
-| `GET` | `/teacher/assignments/{id}` | Assignment + questions |
+| `GET` | `/teacher/assignments/{id}` | Assignment + questions. Includes `created_by` (teacher id, `null` if that account was deleted) so the UI can hide edit / delete for co-teachers |
 | `PATCH` | `/teacher/assignments/{id}` | Any of the create fields except `class_id` |
 | `DELETE` | `/teacher/assignments/{id}` | Cascades its submissions |
 

@@ -360,6 +360,7 @@ class AssignmentOut(OutModel):
     id: int
     class_id: int
     class_name: str
+    created_by: int | None
     title: str
     description_md: str
     due_at: str | None
