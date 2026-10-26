@@ -18,3 +18,14 @@ export function formatElapsed(fromIso: string, now = Date.now()) {
   const s = Math.max(0, Math.floor((now - new Date(fromIso).getTime()) / 1000));
   return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`;
 }
+
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/** UTC ISO → `datetime-local` input value in the browser's time zone. */
+export function toLocalInput(iso: string) {
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** `datetime-local` value (local time) → UTC ISO; empty → null. */
+export const fromLocalInput = (value: string) => (value ? new Date(value).toISOString() : null);

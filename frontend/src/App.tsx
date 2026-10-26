@@ -9,6 +9,11 @@ import { SummaryPage } from "./features/admin/SummaryPage";
 import { UserPage } from "./features/admin/UserPage";
 import { UsersPage } from "./features/admin/UsersPage";
 import { LoginPage } from "./features/login/LoginPage";
+import { AssignmentPage, AssignmentQuestionPage, NewAssignmentPage } from "./features/teacher/AssignmentPage";
+import { AssignmentsPage } from "./features/teacher/AssignmentsPage";
+import { GeneratePage } from "./features/teacher/GeneratePage";
+import { NewQuestionPage, QuestionPage } from "./features/teacher/QuestionPage";
+import { QuestionsPage } from "./features/teacher/QuestionsPage";
 
 function HomeRedirect() {
   const { auth } = useAuth();
@@ -33,7 +38,18 @@ export default function App() {
           path="/admin/classes/:cid/assignments/:aid"
           element={<RequireRole role="admin"><SummaryPage /></RequireRole>}
         />
-        <Route path="/teacher/*" element={<RequireRole role="teacher"><ComingSoon /></RequireRole>} />
+        <Route path="/teacher" element={<RequireRole role="teacher"><Navigate to="/teacher/assignments" replace /></RequireRole>} />
+        <Route path="/teacher/questions" element={<RequireRole role="teacher"><QuestionsPage /></RequireRole>} />
+        <Route path="/teacher/questions/new" element={<RequireRole role="teacher"><NewQuestionPage /></RequireRole>} />
+        <Route path="/teacher/questions/:id" element={<RequireRole role="teacher"><QuestionPage /></RequireRole>} />
+        <Route path="/teacher/generate" element={<RequireRole role="teacher"><GeneratePage /></RequireRole>} />
+        <Route path="/teacher/assignments" element={<RequireRole role="teacher"><AssignmentsPage /></RequireRole>} />
+        <Route path="/teacher/assignments/new" element={<RequireRole role="teacher"><NewAssignmentPage /></RequireRole>} />
+        <Route path="/teacher/assignments/:id" element={<RequireRole role="teacher"><AssignmentPage /></RequireRole>} />
+        <Route
+          path="/teacher/assignments/:id/questions/:qid"
+          element={<RequireRole role="teacher"><AssignmentQuestionPage /></RequireRole>}
+        />
         <Route path="/student/*" element={<RequireRole role="student"><ComingSoon /></RequireRole>} />
       </Route>
       <Route path="*" element={<HomeRedirect />} />

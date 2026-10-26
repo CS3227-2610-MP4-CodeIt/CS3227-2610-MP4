@@ -102,6 +102,7 @@ export const keys = {
   teacherQuestion: (id: number) => ["teacher", "question", id],
   teacherAssignments: (classId?: number) => ["teacher", "assignments", { classId }],
   teacherAssignment: (id: number) => ["teacher", "assignment", id],
+  teacherAssignmentQuestion: (aid: number, qid: number) => ["teacher", "assignment", aid, "question", qid],
   // student
   studentAssignments: () => ["student", "assignments"],
   studentAssignment: (aid: number) => ["student", "assignment", aid],

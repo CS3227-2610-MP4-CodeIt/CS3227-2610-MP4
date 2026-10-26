@@ -316,3 +316,21 @@ async def test_co_teacher_cannot_edit_or_delete_but_can_view(client, teacher, st
     assert (await client.patch(f"/api/teacher/assignments/{a.id}", json={"title": "z"}, headers=h)).status_code == 404
     assert (await client.delete(f"/api/teacher/assignments/{a.id}", headers=h)).status_code == 404
     assert (await client.patch(f"/api/teacher/assignments/{a.id}", json={"title": "z"}, headers=teacher.headers)).status_code == 200
+
+
+async def test_co_teacher_can_read_assignment_questions(client, teacher, student, make_user, make_class, make_question, make_assignment):
+    co = await make_user("teacher")
+    outsider = await make_user("teacher")
+    c = await make_class(members=[teacher, co, student])
+    q = await make_question(teacher)
+    other_q = await make_question(teacher)
+    a = await make_assignment(teacher, c.id, [q.id])
+    path = f"/api/teacher/assignments/{a.id}/questions/{q.id}"
+    r = await client.get(path, headers=co.headers)
+    assert r.status_code == 200 and r.json()["id"] == q.id
+    assert any(t["is_hidden"] for t in r.json()["test_cases"])
+    assert (await client.get(f"/api/teacher/questions/{q.id}", headers=co.headers)).status_code == 404
+    assert (await client.get(path, headers=outsider.headers)).status_code == 404
+    other = f"/api/teacher/assignments/{a.id}/questions/{other_q.id}"
+    assert (await client.get(other, headers=co.headers)).status_code == 404
+    assert (await client.get(path, headers=student.headers)).status_code == 403

@@ -98,7 +98,7 @@ Rules enforced by the app (not expressible as simple constraints):
 - An assignment always has 1–3 distinct questions, all created by the teacher creating it.
 - A teacher can create an assignment only for a class they are a member of.
 - Only the teacher who created an assignment (`created_by`) can edit or delete it. Other teachers
-  of the class can view it; their `PATCH` / `DELETE` → `404`.
+  of the class can view it and its questions (read-only); their `PATCH` / `DELETE` → `404`.
 - A question used by any assignment cannot be deleted (`409`; the FK is `RESTRICT`).
 - A question cannot be removed from an assignment once it has submissions for it (`409`).
 - The last remaining admin cannot be deleted, and an admin cannot delete themself (`409`).
@@ -186,6 +186,7 @@ automatically, so `allow_credentials` stays `False` (it can't be combined with `
 | `GET` | `/teacher/assignments?class_id=` | Assignments of the teacher's classes |
 | `POST` | `/teacher/assignments` | `{class_id, title, description_md?, due_at?, question_ids: [1..3]}` |
 | `GET` | `/teacher/assignments/{id}` | Assignment + questions. Includes `created_by` (teacher id, `null` if that account was deleted) so the UI can hide edit / delete for co-teachers |
+| `GET` | `/teacher/assignments/{id}/questions/{qid}` | Read-only full question (incl. all test cases) of a question in the assignment, for any teacher of its class (e.g. a co-teacher who did not write it). Not in the assignment → `404` |
 | `PATCH` | `/teacher/assignments/{id}` | Any of the create fields except `class_id` |
 | `DELETE` | `/teacher/assignments/{id}` | Cascades its submissions |
 
@@ -743,7 +744,8 @@ files are git-ignored.
 | Student calls `/admin/*` or `/teacher/*` | `403` |
 | Student opens an assignment of another class | `404` |
 | Teacher edits another teacher's question | `404` |
-| Co-teacher (same class) edits / deletes another teacher's assignment | `404`; can still view it |
+| Co-teacher (same class) edits / deletes another teacher's assignment | `404`; can still view it and read its questions via `/teacher/assignments/{id}/questions/{qid}` |
+| Teacher reads a question via an assignment of a class they are not in, or a question not in that assignment | `404` |
 | Teacher creates an assignment for a class they are not in | `404` |
 | Reading another user's job via `/jobs/{id}` | `404` |
 | Reading another student's submission via `.../submissions/{sid}` | `404` |

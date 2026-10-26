@@ -1,4 +1,4 @@
-// Mirrors backend/app/schemas.py. Teacher / student types are added with their pages.
+// Mirrors backend/app/schemas.py. Student types are added with their pages.
 
 export type Role = "admin" | "teacher" | "student";
 export type MemberRole = "teacher" | "student";
@@ -98,4 +98,96 @@ export interface SummaryStats {
 export interface SummaryResult {
   stats: SummaryStats;
   summary_md: string;
+}
+
+// --- teacher: questions (backend §5.3) ---
+
+export interface FloatTolerance {
+  abs: number;
+  rel: number;
+}
+
+export interface TestCase {
+  stdin: string;
+  expected_stdout: string;
+  is_hidden: boolean;
+}
+
+export interface QuestionIn {
+  title: string;
+  statement_md: string;
+  difficulty: Difficulty;
+  topics: string[];
+  time_limit_ms: number;
+  memory_limit_mb: number;
+  float_tolerance: FloatTolerance | null;
+  test_cases: TestCase[];
+}
+
+export interface QuestionSummary {
+  id: number;
+  title: string;
+  difficulty: Difficulty;
+  topics: string[];
+  time_limit_ms: number;
+  memory_limit_mb: number;
+  float_tolerance: FloatTolerance | null;
+  source_job_id: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Question extends QuestionSummary {
+  statement_md: string;
+  test_cases: (TestCase & { position: number })[];
+}
+
+// --- teacher: question generation (backend §7.2) ---
+
+export interface QuestionGenIn {
+  difficulty: Difficulty;
+  topics: string[];
+  prompt: string;
+  parent_job_id: number | null;
+  feedback: string | null;
+}
+
+export interface QuestionDraft extends QuestionIn {
+  reference_solution: string;
+}
+
+export interface QuestionGenResult {
+  draft: QuestionDraft;
+}
+
+// --- teacher: assignments ---
+
+export interface AssignmentCreate {
+  class_id: number;
+  title: string;
+  description_md: string;
+  due_at: string | null;
+  question_ids: number[];
+}
+
+export type AssignmentUpdate = Partial<Omit<AssignmentCreate, "class_id">>;
+
+export interface AssignmentQuestion {
+  id: number;
+  position: number;
+  title: string;
+  difficulty: Difficulty;
+}
+
+export interface Assignment {
+  id: number;
+  class_id: number;
+  class_name: string;
+  created_by: number | null;
+  title: string;
+  description_md: string;
+  due_at: string | null;
+  created_at: string;
+  updated_at: string;
+  questions: AssignmentQuestion[];
 }

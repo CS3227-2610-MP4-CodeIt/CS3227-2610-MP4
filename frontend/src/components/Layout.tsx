@@ -9,7 +9,11 @@ const NAV: Record<Role, { to: string; label: string }[]> = {
     { to: "/admin/users", label: "Users" },
     { to: "/admin/classes", label: "Classes" },
   ],
-  teacher: [],
+  teacher: [
+    { to: "/teacher/assignments", label: "Assignments" },
+    { to: "/teacher/questions", label: "Questions" },
+    { to: "/teacher/generate", label: "Generate" },
+  ],
   student: [],
 };
 

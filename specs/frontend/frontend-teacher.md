@@ -17,6 +17,7 @@ Pages for `role = teacher`. Endpoints: `specs/backend-spec.md` §5.3, §7.2. Sta
 | `/teacher/assignments?class_id=` | Assignments of the teacher's classes, class filter in the URL. "New assignment" | `teacherClasses()`, `teacherAssignments(classId)` |
 | `/teacher/assignments/new` | Assignment form (§1.2) | `teacherClasses()`, `teacherQuestions()` |
 | `/teacher/assignments/:id` | Assignment view; edit form and delete only if the teacher created it | `teacherAssignment(id)`, `teacherQuestions()` |
+| `/teacher/assignments/:id/questions/:qid` | Read-only question view (statement via `Markdown`, limits, all test cases) for any teacher of the class | `teacherAssignmentQuestion(id, qid)` |
 
 ### 1.1 Question form
 
@@ -45,6 +46,10 @@ On `/teacher/assignments/:id`, only the teacher who created the assignment may e
 (backend §3). The edit / delete controls are shown only when `assignment.created_by` equals the
 logged-in user's id from the auth context (`frontend-spec.md` §5), so never when it is `null`. A `404` on `PATCH` / `DELETE` (e.g. a stale page)
 is still shown as "Only the teacher who created this assignment can change it."
+
+Question titles on the assignment view link to the question editor (`/teacher/questions/:id`) for
+the creator, and to the read-only view (`/teacher/assignments/:id/questions/:qid`) for other
+teachers, whose `teacherQuestion(id)` would be `404`.
 
 ### 1.3 Mutations and cache updates
 

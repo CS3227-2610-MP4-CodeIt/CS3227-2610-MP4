@@ -194,6 +194,18 @@ async def get_assignment(
     return AssignmentOut.model_validate(await _own_assignment(ctx, user, assignment_id))
 
 
+@router.get("/assignments/{assignment_id}/questions/{question_id}")
+async def get_assignment_question(
+    assignment_id: int, question_id: int, user: User = Depends(require_teacher), ctx: AppContext = Depends(get_ctx)
+) -> QuestionOut:
+    """Read-only view for any teacher of the class, including co-teachers who did not write it."""
+    assignment = await _own_assignment(ctx, user, assignment_id)
+    question = await questions_repo.get(ctx.db, question_id) if assignment.has_question(question_id) else None
+    if question is None:
+        raise HTTPException(status_code=404, detail="question not found")
+    return QuestionOut.model_validate(question)
+
+
 @router.patch("/assignments/{assignment_id}")
 async def update_assignment(
     assignment_id: int,
