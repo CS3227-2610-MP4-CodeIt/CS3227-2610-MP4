@@ -106,7 +106,7 @@ Notes:
 
 #### Verified model catalog
 
-On 2026-10-21, an authenticated `curl` request to `https://soclaas-api.comp.nus.edu.sg/v1/models` returned `HTTP 200` with 17 model entries. This snapshot reflects the models visible to the provided API key; availability and metadata may change. Refresh it with `GET /v1/models` when needed.
+On 2026-10-26, an authenticated `curl` request to `https://soclaas-api.comp.nus.edu.sg/v1/models` returned `HTTP 200` with 19 model entries. This snapshot reflects the models visible to the provided API key; availability and metadata may change. Refresh it with `GET /v1/models` when needed.
 
 | Model ID | Display name | Capability | Context tokens | Alias of |
 | --- | --- | --- | ---: | --- |
@@ -120,8 +120,10 @@ On 2026-10-21, an authenticated `curl` request to `https://soclaas-api.comp.nus.
 | `qwen3-coder-next` | Qwen 3 Coder Next 80B A3B | `chat` | 262,144 | — |
 | `qwen3-vl:32b` | Qwen 3 VL 32B | `chat` | 80,000 | — |
 | `whisper-large-v3` | Whisper Large v3 | `audio-transcription` | 131,072 | — |
-| `x-test-1` | Testing GLM 5.3 Flash | `chat` | 1,048,576 | — |
-| `x-test-2` | Testing DeepSeek V4.1 Flash 1017 | `chat` | 1,048,576 | — |
+| `x-test-1` | Test GLM 5.3 Flash | `chat` | 1,048,576 | — |
+| `x-test-2` | Test DeepSeek V4.1 Flash 1017 | `chat` | 1,048,576 | — |
+| `x-test-3` | Test Qwen 3.8 Flash Next | `chat` | 262,144 | — |
+| `x-test-4` | Test MiniMax M3.1 Flash | `chat` | 1,048,576 | — |
 | `coder` | Qwen 3.8 27B | `chat` | 262,144 | `qwen3.8:27b` |
 | `coding` | Qwen 3.8 27B | `chat` | 262,144 | `qwen3.8:27b` |
 | `default` | Qwen 3.6 35B A3B | `chat` | 262,144 | `qwen3.6:35b` |
@@ -181,11 +183,11 @@ Notes:
 
 Observed behavior (verified 2026-10-21):
 
-- The response `model` field contains the upstream model, not the public ID you sent. For example, `default` returns `qwen3.6:35b` and `x-test-1` returns `glm-5.3-flash`. Track the requested model on the client side instead of reading it from the response.
+- The response `model` field contains the upstream model, not the public ID you sent. For example, `default` returns `qwen3.6:35b`, `x-test-1` returns `glm-5.3-flash`, `x-test-3` returns `qwen3.8-flash-next`, and `x-test-4` returns `minimax-m3.1-flash`. Track the requested model on the client side instead of reading it from the response.
 - The response body passes through from the backend, so its extra fields depend on the backend. vLLM-backed models (such as `qwen3.6:35b`) add fields like `reasoning`, `refusal`, `token_ids`, `routed_experts`, and `kv_transfer_params`. Ollama-backed models (such as `llama3.1:8b`) return a minimal body. Rely only on the standard OpenAI fields: `choices[].message.content`, `choices[].finish_reason`, and `usage`.
-- Some models (`ornith1.5:35b`, `qwen3.8:27b`, and its aliases such as `coder`) begin their content with `\n\n`. Trim content before using it.
+- Some models (`ornith1.5:35b`, `qwen3.8:27b` and its aliases such as `coder`, and `x-test-3`) begin their content with `\n\n`. Trim content before using it.
 - When streaming, the final chunk before `data: [DONE]` has an empty `choices` array and carries `usage`. Guard against empty `choices` when reading chunks. Ollama-backed models repeat `"role": "assistant"` in every delta, not only the first one.
-- Latency varies widely by model. For a trivial prompt, most models answered in under 1 s, `gemma4:26b`, `qwen3.5:9b`, and `x-test-2` took 2–3 s, and `x-test-1` took about 10 s.
+- Latency varies widely by model. For a trivial prompt, most models answered in under 1 s, `gemma4:26b`, `qwen3.5:9b`, and `x-test-2` took 2–3 s, and `x-test-1` took about 10 s. On 2026-10-26, the new `x-test-3` and `x-test-4` each answered in about 0.5 s.
 
 ### `POST /v1/responses`
 
