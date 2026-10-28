@@ -114,3 +114,59 @@ tolerance), `toQuestionIn`, `questionErrors` (row / field / other), `moveItem`, 
   go there, the creator's still go to the editor. Shared `QuestionPreview` (also used by draft view).
   The key sits under `["teacher", "assignment", aid]`, so question edits and assignment deletes
   already refresh / remove it.
+
+---
+
+# Round 3 — Student pages (2026-10-28)
+
+Spec: `specs/frontend/frontend-student.md`. Commits on `staging`: `96d62c5` (backend: hint
+question), `e05987c` (CodeMirror deps), `1f555fe` (student pages). Followed the same day by the
+frontend Dockerfile / nginx config (`c395454`) and `docker-compose.yml` (`66a6417`).
+
+## What was built (`src/features/student/`)
+
+| Area | Files | Notes |
+|---|---|---|
+| Routes / nav | `App.tsx`, `Layout.tsx` | `/student`, `/student/assignments/:aid`, `/student/assignments/:aid/questions/:qid`, all behind `RequireRole`; replaced the "not built yet" placeholder; "Assignments" nav link |
+| API | `api.ts`, `api/types.ts` | Queries only (assignments, assignment, question, submissions, one submission with code). Run / submit / hint are jobs via `jobs/` + `events/`. A submission never changes → `staleTime: Infinity` |
+| Assignments | `AssignmentsPage.tsx` | Grouped by class (sorted by name, backend order inside), due date + "closed" tag, solved `x / n` |
+| Assignment | `AssignmentPage.tsx` | Description (Markdown), ordered question table with difficulty and ✓ solved |
+| Question | `QuestionPage.tsx` | Statement + sample tests (copy buttons) on the left, editor + results on the right, in a resizable `SplitPane` |
+| Results | `JudgeResultView.tsx`, `verdict.ts` | Verdict, passed / total, max time / memory, error message, per-test rows; visible tests expand to your output vs expected (+ stderr); hidden tests show status only; note when judging stopped at the first failure |
+| Drafts | `drafts.ts`, `useDraftSaver.ts` | `localStorage["draft:{user}:{aid}:{qid}"]`, saved 1 s after the last keystroke and flushed on unmount / `pagehide`; storage errors swallowed |
+| Shared | `components/SplitPane.tsx`, `CopyButton.tsx` | Divider draggable by pointer or arrow keys (25–75 %), stacked below `lg`; copy button shows "Copied" briefly |
+
+## Question page details
+
+- **Editor**: CodeMirror (`@uiw/react-codemirror` + `@codemirror/lang-python`), height resizable
+  by dragging the corner. Content is local state, set once on mount: draft → latest submission's
+  code → empty (`initialCode`). The submissions query is only waited on when there is no draft, and
+  later refetches never touch the editor.
+- `QuestionWorkspace` is keyed by `aid:qid`, so editor state never leaks between questions.
+- **Buttons**: Run and Submit disabled on an empty editor, while starting, or while their job is
+  `in_process`; Submit also disabled (label "Submissions closed") past the due date. Get hint sends
+  `"\n"` for an empty editor.
+- **Tabs**: Run result / Submit result / Hint / Submissions; pressing a button switches to its tab.
+  `JobPanel` handles the pending / error / no job / running / success states for each job.
+- **"Not sent" notice**: when the start returns `created: false` and that job is still running,
+  the page says the existing job is shown and the latest code was not sent.
+- **Hint**: Markdown hint plus "Looked at: question, your code" from `tools_used`; `422` from the
+  injection guard shown inline via `ErrorText`.
+- **Submissions**: history table (time, coloured verdict, passed); clicking a row shows its code
+  with "Load into editor" behind a confirm (overwrites the draft).
+
+## Spec change — optional question with a hint (asked for by the user)
+
+- Students can type "What are you stuck on?" (≤ 500 chars) above the buttons; it is sent as
+  `question` with Get hint, left out when blank, and kept after sending so it can be tweaked.
+- Backend (`96d62c5`): `HintIn(CodeIn)` with `question: str | None` (blank → `None`); the injection
+  scan covers it; the hint user message adds `"Their question: …"` wrapped as
+  `untrusted("student_question")`; `prompts/hint.md` says to answer it within the hint rules.
+  Tests added in `test_student.py` (injection → `422`, wrapped in the message, > 500 chars → `422`).
+- Specs updated: `backend-spec.md` §5.4, §7.1, §8 #3, §12; `frontend-student.md` §1, §3.2.
+
+## Tests — 41 passing (+5)
+
+`drafts.test.ts`: key per user / assignment / question, skip saving when storage is full, an empty
+draft still counts as a draft, draft preferred without waiting for submissions, fallback to the
+latest submission then empty. No UI tests (spec §9).
