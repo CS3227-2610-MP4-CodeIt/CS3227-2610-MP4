@@ -16,6 +16,7 @@ from app.repos import assignments as assignments_repo
 from app.repos.users import User
 from app.schemas import (
     CodeIn,
+    HintIn,
     JobCheckOut,
     StudentAssignmentOut,
     StudentQuestionBrief,
@@ -138,10 +139,12 @@ async def get_submission(aid: int, qid: int, sid: int, user: User = Depends(requ
 
 
 @router.post("/assignments/{aid}/questions/{qid}/hint")
-async def request_hint(aid: int, qid: int, body: CodeIn, user: User = Depends(require_student), ctx: AppContext = Depends(get_ctx)):
+async def request_hint(aid: int, qid: int, body: HintIn, user: User = Depends(require_student), ctx: AppContext = Depends(get_ctx)):
     await _get_assignment(ctx, user, aid, qid)
-    guards.reject_injection(body.code)
-    job_input = {"student_id": user.id, "assignment_id": aid, "question_id": qid, "code": body.code}
+    guards.reject_injection(body.code, body.question)
+    job_input = {
+        "student_id": user.id, "assignment_id": aid, "question_id": qid, "code": body.code, "question": body.question,
+    }
     job, created = await start_job(
         ctx.db, user.id, "hint", f"a{aid}:q{qid}", job_input,
         functools.partial(hints.run_hint, ctx), ctx.settings.llm_job_timeout_s,

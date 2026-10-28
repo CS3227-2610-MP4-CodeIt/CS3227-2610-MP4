@@ -52,12 +52,14 @@ async def run_hint(ctx: AppContext, job_input: dict[str, Any]) -> dict[str, Any]
 
     nonce = guards.new_nonce()
     canary = guards.new_canary()
+    asked = job_input.get("question")
+    asked_line = f"Their question: {guards.wrap_untrusted('student_question', asked, nonce)} " if asked else ""
     messages: list[dict[str, Any]] = [
         {"role": "system", "content": guards.build_system_prompt(_BASE_PROMPT, nonce, canary)},
         {
             "role": "user",
             "content": f"The student is stuck on the question {guards.wrap_untrusted('title', question.title, nonce)} and asks for a hint. "
-            "Use the tools to read the question and/or their code if you need them.",
+            f"{asked_line}Use the tools to read the question and/or their code if you need them.",
         },
     ]
     tools_used: list[str] = []

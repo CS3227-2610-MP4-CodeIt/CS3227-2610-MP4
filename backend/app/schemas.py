@@ -424,6 +424,19 @@ class CodeIn(BaseModel):
         return _check_code(value)
 
 
+class HintIn(CodeIn):
+    """Body of a hint: the code plus an optional question from the student (§5.4)."""
+
+    question: str | None = Field(default=None, max_length=500)
+
+    @field_validator("question")
+    @classmethod
+    def _question(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return value.strip() or None  # blank → absent
+
+
 class SubmissionBriefOut(OutModel):
     id: int
     verdict: Verdict
