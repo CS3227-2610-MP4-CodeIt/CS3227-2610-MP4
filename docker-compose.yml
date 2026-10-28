@@ -1,0 +1,60 @@
+# Local stack: frontend (5173) -> backend (8000) -> code-executor (internal only).
+#   docker compose up -d --build
+# EXECUTOR_TOKEN must match in backend/.env and code-execution/.env.
+services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked in at build time; the browser calls the backend through the host port.
+        VITE_API_BASE_URL: http://localhost:8000
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    env_file: ./backend/.env
+    environment:
+      CODE_EXECUTION_SERVER: http://code-executor:8001
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend-data:/data
+    networks:
+      - default    # outbound internet for SoCLaaS
+      - executor
+    depends_on:
+      - code-executor
+    restart: unless-stopped
+
+  code-executor:
+    build: ./code-execution
+    env_file: ./code-execution/.env
+    environment:
+      WORK_ROOT: /work
+    # No published port: only the backend reaches it, over the internal network.
+    networks:
+      - executor
+    # Hardening (code-execution spec §6).
+    read_only: true
+    tmpfs:
+      - /work:size=256m,mode=1777
+      - /tmp:size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 512
+    mem_limit: 16g
+    cpus: 8
+    restart: unless-stopped
+
+networks:
+  executor:
+    internal: true   # no outbound internet for the executor
+
+volumes:
+  backend-data:
