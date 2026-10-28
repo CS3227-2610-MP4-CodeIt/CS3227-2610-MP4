@@ -1,4 +1,4 @@
-// Mirrors backend/app/schemas.py. Student types are added with their pages.
+// Mirrors backend/app/schemas.py.
 
 export type Role = "admin" | "teacher" | "student";
 export type MemberRole = "teacher" | "student";
@@ -190,4 +190,91 @@ export interface Assignment {
   created_at: string;
   updated_at: string;
   questions: AssignmentQuestion[];
+}
+
+// --- student (backend §5.4) ---
+
+export interface StudentQuestionBrief {
+  id: number;
+  position: number;
+  title: string;
+  difficulty: Difficulty;
+  solved: boolean;
+}
+
+export interface StudentAssignment {
+  id: number;
+  class_id: number;
+  class_name: string;
+  title: string;
+  description_md: string;
+  due_at: string | null;
+  questions: StudentQuestionBrief[];
+}
+
+export interface VisibleTestCase {
+  position: number;
+  stdin: string;
+  expected_stdout: string;
+}
+
+export interface StudentQuestion {
+  id: number;
+  title: string;
+  statement_md: string;
+  difficulty: Difficulty;
+  topics: string[];
+  time_limit_ms: number;
+  memory_limit_mb: number;
+  float_tolerance: FloatTolerance | null;
+  test_cases: VisibleTestCase[];
+  solved: boolean;
+}
+
+export interface CodeIn {
+  code: string;
+}
+
+export interface HintIn extends CodeIn {
+  question?: string;
+}
+
+export interface SubmissionBrief {
+  id: number;
+  verdict: Verdict;
+  passed: number;
+  total: number;
+  created_at: string;
+}
+
+export interface Submission extends SubmissionBrief {
+  code: string;
+}
+
+// --- student: job results (backend §7.1, §7.4) ---
+
+export interface JudgeTestResult {
+  index: number;
+  hidden: boolean;
+  status: Verdict;
+  time_ms: number;
+  memory_kb: number | null;
+  stdout_preview?: string;
+  stderr_preview?: string;
+}
+
+export interface JudgeResult {
+  verdict: Verdict;
+  passed: number;
+  total: number;
+  failed_test_index: number | null;
+  error_message: string | null;
+  max_time_ms: number;
+  max_memory_kb: number | null;
+  results: JudgeTestResult[];
+}
+
+export interface HintResult {
+  hint_md: string;
+  tools_used: string[];
 }

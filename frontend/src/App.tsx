@@ -9,6 +9,9 @@ import { SummaryPage } from "./features/admin/SummaryPage";
 import { UserPage } from "./features/admin/UserPage";
 import { UsersPage } from "./features/admin/UsersPage";
 import { LoginPage } from "./features/login/LoginPage";
+import { AssignmentPage as StudentAssignmentPage } from "./features/student/AssignmentPage";
+import { AssignmentsPage as StudentAssignmentsPage } from "./features/student/AssignmentsPage";
+import { QuestionPage as StudentQuestionPage } from "./features/student/QuestionPage";
 import { AssignmentPage, AssignmentQuestionPage, NewAssignmentPage } from "./features/teacher/AssignmentPage";
 import { AssignmentsPage } from "./features/teacher/AssignmentsPage";
 import { GeneratePage } from "./features/teacher/GeneratePage";
@@ -18,10 +21,6 @@ import { QuestionsPage } from "./features/teacher/QuestionsPage";
 function HomeRedirect() {
   const { auth } = useAuth();
   return <Navigate to={auth ? homePath(auth.user.role) : "/login"} replace />;
-}
-
-function ComingSoon() {
-  return <p className="text-sm text-slate-500">This section is not built yet.</p>;
 }
 
 export default function App() {
@@ -50,7 +49,15 @@ export default function App() {
           path="/teacher/assignments/:id/questions/:qid"
           element={<RequireRole role="teacher"><AssignmentQuestionPage /></RequireRole>}
         />
-        <Route path="/student/*" element={<RequireRole role="student"><ComingSoon /></RequireRole>} />
+        <Route path="/student" element={<RequireRole role="student"><StudentAssignmentsPage /></RequireRole>} />
+        <Route
+          path="/student/assignments/:aid"
+          element={<RequireRole role="student"><StudentAssignmentPage /></RequireRole>}
+        />
+        <Route
+          path="/student/assignments/:aid/questions/:qid"
+          element={<RequireRole role="student"><StudentQuestionPage /></RequireRole>}
+        />
       </Route>
       <Route path="*" element={<HomeRedirect />} />
     </Routes>

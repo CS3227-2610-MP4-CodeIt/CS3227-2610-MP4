@@ -40,7 +40,7 @@ contents after a confirm, since it overwrites the draft.
   set once by §1.2 when the page mounts (the page waits for the submissions query only when there
   is no draft) and after that changes only by typing or "Load into editor". Refetches of
   submissions (e.g. after a submit event) never touch it.
-- Run, Submit and Hint send the editor's current content as `{code}`. An empty editor sends `"\n"`
+- Run, Submit and Hint send the editor's current content as `{code}` (Hint may add `question`, §3.2). An empty editor sends `"\n"`
   for hints (backend §5.4); Run / Submit are disabled when the editor is empty.
 - Drafts are not synced live between two tabs on the same question; each tab saves what it has and
   the last save wins. This is acceptable for a convenience feature.
@@ -104,7 +104,10 @@ Submit specifics:
 
 ### 3.2 Hint
 
-- "Get hint" → `startHint.mutate({code})`. `422` from the injection guard (backend §8 #3) is shown
+- An optional one-line "What are you stuck on?" input (≤ 500 chars, local `useState`) sits above
+  the buttons. "Get hint" → `startHint.mutate({code, question})`, leaving `question` out when it is
+  blank. The input is kept after sending so the student can tweak it and ask again.
+- `422` from the injection guard (backend §8 #3) is shown
   inline as the backend's `detail` ("Your input contains text that looks like instructions to the
   AI…"); no job was created.
 - `in_process` → "Thinking…". `success` → `result.hint_md` via `Markdown`, with a small line

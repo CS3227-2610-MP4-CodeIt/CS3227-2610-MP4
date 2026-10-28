@@ -14,7 +14,7 @@ const NAV: Record<Role, { to: string; label: string }[]> = {
     { to: "/teacher/questions", label: "Questions" },
     { to: "/teacher/generate", label: "Generate" },
   ],
-  student: [],
+  student: [{ to: "/student", label: "Assignments" }],
 };
 
 function ReconnectingBar() {
