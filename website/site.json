@@ -1,0 +1,22 @@
+{
+  "baseUrl": "/CS3227-2610-MP4",
+  "titlePrefix": "CodeIt",
+  "faviconPath": "images/favicon.svg",
+  "style": {
+    "codeTheme": "light"
+  },
+  "pages": [
+    {
+      "src": "index.md",
+      "title": "Python assignments with AI assistance"
+    }
+  ],
+  "ignore": [
+    "_site/**",
+    "*.md",
+    "*.json"
+  ],
+  "deploy": {
+    "message": "Site Update."
+  }
+}

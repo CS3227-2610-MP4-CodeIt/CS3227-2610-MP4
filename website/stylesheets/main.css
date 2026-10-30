@@ -1,0 +1,50 @@
+#content-wrapper {
+  margin: 0 auto;
+  max-width: 1000px;
+  padding: 0 1.5rem 3rem;
+}
+
+.hero {
+  padding: 3.5rem 0 2.5rem;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 2.6rem;
+  font-weight: 700;
+}
+
+.hero .tagline {
+  color: #555;
+  font-size: 1.2rem;
+  margin: 1rem auto 1.75rem;
+  max-width: 680px;
+}
+
+.hero .btn {
+  margin: 0.25rem;
+}
+
+.roles {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin: 1.5rem 0 2.5rem;
+}
+
+.role-card {
+  border: 1px solid #e3e3e3;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+}
+
+.role-card h3 {
+  margin-top: 0;
+}
+
+.role-card .ai {
+  background: #f3edff;
+  border-radius: 6px;
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.8rem;
+}
