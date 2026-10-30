@@ -7,7 +7,7 @@ import remarkGfm from "remark-gfm";
  */
 export function Markdown({ children }: { children: string }) {
   return (
-    <div className="prose prose-sm max-w-none">
+    <div className="prose prose-sm max-w-none prose-code:before:content-none prose-code:after:content-none">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
