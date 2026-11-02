@@ -32,7 +32,7 @@ Never use `.gitignore` to hide an uncertain or user-owned file.
 Group changes by intent, not merely by file. Each commit should represent one independently valid logical outcome. Keep implementation with its direct tests and documentation when inseparable; split independently reviewable outcomes such as reusable tooling, test scenarios that consume it, and generated artifacts.
 
 Do not combine unrelated workflows into one large commit; split at independently reviewable outcome boundaries.
-Strongly prefer small, focused commits; keep work together only when splitting it would make a commit invalid or misleading.
+Keep each commit as small as logical while preserving one coherent, independently reviewable change. Split unrelated changes into separate commits; keep changes together when splitting them would make a commit invalid or misleading.
 
 ### Commit grouping standard
 
@@ -94,6 +94,8 @@ before each `git commit`.
 Show added/deleted line counts (`+N/-N`) for each planned commit, including untracked files and only the selected hunks of mixed files.
 
 Stage whole files when their changes belong together; for mixed files, stage only the relevant hunks when supported, then review the staged diff.
+
+Prefer noninteractive patch staging for mixed files when interactive staging requires approval for each response; preserve existing staged changes and review the resulting staged diff.
 
 ```bash
 git add -- path/to/file
