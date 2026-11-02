@@ -48,8 +48,8 @@ services:
     security_opt:
       - no-new-privileges:true
     pids_limit: 512
-    mem_limit: 16g
-    cpus: 8
+    mem_limit: 4g
+    cpus: 2
     restart: unless-stopped
 
 networks:
