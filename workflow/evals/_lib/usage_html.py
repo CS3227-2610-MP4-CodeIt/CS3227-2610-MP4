@@ -594,8 +594,12 @@ def _timeline_component(tree: dict[str, Any] | None, prefix: str) -> str:
             sec = (when - origin).total_seconds() if when else None
             position = min(100.0, max(0.0, timeline_y(sec) / canvas_h * 100)) if sec is not None else None
             kind = str(ev.get("kind") or "event")
+            role_class = f" role-{_slug(ev.get('role'))}" if kind == "msg" and ev.get("role") else ""
             raw = ev.get("command") or ev.get("text") or ev.get("prompt") or ev.get("tool") or ""
             label = {"cmd": "command", "tool": "tool call", "reason": "recorded reasoning summary", "ret": "final answer" if actor.get("is_main") else "returns to main"}.get(kind, kind)
+            if kind == "msg":
+                role = str(ev.get("role") or "").lower()
+                label = {"user": "user msg", "assistant": "agent msg"}.get(role, "message")
             if kind == "spawn":
                 raw = ev.get("prompt") or ""
                 spawn_label = ev.get("requested_profile") or _agent_label({"spawn_task_name": ev.get("spawn_task_name") or ev.get("task_name")}, "")
@@ -618,7 +622,17 @@ def _timeline_component(tree: dict[str, Any] | None, prefix: str) -> str:
             output = ev.get("output")
             if output:
                 body += f"<pre class='u-captured'>{_esc(output)}</pre>"
-            time_label = f"+{sec:.1f}s" if sec is not None else "—"
+            time_label = f"+{_format_elapsed(sec)}" if sec is not None else "—"
+            local_when = when.astimezone() if when else None
+            crosses_local_date = origin.astimezone().date() != finish.astimezone().date()
+            date_label = local_when.strftime("%b %d") if local_when and crosses_local_date else ""
+            clock_label = local_when.strftime("%H:%M:%S") if local_when else "—"
+            date_markup = f"<span class='u-event-date'>{_esc(date_label)}</span>" if date_label else ""
+            time_markup = (
+                f"<time class='u-event-time' datetime='{_esc(ev.get('ts'))}' title='{_esc(ev.get('ts'))} · local time'>"
+                f"{date_markup}<span class='u-event-clock'>{_esc(clock_label)}</span><small class='u-event-elapsed'>{_esc(time_label)}</small></time>"
+                if local_when else "<time class='u-event-time'>—</time>"
+            )
             event_ref_attr = (
                 f" data-event-index='{int(ev['event_index'])}'"
                 if isinstance(ev.get("event_index"), int)
@@ -626,8 +640,8 @@ def _timeline_component(tree: dict[str, Any] | None, prefix: str) -> str:
             )
             attrs = f" data-position='{position:.4f}' data-time='{sec:.1f}'{event_ref_attr} tabindex='0' role='button' onclick='selectTimelineEvent(this)' onkeydown=\"if(event.key==='Enter'||event.key===' '){{event.preventDefault();selectTimelineEvent(this)}}\"" if sec is not None else event_ref_attr
             rows.append(
-                f"<div class='u-event {actor_color} kind-{_slug(kind)}'{attrs}>"
-                f"<time class='u-event-time' title='{_esc(ev.get('ts'))}'>{time_label}</time><div class='u-event-content'>"
+                f"<div class='u-event {actor_color} kind-{_slug(kind)}{role_class}'{attrs}>"
+                f"{time_markup}<div class='u-event-content'>"
                 f"<div class='u-event-head'>{_esc(label)}{exit_html}</div>{body}</div></div>"
             )
         if not rows:
@@ -1935,12 +1949,15 @@ code { font-family:var(--mono); font-size:11px; background:#eef4fb; border:1px s
 .u-note-mark { width:17px; height:17px; display:grid; place-items:center; flex:none; border-radius:50%; background:#e7edf8; color:#536684; font:700 11px/1 sans-serif; }
 .u-event-meta { flex:none; font-size:11px; color:var(--text-muted); margin:2px 0 10px; }
 .u-event-list { flex:1 1 auto; min-height:0; max-height:none; overflow:auto; border-top:1px solid var(--border); scrollbar-gutter:stable; }
-.u-event { display:grid; grid-template-columns:64px minmax(0,1fr); gap:12px; padding:12px 10px; border-bottom:1px solid #eef1f6; border-left:3px solid transparent; }
+.u-event { display:grid; grid-template-columns:90px minmax(0,1fr); gap:12px; padding:12px 10px; border-bottom:1px solid #eef1f6; border-left:3px solid transparent; }
 .u-event[data-position] { cursor:pointer; }
 .u-event:hover { background:#f8fafd; }
+.u-event.kind-msg.role-user { background:#f1f6ff; border-left-color:#5b83c5; border-radius:7px; margin:5px 0; }
+.u-event.kind-msg.role-assistant { background:#fafbfd; border-left-color:#9aa7ba; border-radius:7px; margin:5px 0; }
 .u-event.selected { background:#eef4fb; border-left-color:var(--agent); }
 .u-event:focus-visible { outline:2px solid var(--agent); outline-offset:-2px; }
-.u-event-time { font:11px var(--mono); color:var(--text-muted); padding-top:2px; font-variant-numeric:tabular-nums; }
+.u-event-time { display:flex; flex-direction:column; align-items:flex-start; gap:3px; font:11px var(--mono); color:var(--text-muted); padding-top:2px; font-variant-numeric:tabular-nums; }
+.u-event-clock { color:var(--text-secondary); font-weight:700; white-space:nowrap; }.u-event-date { color:var(--text-muted); font:9px var(--mono); }.u-event-elapsed { color:var(--text-muted); font:10px var(--mono); white-space:nowrap; }
 .u-event-content { min-width:0; }
 .u-event-head { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font:800 10px var(--mono); text-transform:uppercase; letter-spacing:.04em; color:var(--agent); }
 .u-event-text { font-size:13px; line-height:1.5; margin-top:5px; white-space:pre-wrap; overflow-wrap:anywhere; }
