@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prototype for Task Alignment"
+  short_description: "Align on an unclear UI before implementation"
+  default_prompt: "Use $prototype to help me compare UI directions for this task."

@@ -26,6 +26,7 @@ Decisions: <agreed choices, brief rationale and approval source, if any.>
 
 ## Implementer handoff
 <First unblocked action; applicable coding-skill paths and when to use them.>
+Prototype: <if used, stable relative path/revision, selected version or elements, and agreed UI states; omit if none.>
 <Required access, unresolved decisions and verification limits, if any.>
 ```
 

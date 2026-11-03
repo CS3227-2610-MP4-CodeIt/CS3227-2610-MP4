@@ -22,7 +22,11 @@ to the implementer unless an approved contract constrains them.
 3. For unresolved task-blocking behavior/scope/policy decisions, ask compact
    rounds of independent questions with options, a recommendation and trade-offs.
    Wait for answers, then revisit dependent questions. Use concrete scenarios to
-   sharpen vague terms; reuse settled decisions. Stop when those decisions close.
+   sharpen vague terms; reuse settled decisions. After repository/spec review,
+   if a material frontend layout or interaction choice remains hard to settle
+   in words, follow [prototype](../prototype/SKILL.md) for that branch. Its
+   approval step must complete before prototype files are created. If declined,
+   settle the choice in text. Stop when those decisions close.
 4. Default to the smallest independently verifiable vertical slice: one outcome,
    its implementation, spec changes and tests. Split independent outcomes until
    each fits one focused implementation-and-review cycle and leaves the app
