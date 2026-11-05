@@ -17,6 +17,8 @@ export const VERDICT_CLASS: Record<Verdict, string> = {
   RUNTIME_ERROR: "text-red-700",
 };
 
-export const isPastDue = (dueAt: string | null, now = Date.now()) => dueAt !== null && new Date(dueAt).getTime() <= now;
+export const isPastDue = (dueAt: string | null, now = Date.now()) =>
+  dueAt !== null && new Date(dueAt).getTime() <= now;
 
-export const formatMemory = (kb: number | null) => (kb === null ? "—" : `${(kb / 1024).toFixed(1)} MB`);
+export const formatMemory = (kb: number | null) =>
+  kb === null ? "—" : `${(kb / 1024).toFixed(1)} MB`;

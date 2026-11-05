@@ -7,13 +7,18 @@ import { isPastDue } from "./verdict";
 
 /** Group by class, keeping the backend's order within each class. */
 function byClass(list: StudentAssignment[]) {
-  const groups = new Map<number, { name: string; assignments: StudentAssignment[] }>();
+  const groups = new Map<
+    number,
+    { name: string; assignments: StudentAssignment[] }
+  >();
   for (const a of list) {
     const g = groups.get(a.class_id) ?? { name: a.class_name, assignments: [] };
     g.assignments.push(a);
     groups.set(a.class_id, g);
   }
-  return [...groups.entries()].sort(([, x], [, y]) => x.name.localeCompare(y.name));
+  return [...groups.entries()].sort(([, x], [, y]) =>
+    x.name.localeCompare(y.name),
+  );
 }
 
 export function AssignmentsPage() {
@@ -41,11 +46,19 @@ export function AssignmentsPage() {
                     {g.assignments.map((a) => (
                       <tr key={a.id}>
                         <td>
-                          <Link to={`/student/assignments/${a.id}`} className="link">{a.title}</Link>
+                          <Link
+                            to={`/student/assignments/${a.id}`}
+                            className="link"
+                          >
+                            {a.title}
+                          </Link>
                         </td>
-                        <td><DueDate dueAt={a.due_at} /></td>
                         <td>
-                          {a.questions.filter((q) => q.solved).length} / {a.questions.length}
+                          <DueDate dueAt={a.due_at} />
+                        </td>
+                        <td>
+                          {a.questions.filter((q) => q.solved).length} /{" "}
+                          {a.questions.length}
                         </td>
                       </tr>
                     ))}
@@ -65,7 +78,11 @@ export function DueDate({ dueAt }: { dueAt: string | null }) {
   return (
     <>
       {formatDate(dueAt)}
-      {isPastDue(dueAt) && <span className="ml-2 rounded bg-slate-200 px-1.5 text-xs text-slate-600">closed</span>}
+      {isPastDue(dueAt) && (
+        <span className="ml-2 rounded bg-slate-200 px-1.5 text-xs text-slate-600">
+          closed
+        </span>
+      )}
     </>
   );
 }

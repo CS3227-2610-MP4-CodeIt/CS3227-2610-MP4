@@ -1,7 +1,8 @@
 // Code drafts in localStorage (frontend-student §1.1). A convenience, not a guarantee: any storage
 // error is swallowed.
 
-export const draftKey = (userId: number, aid: number, qid: number) => `draft:${userId}:${aid}:${qid}`;
+export const draftKey = (userId: number, aid: number, qid: number) =>
+  `draft:${userId}:${aid}:${qid}`;
 
 export function loadDraft(key: string): string | null {
   try {
@@ -25,7 +26,10 @@ export function saveDraft(key: string, code: string) {
  */
 export function initialCode(
   draft: string | null,
-  latest: { status: "pending" | "error" } | { status: "none" } | { status: "loaded"; code: string },
+  latest:
+    | { status: "pending" | "error" }
+    | { status: "none" }
+    | { status: "loaded"; code: string },
 ): string | null {
   if (draft !== null) return draft;
   if (latest.status === "pending") return null;

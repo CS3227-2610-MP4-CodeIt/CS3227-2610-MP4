@@ -36,7 +36,12 @@ describe("drafts", () => {
 
   it("keeps an empty draft as a draft", () => {
     saveDraft(draftKey(1, 2, 3), "");
-    expect(initialCode(loadDraft(draftKey(1, 2, 3)), { status: "loaded", code: "old" })).toBe("");
+    expect(
+      initialCode(loadDraft(draftKey(1, 2, 3)), {
+        status: "loaded",
+        code: "old",
+      }),
+    ).toBe("");
   });
 });
 

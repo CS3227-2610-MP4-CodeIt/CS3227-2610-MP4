@@ -3,7 +3,14 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import CodeMirror from "@uiw/react-codemirror";
 import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router";
-import type { CodeIn, HintIn, HintResult, JudgeResult, StudentQuestion, Submission } from "../../api/types";
+import type {
+  CodeIn,
+  HintIn,
+  HintResult,
+  JudgeResult,
+  StudentQuestion,
+  Submission,
+} from "../../api/types";
 import { useAuth } from "../../auth/AuthProvider";
 import { ConfirmButton } from "../../components/ConfirmButton";
 import { CopyButton } from "../../components/CopyButton";
@@ -18,7 +25,12 @@ import { targetKey } from "../../jobs/endpoints";
 import type { Job, JobCheckOut } from "../../jobs/types";
 import { useJob } from "../../jobs/useJob";
 import { useStartJob } from "../../jobs/useStartJob";
-import { useStudentAssignment, useStudentQuestion, useSubmission, useSubmissions } from "./api";
+import {
+  useStudentAssignment,
+  useStudentQuestion,
+  useSubmission,
+  useSubmissions,
+} from "./api";
 import { draftKey, initialCode, loadDraft } from "./drafts";
 import { JudgeResultView } from "./JudgeResultView";
 import { useDraftSaver } from "./useDraftSaver";
@@ -35,7 +47,10 @@ const TABS: { id: Tab; label: string }[] = [
 
 const EXTENSIONS = [python()];
 
-const TOOL_LABEL: Record<string, string> = { get_question: "question", get_code: "your code" };
+const TOOL_LABEL: Record<string, string> = {
+  get_question: "question",
+  get_code: "your code",
+};
 
 /** Question page (frontend-student §3). Keyed by ids so editor state never carries over to another question. */
 export function QuestionPage() {
@@ -55,7 +70,10 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
   // Editor content is local state, set once from draft / latest submission / empty (§1.2, §1.4).
   const [draft] = useState(() => loadDraft(storageKey));
   const [code, setCode] = useState<string | null>(null);
-  const latestId = code === null && draft === null ? (submissions.data?.[0]?.id ?? null) : null;
+  const latestId =
+    code === null && draft === null
+      ? (submissions.data?.[0]?.id ?? null)
+      : null;
   const latest = useSubmission(aid, qid, latestId);
   if (code === null) {
     const init = initialCode(
@@ -90,7 +108,8 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
   const [asked, setAsked] = useState("");
   const [tab, setTab] = useState<Tab>("run");
 
-  const running = (q: UseQueryResult<JobCheckOut<unknown>>) => q.data?.job?.status === "in_process";
+  const running = (q: UseQueryResult<JobCheckOut<unknown>>) =>
+    q.data?.job?.status === "in_process";
   const empty = !code?.trim();
   const closed = isPastDue(assignment.data?.due_at ?? null);
 
@@ -113,117 +132,167 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
             label="Resize statement and editor"
             left={<Statement question={q} />}
             right={
-            <div className="min-w-0 space-y-4">
-              <div className="card space-y-3">
-                {code === null ? (
-                  <Spinner label="Loading your code…" />
-                ) : (
-                  // Drag the bottom-right corner to change the height.
-                  <div className="h-96 min-h-40 resize-y overflow-hidden rounded border border-slate-200">
-                    <CodeMirror
-                      value={code}
-                      onChange={edit}
-                      extensions={EXTENSIONS}
-                      height="100%"
-                      className="h-full text-sm"
-                      aria-label="Code editor"
-                    />
-                  </div>
-                )}
-                <input
-                  className="input"
-                  maxLength={500}
-                  value={asked}
-                  onChange={(e) => setAsked(e.target.value)}
-                  placeholder="What are you stuck on? (optional, sent with Get hint)"
-                  aria-label="Question for the hint"
-                />
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    className="btn"
-                    disabled={empty || startRun.isPending || running(run)}
-                    onClick={() => {
-                      setTab("run");
-                      startRun.mutate({ code: code! });
-                    }}
-                  >
-                    Run
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    disabled={empty || closed || startSubmit.isPending || running(submit)}
-                    onClick={() => {
-                      setTab("submit");
-                      startSubmit.mutate({ code: code! });
-                    }}
-                  >
-                    {closed ? "Submissions closed" : "Submit"}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn ml-auto"
-                    disabled={code === null || startHint.isPending || running(hint)}
-                    onClick={() => {
-                      setTab("hint");
-                      const question = asked.trim();
-                      startHint.mutate(question ? { code: code || "\n", question } : { code: code || "\n" });
-                    }}
-                  >
-                    Get hint
-                  </button>
-                </div>
-                <NotSentNotice start={startRun.data} current={run.data} what="A run" />
-                <NotSentNotice start={startSubmit.data} current={submit.data} what="A submission" />
-                <NotSentNotice start={startHint.data} current={hint.data} what="A hint" />
-                <ErrorText error={startRun.error} />
-                <ErrorText error={startSubmit.error} />
-                <ErrorText error={startHint.error} />
-              </div>
-              <div className="card space-y-3">
-                <div className="flex flex-wrap gap-1 border-b border-slate-200 pb-2" role="tablist">
-                  {TABS.map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={tab === t.id}
-                      onClick={() => setTab(t.id)}
-                      className={`rounded px-2 py-1 text-sm ${tab === t.id ? "bg-slate-200 font-medium" : "text-slate-600 hover:bg-slate-100"}`}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
-                {tab === "run" && (
-                  <JobPanel query={run} empty="No run yet. Run checks your code on the visible tests." runningLabel="Running…">
-                    {(result, job) => <JudgeResultView result={result} sentAt={job.created_at} visibleTests={q.test_cases} />}
-                  </JobPanel>
-                )}
-                {tab === "submit" && (
-                  <JobPanel query={submit} empty="No submission yet. Submit judges your code on all tests." runningLabel="Judging…">
-                    {(result, job) => <JudgeResultView result={result} sentAt={job.created_at} visibleTests={q.test_cases} />}
-                  </JobPanel>
-                )}
-                {tab === "hint" && (
-                  <JobPanel query={hint} empty="No hint yet." runningLabel="Thinking…">
-                    {(result) => <HintView result={result} />}
-                  </JobPanel>
-                )}
-                {tab === "submissions" && (
-                  <SubmissionsPanel
-                    aid={aid}
-                    qid={qid}
-                    list={submissions}
-                    onLoad={(c) => {
-                      edit(c);
-                      setTab("run");
-                    }}
+              <div className="min-w-0 space-y-4">
+                <div className="card space-y-3">
+                  {code === null ? (
+                    <Spinner label="Loading your code…" />
+                  ) : (
+                    // Drag the bottom-right corner to change the height.
+                    <div className="h-96 min-h-40 resize-y overflow-hidden rounded border border-slate-200">
+                      <CodeMirror
+                        value={code}
+                        onChange={edit}
+                        extensions={EXTENSIONS}
+                        height="100%"
+                        className="h-full text-sm"
+                        aria-label="Code editor"
+                      />
+                    </div>
+                  )}
+                  <input
+                    className="input"
+                    maxLength={500}
+                    value={asked}
+                    onChange={(e) => setAsked(e.target.value)}
+                    placeholder="What are you stuck on? (optional, sent with Get hint)"
+                    aria-label="Question for the hint"
                   />
-                )}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      className="btn"
+                      disabled={empty || startRun.isPending || running(run)}
+                      onClick={() => {
+                        setTab("run");
+                        startRun.mutate({ code: code! });
+                      }}
+                    >
+                      Run
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      disabled={
+                        empty ||
+                        closed ||
+                        startSubmit.isPending ||
+                        running(submit)
+                      }
+                      onClick={() => {
+                        setTab("submit");
+                        startSubmit.mutate({ code: code! });
+                      }}
+                    >
+                      {closed ? "Submissions closed" : "Submit"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn ml-auto"
+                      disabled={
+                        code === null || startHint.isPending || running(hint)
+                      }
+                      onClick={() => {
+                        setTab("hint");
+                        const question = asked.trim();
+                        startHint.mutate(
+                          question
+                            ? { code: code || "\n", question }
+                            : { code: code || "\n" },
+                        );
+                      }}
+                    >
+                      Get hint
+                    </button>
+                  </div>
+                  <NotSentNotice
+                    start={startRun.data}
+                    current={run.data}
+                    what="A run"
+                  />
+                  <NotSentNotice
+                    start={startSubmit.data}
+                    current={submit.data}
+                    what="A submission"
+                  />
+                  <NotSentNotice
+                    start={startHint.data}
+                    current={hint.data}
+                    what="A hint"
+                  />
+                  <ErrorText error={startRun.error} />
+                  <ErrorText error={startSubmit.error} />
+                  <ErrorText error={startHint.error} />
+                </div>
+                <div className="card space-y-3">
+                  <div
+                    className="flex flex-wrap gap-1 border-b border-slate-200 pb-2"
+                    role="tablist"
+                  >
+                    {TABS.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={tab === t.id}
+                        onClick={() => setTab(t.id)}
+                        className={`rounded px-2 py-1 text-sm ${tab === t.id ? "bg-slate-200 font-medium" : "text-slate-600 hover:bg-slate-100"}`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                  {tab === "run" && (
+                    <JobPanel
+                      query={run}
+                      empty="No run yet. Run checks your code on the visible tests."
+                      runningLabel="Running…"
+                    >
+                      {(result, job) => (
+                        <JudgeResultView
+                          result={result}
+                          sentAt={job.created_at}
+                          visibleTests={q.test_cases}
+                        />
+                      )}
+                    </JobPanel>
+                  )}
+                  {tab === "submit" && (
+                    <JobPanel
+                      query={submit}
+                      empty="No submission yet. Submit judges your code on all tests."
+                      runningLabel="Judging…"
+                    >
+                      {(result, job) => (
+                        <JudgeResultView
+                          result={result}
+                          sentAt={job.created_at}
+                          visibleTests={q.test_cases}
+                        />
+                      )}
+                    </JobPanel>
+                  )}
+                  {tab === "hint" && (
+                    <JobPanel
+                      query={hint}
+                      empty="No hint yet."
+                      runningLabel="Thinking…"
+                    >
+                      {(result) => <HintView result={result} />}
+                    </JobPanel>
+                  )}
+                  {tab === "submissions" && (
+                    <SubmissionsPanel
+                      aid={aid}
+                      qid={qid}
+                      list={submissions}
+                      onLoad={(c) => {
+                        edit(c);
+                        setTab("run");
+                      }}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
             }
           />
         </div>
@@ -238,11 +307,14 @@ function Statement({ question: q }: { question: StudentQuestion }) {
       <div className="card space-y-3">
         <h1 className="text-xl font-semibold">
           {q.title}
-          {q.solved && <span className="ml-2 text-base text-green-700">✓ solved</span>}
+          {q.solved && (
+            <span className="ml-2 text-base text-green-700">✓ solved</span>
+          )}
         </h1>
         <p className="text-sm text-slate-600">
           {q.difficulty} · {q.time_limit_ms} ms · {q.memory_limit_mb} MB
-          {q.float_tolerance && ` · tolerance abs ${q.float_tolerance.abs}, rel ${q.float_tolerance.rel}`}
+          {q.float_tolerance &&
+            ` · tolerance abs ${q.float_tolerance.abs}, rel ${q.float_tolerance.rel}`}
         </p>
         <Markdown>{q.statement_md}</Markdown>
       </div>
@@ -269,7 +341,9 @@ function Sample({ label, text }: { label: string; text: string }) {
         <span className="text-xs font-medium text-slate-500">{label}</span>
         <CopyButton text={text} />
       </div>
-      <pre className="max-h-48 overflow-auto rounded bg-slate-100 p-2 font-mono text-xs whitespace-pre-wrap">{text}</pre>
+      <pre className="max-h-48 overflow-auto rounded bg-slate-100 p-2 font-mono text-xs whitespace-pre-wrap">
+        {text}
+      </pre>
     </div>
   );
 }
@@ -284,9 +358,16 @@ function NotSentNotice({
   current: JobCheckOut<unknown> | undefined;
   what: string;
 }) {
-  if (start?.created !== false || current?.job?.id !== start.job.id || current.job.status !== "in_process") return null;
+  if (
+    start?.created !== false ||
+    current?.job?.id !== start.job.id ||
+    current.job.status !== "in_process"
+  )
+    return null;
   return (
-    <p className="text-sm text-slate-600">{what} is already in progress — showing it. Your latest code was not sent.</p>
+    <p className="text-sm text-slate-600">
+      {what} is already in progress — showing it. Your latest code was not sent.
+    </p>
   );
 }
 
@@ -303,7 +384,10 @@ function JobPanel<R>({
   children: (result: R, job: Job<R>) => ReactNode;
 }) {
   if (query.isPending) return <Spinner />;
-  if (query.isError) return <ErrorText error={query.error} onRetry={() => void query.refetch()} />;
+  if (query.isError)
+    return (
+      <ErrorText error={query.error} onRetry={() => void query.refetch()} />
+    );
   const job = query.data.job;
   if (!job) return <p className="text-sm text-slate-500">{empty}</p>;
   return (
@@ -319,7 +403,9 @@ function HintView({ result }: { result: HintResult }) {
   return (
     <div className="space-y-2">
       <Markdown>{result.hint_md}</Markdown>
-      {looked.length > 0 && <p className="text-xs text-slate-500">Looked at: {looked.join(", ")}</p>}
+      {looked.length > 0 && (
+        <p className="text-xs text-slate-500">Looked at: {looked.join(", ")}</p>
+      )}
     </div>
   );
 }
@@ -337,8 +423,10 @@ function SubmissionsPanel({
 }) {
   const [selected, setSelected] = useState<number | null>(null);
   if (list.isPending) return <Spinner />;
-  if (list.isError) return <ErrorText error={list.error} onRetry={() => void list.refetch()} />;
-  if (list.data.length === 0) return <p className="text-sm text-slate-500">No submissions yet.</p>;
+  if (list.isError)
+    return <ErrorText error={list.error} onRetry={() => void list.refetch()} />;
+  if (list.data.length === 0)
+    return <p className="text-sm text-slate-500">No submissions yet.</p>;
   return (
     <div className="space-y-3">
       <div className="overflow-x-auto">
@@ -358,18 +446,28 @@ function SubmissionsPanel({
                 className={`cursor-pointer ${s.id === selected ? "bg-slate-100" : "hover:bg-slate-50"}`}
               >
                 <td>
-                  <button type="button" className="link" aria-expanded={s.id === selected}>
+                  <button
+                    type="button"
+                    className="link"
+                    aria-expanded={s.id === selected}
+                  >
                     {formatDate(s.created_at)}
                   </button>
                 </td>
-                <td className={VERDICT_CLASS[s.verdict]}>{VERDICT_LABEL[s.verdict]}</td>
-                <td>{s.passed} / {s.total}</td>
+                <td className={VERDICT_CLASS[s.verdict]}>
+                  {VERDICT_LABEL[s.verdict]}
+                </td>
+                <td>
+                  {s.passed} / {s.total}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      {selected !== null && <SubmissionCode aid={aid} qid={qid} sid={selected} onLoad={onLoad} />}
+      {selected !== null && (
+        <SubmissionCode aid={aid} qid={qid} sid={selected} onLoad={onLoad} />
+      )}
     </div>
   );
 }
@@ -387,12 +485,15 @@ function SubmissionCode({
 }) {
   const sub = useSubmission(aid, qid, sid);
   if (sub.isPending) return <Spinner />;
-  if (sub.isError) return <ErrorText error={sub.error} onRetry={() => void sub.refetch()} />;
+  if (sub.isError)
+    return <ErrorText error={sub.error} onRetry={() => void sub.refetch()} />;
   const s: Submission = sub.data;
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium">Submitted {formatDate(s.created_at)}</span>
+        <span className="text-sm font-medium">
+          Submitted {formatDate(s.created_at)}
+        </span>
         <ConfirmButton
           className="btn ml-auto"
           message="Replace the editor contents with this submission? Your current draft will be overwritten."
@@ -401,7 +502,9 @@ function SubmissionCode({
           Load into editor
         </ConfirmButton>
       </div>
-      <pre className="max-h-96 overflow-auto rounded bg-slate-900 p-3 font-mono text-xs text-slate-100">{s.code}</pre>
+      <pre className="max-h-96 overflow-auto rounded bg-slate-900 p-3 font-mono text-xs text-slate-100">
+        {s.code}
+      </pre>
     </div>
   );
 }
