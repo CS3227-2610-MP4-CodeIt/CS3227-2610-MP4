@@ -1,11 +1,11 @@
 # Project checks
 
 Discover commands from `AGENTS.md`, the component READMEs, and current
-`backend/pyproject.toml` and `frontend/package.json` before running. Use check
+`backend/pyproject.toml`, `code-execution/pyproject.toml` and `frontend/package.json` before running. Use check
 modes, not automatic fixes. Classify each check as `Passed`, `Failed`,
 `Not configured`, `Not applicable`, or `Blocked`.
 
-Backend and frontend are separate projects; run applicable commands from the
+Backend, code execution and frontend are separate projects; run applicable commands from the
 stated directory, not the repository root. Use existing dependencies and
 environments; report missing setup as `Blocked` rather than bootstrapping it.
 
@@ -14,15 +14,30 @@ environments; report missing setup as `Blocked` rather than bootstrapping it.
 ```text
 uv run --locked --no-sync ruff format --check .
 uv run --locked --no-sync ruff check .
-uv run --locked --no-sync mypy src/quiz_backend
+uv run --locked --no-sync mypy app
 uv run --locked --no-sync pytest -q
-uv build
+uv build --offline
 ```
 
 `--no-sync` keeps review runs from installing or updating the environment.
 Build checks may create normal build/cache outputs, but must not change
 source, configuration or lockfiles. If a check requires additional downloads
 or installation, report it as `Blocked`.
+
+## Code execution (`code-execution/`)
+
+```text
+uv run --locked --no-sync ruff format --check .
+uv run --locked --no-sync ruff check .
+uv run --locked --no-sync mypy app
+uv run --locked --no-sync pytest -q
+uv build --offline
+```
+
+The executor requires Linux (`os.pidfd_open` and resource limits). Run its
+pytest suite on Linux or in its Docker image; macOS results do not verify
+submission execution. Its mypy configuration targets the Linux runtime.
+Package builds use cached build dependencies; missing cache entries are `Blocked`.
 
 ## Frontend (`frontend/`)
 
@@ -38,11 +53,12 @@ assuming a separate typecheck script or introducing new checks.
 
 ## Scope and evidence
 
-Security review owns the [configured Semgrep scan](../../../../workflow/security/semgrep.md).
-Reuse matching evidence; do not duplicate that scan in verification review.
+Semgrep is **Not configured** in this checkout; the shared scan configuration
+and script are absent. If a scan is configured later, security review owns its
+execution and verification review should reuse matching evidence.
 
-Run only applicable checks. Backend tests mock SoCLaaS; frontend tests mock
-APIs. These do not prove live AI, browser end-to-end or deployed behaviour.
+Run only applicable checks. Backend tests mock SoCLaaS and the executor; executor tests run real local
+submissions under Linux resource limits; frontend tests mock APIs. These do not prove live AI, browser end-to-end or deployed behaviour.
 Use the documented smoke/deployment procedure when the requested review
 needs that evidence; use disposable test data and do not alter production.
 Do not run metered live-AI checks without explicit authorization.
