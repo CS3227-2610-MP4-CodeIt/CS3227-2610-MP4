@@ -475,6 +475,19 @@ def parse_session_rollout(rollout: Path) -> dict[str, Any]:
     user_texts: list[str] = []
     injected_skills: set[str] = set()
     command_read_skills: set[str] = set()
+    # Which turn was "live" when each skill was observed. Keyed by both the
+    # per-turn id and the root-turn id so the summary builder can cross-reference
+    # priced requests (which carry either identifier) back to a skill. Each turn
+    # id maps to the SET of skills seen during it; a turn that saw more than one
+    # skill is ambiguous and must not be charged to any single skill.
+    turn_skills: dict[str, set[str]] = defaultdict(set)
+    current_turn_id: str | None = None
+    current_root_turn_id: str | None = None
+
+    def _note_turn_skill(skill: str) -> None:
+        for key in (current_turn_id, current_root_turn_id):
+            if key:
+                turn_skills[key].add(skill)
 
     latest_total_usage: dict[str, Any] | None = None
 
@@ -541,6 +554,10 @@ def parse_session_rollout(rollout: Path) -> dict[str, Any]:
                 turn_context_count += 1
                 payload = event.get("payload", event)
                 if isinstance(payload, dict):
+                    if isinstance(payload.get("turn_id"), str):
+                        current_turn_id = payload["turn_id"]
+                    if isinstance(payload.get("root_turn_id"), str):
+                        current_root_turn_id = payload["root_turn_id"]
                     if isinstance(payload.get("cwd"), str) and payload["cwd"] and not cwd:
                         cwd = payload["cwd"]
                     if isinstance(payload.get("model"), str):
@@ -551,7 +568,9 @@ def parse_session_rollout(rollout: Path) -> dict[str, Any]:
             for utext in _extract_user_texts(event):
                 user_texts.append(utext)
                 for match in SKILL_BLOCK_RE.finditer(utext):
-                    injected_skills.add(match.group(1).lower())
+                    skill_name = match.group(1).lower()
+                    injected_skills.add(skill_name)
+                    _note_turn_skill(skill_name)
 
             if ev_type == "event_msg":
                 payload = event.get("payload")
@@ -591,7 +610,9 @@ def parse_session_rollout(rollout: Path) -> dict[str, Any]:
                 if command_item.get("exit_code") in (None, 0):
                     cmd_str = str(command_item.get("command", ""))
                     for match in SKILL_PATH_RE.finditer(cmd_str):
-                        command_read_skills.add(match.group(1).lower())
+                        skill_name = match.group(1).lower()
+                        command_read_skills.add(skill_name)
+                        _note_turn_skill(skill_name)
 
     if thread_id is None:
         match = ROLLOUT_FILENAME_RE.match(rollout.name)
@@ -710,6 +731,9 @@ def parse_session_rollout(rollout: Path) -> dict[str, Any]:
         "explicit_skill_tokens": sorted(explicit_tokens),
         "skills_used": all_skills,
         "skill_invocations": skill_invocations,
+        "turn_skills": {
+            turn: sorted(skills) for turn, skills in turn_skills.items()
+        },
         "spawned_thread_ids": collab_summary["subagent_thread_ids"],
         "subagent_spawn_count": collab_summary["subagent_spawn_count"],
         "subagent_wait_count": collab_summary["subagent_wait_count"],
@@ -1178,6 +1202,102 @@ def _traverse_subagent_tree(
             child["prompt_status"] = event.get("prompt_status") or "not_captured"
 
     return subagent_records, subagent_tokens, subagent_cost_sum, subagent_cost_known
+
+
+def _attribute_skill_costs(
+    root: dict[str, Any],
+    subagent_records: list[dict[str, Any]],
+    by_tid: dict[str, dict[str, Any]],
+    skill_stats: dict[str, dict[str, Any]],
+) -> None:
+    """Attribute per-request cost/tokens to a skill only when a turn is unambiguous.
+
+    Every priced request is anchored to a turn (``turn_id``) and a root turn
+    (``root_turn_id``). ``parse_session_rollout`` records which skills were
+    observed during each turn. When a turn maps to exactly ONE skill we can
+    honestly attribute that turn's priced requests to it. Turns that map to
+    more than one skill are ambiguous: their cost is left in a "shared" bucket
+    and never split or double-counted. This never fabricates a cost — a skill
+    only accrues spend from requests it uniquely owns.
+    """
+    # Merge turn -> skills across the root session and every recorded subagent.
+    # Subagent turn_skills live on the parsed session entry keyed by thread id.
+    turn_to_skills: dict[str, set[str]] = defaultdict(set)
+    sources: list[dict[str, Any]] = [root]
+    for sub in subagent_records:
+        entry = by_tid.get(sub.get("thread_id"))
+        if entry is not None:
+            sources.append(entry)
+    for source in sources:
+        for turn, skills in (source.get("turn_skills") or {}).items():
+            if turn:
+                turn_to_skills[turn].update(skills)
+
+    if not turn_to_skills:
+        return
+
+    # Collect every priced request across the session subtree.
+    requests: list[dict[str, Any]] = list(record_accounting(root).get("requests", []))
+    for sub in subagent_records:
+        requests.extend((sub.get("accounting") or {}).get("requests", []))
+
+    # Per skill: turns whose cost was attributed vs. turns that were shared.
+    attributed_turns: dict[str, set[str]] = defaultdict(set)
+    shared_turns: dict[str, set[str]] = defaultdict(set)
+
+    for request in requests:
+        # A request's turn is identified by turn_id first; root_turn_id links
+        # worker requests back to the originating turn when turn_id is absent.
+        turn_key = None
+        for candidate in (request.get("turn_id"), request.get("root_turn_id")):
+            if candidate and candidate in turn_to_skills:
+                turn_key = candidate
+                break
+        if turn_key is None:
+            continue
+        skills = turn_to_skills[turn_key]
+        if len(skills) == 1:
+            (only_skill,) = tuple(skills)
+            stat = skill_stats.get(only_skill)
+            if stat is None:
+                continue
+            attributed_turns[only_skill].add(turn_key)
+            est = request.get("est_cost")
+            if est is not None:
+                stat["est_cost"] = round(stat["est_cost"] + est, 6)
+                stat["priced_count"] += 1
+            tokens = request.get("tokens")
+            if isinstance(tokens, dict):
+                stat["tokens"] = _add_token_dicts(stat["tokens"], tokens)
+        else:
+            # Ambiguous turn: flag every skill that shared it, charge none.
+            for sk in skills:
+                if sk in skill_stats:
+                    shared_turns[sk].add(turn_key)
+
+    # Turns that mapped to exactly one skill but produced no priced request
+    # (e.g. cumulative-only legacy sessions) still count as attributed turns so
+    # the UI can distinguish "no priced data" from "shared/ambiguous".
+    for turn, skills in turn_to_skills.items():
+        if len(skills) == 1:
+            (only_skill,) = tuple(skills)
+            if only_skill in skill_stats:
+                attributed_turns[only_skill].add(turn)
+        else:
+            for sk in skills:
+                if sk in skill_stats:
+                    shared_turns[sk].add(turn)
+
+    for name, stat in skill_stats.items():
+        stat["attributed_turn_count"] += len(attributed_turns.get(name, set()))
+        stat["shared_turn_count"] += len(shared_turns.get(name, set()))
+        has_shared = stat["shared_turn_count"] > 0
+        if stat["priced_count"] > 0:
+            stat["cost_status"] = "attributed_shared" if has_shared else "attributed"
+        elif stat["attributed_turn_count"] > 0 or has_shared:
+            # Turns were linked but no priced request was available for them.
+            stat["cost_status"] = "shared" if has_shared else "unpriced"
+        # else: leave the default "none" (skill never triggered a turn).
 
 
 def _attach_current_profile_files(
@@ -2166,6 +2286,10 @@ def build_project_usage(
             "tokens": _empty_token_usage(),
             "est_cost": 0.0,
             "priced_count": 0,
+            # Cost attributed only from turns that map to this skill alone.
+            "attributed_turn_count": 0,
+            "shared_turn_count": 0,
+            "cost_status": "none",
         }
         for name in inventory["skills"]
     }
@@ -2262,6 +2386,9 @@ def build_project_usage(
                     "tokens": _empty_token_usage(),
                     "est_cost": 0.0,
                     "priced_count": 0,
+                    "attributed_turn_count": 0,
+                    "shared_turn_count": 0,
+                    "cost_status": "none",
                 }
             sstat = skill_stats[sk]
             sstat["sessions_triggered"] += 1
@@ -2269,6 +2396,8 @@ def build_project_usage(
                 sstat["explicit_count"] += 1
             else:
                 sstat["implicit_count"] += 1
+
+        _attribute_skill_costs(root, subagent_records, by_tid, skill_stats)
 
         turns = int(root.get("turn_count", 1) or 1)
         cmds = int(root.get("command_count", 0) or 0) + sum(
@@ -2580,14 +2709,24 @@ def render_usage_markdown(summary: dict[str, Any]) -> str:
         "",
         "## 1. Real project work — Skill activity",
         "",
-        "Observed reads/mentions associate skills with sessions; no exclusive token or cost attribution.",
+        "Cost is attributed only from turns that map to a single skill; shared/ambiguous turns stay unattributed.",
         "",
-        "| Skill | Installed in project | Sessions | Explicit / Implicit |",
-        "|---|---|---:|---:|",
+        "| Skill | Installed in project | Sessions | Explicit / Implicit | Attributable cost |",
+        "|---|---|---:|---:|---:|",
     ]
     for sk in summary["skills"]:
+        status = sk.get("cost_status", "none")
+        if sk.get("priced_count"):
+            shared = " (+shared)" if status == "attributed_shared" else ""
+            cost_cell = f"{format_cost(sk.get('est_cost'))}{shared}"
+        elif status == "shared":
+            cost_cell = "shared / ambiguous"
+        elif status == "unpriced":
+            cost_cell = "no priced requests"
+        else:
+            cost_cell = "—"
         lines.append(f"| `{markdown_cell(sk['skill'])}` | {'Yes' if sk['installed'] else 'External'} | "
-                     f"{sk['sessions_triggered']} | {sk['explicit_count']} / {sk['implicit_count']} |")
+                     f"{sk['sessions_triggered']} | {sk['explicit_count']} / {sk['implicit_count']} | {cost_cell} |")
 
     lines.extend(
         [

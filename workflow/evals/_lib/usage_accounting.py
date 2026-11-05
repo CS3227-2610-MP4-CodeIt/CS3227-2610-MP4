@@ -96,10 +96,15 @@ def finalize_usage_accounting(summary: dict[str, Any]) -> dict[str, Any]:
     attach_cost(evals['totals'], combine_accounting([record_accounting(j) for s in trials for j in s.get('judges', [])]), 'judge_')
     attach_cost(summary['combined_totals'], combine_accounting([real, offline]))
     for skill in summary['skills']:
-        # Activity associations have no exclusive usage or costs.
-        for key in ('tokens', 'est_cost', 'priced_count'):
-            skill.pop(key, None)
-        skill['attribution'] = 'Observed activity; no exclusive token or cost attribution'
+        # Per-skill cost is attributed upstream only from turns that map to a
+        # single skill (see _attribute_skill_costs). Shared/ambiguous turns are
+        # never charged here; the cost_status field records whether a skill's
+        # figure is exclusive, partially shared, or unavailable.
+        skill.setdefault('cost_status', 'none')
+        skill['attribution'] = (
+            'Cost attributed only from turns that uniquely map to this skill; '
+            'shared turns stay unattributed'
+        )
     for group, source in ((summary['daily'], sessions), (evals['by_skill'], trials)):
         field = 'date' if group is summary['daily'] else 'skill'
         for row in group:
