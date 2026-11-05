@@ -7,14 +7,13 @@ from pathlib import Path
 import re
 from urllib.parse import quote
 
-from _lib.common import _fmt, markdown_cell, read_json, write_json
+from _lib.common import _fmt, markdown_metadata, markdown_cell, read_json, write_json
 from _lib.paths import trial_directory
 from _lib.grading import score_band
 from _lib.timing import format_seconds, timing_summary, worker_seconds
+from _lib.accounting import record_accounting, combine_accounting, observation_tokens
 from _lib.pricing import (
-    PRICING,
     PRICING_AS_OF,
-    estimate_api_cost,
     format_cost,
     format_cost_delta,
     format_delta,
@@ -78,6 +77,7 @@ def aggregate(results: list[dict]) -> dict:
                 "det_scores": [],
                 "sem_scores": [],
                 "token_samples": [],
+                "accounting_samples": [],
                 "timing_samples": [],
                 "passed_trials": 0,
                 "needs_review_trials": 0,
@@ -85,11 +85,12 @@ def aggregate(results: list[dict]) -> dict:
             },
         )
         cell["total_trials"] += 1
+        cell["accounting_samples"].append(record_accounting(result))
         # Timing includes failed and abstained trials, unlike score means.
         cell["timing_samples"].append(result)
         tokens = result.get("tokens")
         if isinstance(tokens, dict):
-            cell["token_samples"].append(tokens)
+            cell["token_samples"].append(observation_tokens(tokens))
         if result.get("needs_review") or result.get("status") == "needs_review":
             # Neither a pass nor a fail: an honest "not enough evidence to
             # decide". Excluded from passed_trials and from the score mean.
@@ -122,6 +123,9 @@ def aggregate(results: list[dict]) -> dict:
             cell["mean_semantic_score"] = (
                 round(sum(sem_scores) / len(sem_scores), 2) if sem_scores else None
             )
+            accounting = combine_accounting(cell.pop("accounting_samples"))
+            cell["accounting"] = accounting
+            cell["mean_est_cost"] = (accounting["est_cost"] / cell["total_trials"] if accounting["est_cost"] is not None else None)
             samples = cell.pop("token_samples")
             mean_tokens: dict[str, float] = {}
             for field in TOKEN_FIELDS:
@@ -189,23 +193,13 @@ def write_report(
         else f"# Evaluation report: {experiment['skill']}"
     )
 
-    # Only price when exactly one priced model produced the run; otherwise the
-    # dollar figure would mix rate cards. _distinct joins multiple models.
-    cost_model = model_text if model_text in PRICING else None
-    total_cost: float | None = None
-    if cost_model and results:
-        trial_costs = [
-            estimate_api_cost(r.get("tokens") or {}, cost_model)
-            for r in results
-            if isinstance(r.get("tokens"), dict)
-        ]
-        if trial_costs and all(c is not None for c in trial_costs):
-            total_cost = round(sum(c for c in trial_costs if c is not None), 6)
+    total_accounting = combine_accounting([record_accounting(r) for r in results])
+    total_cost = total_accounting["est_cost"]
 
     lines = [
         title,
         "",
-        f"**Setup:** Model `{markdown_cell(model_text)}` · "
+        f"**Setup:** Model {markdown_metadata(model_text)} · "
         f"Reasoning effort `{markdown_cell(reasoning_text)}` · "
         f"Trials per cell `{markdown_cell(trials_text)}` · "
         f"Semantic judges `{experiment.get('semantic_judges', 0)}` · "
@@ -426,7 +420,7 @@ def write_report(
                 mt = cells.get(name, {}).get(config, {}).get("mean_tokens")
                 if not isinstance(mt, dict):
                     continue
-                cost = estimate_api_cost(mt, cost_model)
+                cost = cells.get(name, {}).get(config, {}).get("mean_est_cost")
                 lines.append(
                     f"| {markdown_cell(name)} | {config} | "
                     f"{_fmt(mt.get('uncached_input_tokens', 0))} | "
@@ -451,13 +445,13 @@ def write_report(
                     format_delta(base_mt.get(f, 0), skill_mt.get(f, 0)) for f in fields
                 )
                 cost_delta = format_cost_delta(
-                    estimate_api_cost(base_mt, cost_model),
-                    estimate_api_cost(skill_mt, cost_model),
+                    cells.get(name, {}).get("baseline", {}).get("mean_est_cost"),
+                    cells.get(name, {}).get("with-skill", {}).get("mean_est_cost"),
                 )
                 lines.append(
                     f"| {markdown_cell(name)} | **delta** | {cell_text} | {cost_delta} |"
                 )
-        token_trials = [r.get("tokens") for r in results if isinstance(r.get("tokens"), dict)]
+        token_trials = [observation_tokens(r["tokens"]) for r in results if isinstance(r.get("tokens"), dict)]
         if len(token_trials) > 1:
             sum_uncached = sum(t.get("uncached_input_tokens", 0) or 0 for t in token_trials)
             sum_cached = sum(t.get("cached_input_tokens", 0) or 0 for t in token_trials)
@@ -473,12 +467,19 @@ def write_report(
             [
                 "",
                 f"_Per-case rows are trial means (comparable only on the same model and "
-                f"reasoning effort); `Billed output` = output + reasoning. `Est. cost` is "
+                f"reasoning effort); `Billed output` = output (including reasoning). `Est. cost` is "
                 f"an **API-equivalent estimate only** (public API list prices as of "
                 f"{PRICING_AS_OF}) — NOT your actual subscription or credit spend._",
             ]
         )
 
+    coverage = total_accounting["coverage"]
+    lines.extend(["", "## Request pricing coverage", "",
+                  f"{coverage['status']}: {coverage['priced_count']} / {coverage['request_count']} requests priced; "
+                  f"{coverage['unavailable_count']} unavailable observations. "
+                  f"Known subtotal: {format_cost(total_accounting['known_cost'])}. "
+                  f"Unknown models: {', '.join(markdown_metadata(model) for model in coverage['unknown_models']) or 'none'}.",
+                  "Cumulative-only legacy usage preserves tokens; request pricing is unavailable."])
     report = experiment_root / "report.md"
     report.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return report

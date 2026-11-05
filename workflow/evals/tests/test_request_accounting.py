@@ -81,6 +81,26 @@ def test_native_gap_preserves_tokens_and_partial_known_subtotal():
     assert accounting['known_cost'] == 0.0004
     assert accounting['coverage']['status'] == 'partial'
 
+def test_historical_derived_output_normalized_without_rewriting_source(tmp_path):
+    from copy import deepcopy
+    from _lib.report import aggregate, write_report
+    from _lib.compare import compare_cell
+    result = {'test_case': 'old', 'configuration': 'baseline', 'score': 100, 'overall_pass': True,
+              'trial': 1, 'run_directory': 'trials/old', 'tokens': {
+                  'input_tokens': 21111, 'output_tokens': 153, 'reasoning_output_tokens': 17,
+                  'billed_output_tokens': 170}}
+    before = deepcopy(result)
+    aggregates = aggregate([result])
+    cell = aggregates['cells']['old']['baseline']
+    assert cell['mean_tokens']['billed_output_tokens'] == 153
+    old = {'mean_tokens': {'output_tokens': 153, 'reasoning_output_tokens': 17, 'billed_output_tokens': 170}}
+    assert compare_cell(old, old)['billed_output_tokens']['old'] == 153
+    report = write_report(tmp_path, {'skill': 'old', 'status': 'completed', 'overall_pass': True,
+                                     'mean_score': 100, 'passed_trials': 1, 'worker_trials': 1}, aggregates, [result])
+    assert '| 153 |' in report.read_text()
+    assert '| 170 |' not in report.read_text()
+    assert result == before
+
 def test_parse_gap_is_partial_and_preserves_known_subtotal():
     accounting = parse_accounting([native('a', model='gpt-6.1-sol')], 'root', parse_errors=1)
     assert accounting['est_cost'] is None

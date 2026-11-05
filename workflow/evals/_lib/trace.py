@@ -8,6 +8,7 @@ from collections import Counter, deque
 from pathlib import Path
 from typing import Any
 
+from _lib.accounting import agent_path, parse_accounting, record_accounting, combine_accounting
 from _lib.common import concatenate_files, write_json
 
 
@@ -91,6 +92,7 @@ def _empty_token_usage() -> dict[str, int]:
         "output_tokens": 0,
         "reasoning_output_tokens": 0,
         "billed_output_tokens": 0,
+        "total_tokens": 0,
     }
 
 
@@ -108,7 +110,8 @@ def _finalize_token_usage(
         "uncached_input_tokens": max(input_tokens - cached_input_tokens, 0),
         "output_tokens": output_tokens,
         "reasoning_output_tokens": reasoning_output_tokens,
-        "billed_output_tokens": output_tokens + reasoning_output_tokens,
+        "billed_output_tokens": output_tokens,
+        "total_tokens": input_tokens + output_tokens,
     }
 
 
@@ -649,13 +652,6 @@ def trace_metrics(trace: Path, skill_name: str | None = None) -> dict[str, Any]:
 
     commands: list[dict[str, Any]] = []
     collab_calls: list[dict[str, Any]] = []
-    turn_completed_seen = False
-    input_tokens = 0
-    cached_input_tokens = 0
-    cache_write_input_tokens = 0
-    output_tokens = 0
-    reasoning_output_tokens = 0
-    latest_total_usage: dict[str, Any] | None = None
     parent_tid: str | None = None
 
     for event in events:
@@ -675,28 +671,6 @@ def trace_metrics(trace: Path, skill_name: str | None = None) -> dict[str, Any]:
         if collab is not None:
             collab_calls.append(collab)
 
-        if ev_type == "turn.completed" and isinstance(event.get("usage"), dict):
-            turn_completed_seen = True
-            usage = event["usage"]
-            input_tokens += int(usage.get("input_tokens", 0) or 0)
-            cached_input_tokens += int(usage.get("cached_input_tokens", 0) or 0)
-            cache_write_input_tokens += int(
-                usage.get("cache_write_input_tokens", 0) or 0
-            )
-            output_tokens += int(usage.get("output_tokens", 0) or 0)
-            reasoning_output_tokens += int(
-                usage.get("reasoning_output_tokens", 0) or 0
-            )
-        elif ev_type == "event_msg":
-            payload = event.get("payload")
-            if isinstance(payload, dict) and payload.get("type") == "token_count":
-                info = payload.get("info")
-                if isinstance(info, dict) and isinstance(
-                    info.get("total_token_usage"), dict
-                ):
-                    latest_total_usage = info["total_token_usage"]
-                elif isinstance(payload.get("total_token_usage"), dict):
-                    latest_total_usage = payload["total_token_usage"]
 
     command_texts = [str(command.get("command", "")) for command in commands]
     repeated = sum(count - 1 for count in Counter(command_texts).values() if count > 1)
@@ -723,26 +697,11 @@ def trace_metrics(trace: Path, skill_name: str | None = None) -> dict[str, Any]:
         )
 
     collab_summary = _summarize_collab_calls(_collab_calls(events), default_parent_tid=parent_tid)
-    if turn_completed_seen:
-        token_usage = _finalize_token_usage(
-            input_tokens,
-            cached_input_tokens,
-            cache_write_input_tokens,
-            output_tokens,
-            reasoning_output_tokens,
-        )
-    elif latest_total_usage is not None:
-        token_usage = _finalize_token_usage(
-            int(latest_total_usage.get("input_tokens", 0) or 0),
-            int(latest_total_usage.get("cached_input_tokens", 0) or 0),
-            int(latest_total_usage.get("cache_write_input_tokens", 0) or 0),
-            int(latest_total_usage.get("output_tokens", 0) or 0),
-            int(latest_total_usage.get("reasoning_output_tokens", 0) or 0),
-        )
-    else:
-        token_usage = _empty_token_usage()
+    accounting = parse_accounting(events, trace_thread_id(trace), parse_errors)
+    token_usage = accounting["tokens"]
 
     return {
+        "accounting": accounting,
         "event_count": len(events),
         "parse_errors": parse_errors,
         "command_count": len(commands),
@@ -798,14 +757,6 @@ def read_rollout_metrics(rollout: Path) -> dict[str, Any]:
     failed_command_count = 0
     collab_calls: list[dict[str, Any]] = []
 
-    turn_completed_seen = False
-    tc_input = 0
-    tc_cached = 0
-    tc_cache_write = 0
-    tc_output = 0
-    tc_reasoning = 0
-    latest_total_usage: dict[str, Any] | None = None
-
     events: list[dict[str, Any]] = []
     for line in rollout.read_text(encoding="utf-8", errors="replace").splitlines():
         if not line.strip():
@@ -828,7 +779,7 @@ def read_rollout_metrics(rollout: Path) -> dict[str, Any]:
                 thread_id = event["thread_id"]
         elif ev_type == "session_meta":
             payload = event.get("payload")
-            if isinstance(payload, dict):
+            if isinstance(payload, dict) and (thread_id is None or payload.get("id", thread_id) == thread_id):
                 if isinstance(payload.get("id"), str) and thread_id is None:
                     thread_id = payload["id"]
                 if isinstance(payload.get("parent_thread_id"), str):
@@ -876,15 +827,7 @@ def read_rollout_metrics(rollout: Path) -> dict[str, Any]:
         if ev_type == "event_msg":
             payload = event.get("payload")
             if isinstance(payload, dict):
-                if payload.get("type") == "token_count":
-                    info = payload.get("info")
-                    if isinstance(info, dict) and isinstance(
-                        info.get("total_token_usage"), dict
-                    ):
-                        latest_total_usage = info["total_token_usage"]
-                    elif isinstance(payload.get("total_token_usage"), dict):
-                        latest_total_usage = payload["total_token_usage"]
-                elif payload.get("type") == "task_complete":
+                if payload.get("type") == "task_complete":
                     final_status = "completed"
                     if (
                         isinstance(payload.get("last_agent_message"), str)
@@ -892,42 +835,23 @@ def read_rollout_metrics(rollout: Path) -> dict[str, Any]:
                     ):
                         final_message = payload["last_agent_message"]
 
-        if ev_type == "turn.completed" and isinstance(event.get("usage"), dict):
-            turn_completed_seen = True
-            usage = event["usage"]
-            tc_input += int(usage.get("input_tokens", 0) or 0)
-            tc_cached += int(usage.get("cached_input_tokens", 0) or 0)
-            tc_cache_write += int(usage.get("cache_write_input_tokens", 0) or 0)
-            tc_output += int(usage.get("output_tokens", 0) or 0)
-            tc_reasoning += int(usage.get("reasoning_output_tokens", 0) or 0)
-
         collab = _extract_collab_item(event)
         if collab is not None:
             collab_calls.append(collab)
 
-    if turn_completed_seen:
-        token_usage = _finalize_token_usage(
-            tc_input, tc_cached, tc_cache_write, tc_output, tc_reasoning
-        )
-    elif latest_total_usage is not None:
-        token_usage = _finalize_token_usage(
-            int(latest_total_usage.get("input_tokens", 0) or 0),
-            int(latest_total_usage.get("cached_input_tokens", 0) or 0),
-            int(latest_total_usage.get("cache_write_input_tokens", 0) or 0),
-            int(latest_total_usage.get("output_tokens", 0) or 0),
-            int(latest_total_usage.get("reasoning_output_tokens", 0) or 0),
-        )
-    else:
-        token_usage = _empty_token_usage()
+    accounting = parse_accounting(events, thread_id, parse_errors)
+    token_usage = accounting["tokens"]
 
     collab_calls = _collab_calls(events)
     collab_summary = _summarize_collab_calls(collab_calls, default_parent_tid=thread_id)
     return {
+        "accounting": accounting,
         "thread_id": thread_id,
         "parent_thread_id": parent_thread_id,
         "depth": depth,
         "agent_nickname": agent_nickname,
         "agent_role": agent_role,
+        "agent_path": agent_path(events, thread_id),
         "model": model,
         "reasoning_effort": effort,
         "final_status": final_status,
@@ -1048,6 +972,8 @@ def capture_subagent_rollouts(
                 "command_count": info["command_count"],
                 "failed_command_count": info["failed_command_count"],
                 "token_usage": usage,
+                "accounting": info["accounting"],
+                "agent_path": info.get("agent_path"),
             }
             subagents_list.append(record)
 
@@ -1134,6 +1060,7 @@ def merge_subagent_metrics(
         + sub_tokens["reasoning_output_tokens"],
     )
 
+    merged["accounting"] = combine_accounting([record_accounting(metrics)] + [record_accounting(s) for s in subagent_capture.get("subagents", [])])
     merged.update(total_tokens)
     merged["parent_token_usage"] = parent_tokens
     merged["subagent_token_usage"] = sub_tokens

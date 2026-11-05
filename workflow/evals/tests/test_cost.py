@@ -216,8 +216,8 @@ def test_compare_render_shows_cost_when_same_priced_model():
     rows = [{
         "test_case": "case-a",
         "diff": evalmod.compare_cell(
-            _cell(100, 1, 1_000_000, 100_000),
-            _cell(100, 1, 500_000, 100_000),
+            {**_cell(100, 1, 1_000_000, 100_000), "mean_est_cost": 0.58},
+            {**_cell(100, 1, 500_000, 100_000), "mean_est_cost": 0.38},
         ),
         "confounds": [],
     }]

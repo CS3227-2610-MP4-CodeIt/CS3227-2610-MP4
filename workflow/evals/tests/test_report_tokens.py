@@ -149,6 +149,11 @@ def test_report_marks_provenance_unknown_when_absent(tmp_path):
 
 def _result_model(test_case, configuration, billed_output, model):
     r = _result(test_case, configuration, 90, billed_output)
+    from _lib.accounting import parse_accounting
+    # Cost fixtures establish an actual request, rather than pricing trial totals.
+    r["accounting"] = parse_accounting([{"type": "token_usage_record", "payload": {
+        "thread_id": "fixture", "response_id": test_case + configuration, "model": model,
+        "usage": r["tokens"]}}], "fixture")
     r["resolved_model"] = model
     r["resolved_reasoning_effort"] = "low"
     return r
@@ -186,7 +191,7 @@ def test_report_cost_na_for_unpriced_model(tmp_path):
     assert "n/a" in text
 
 
-def test_report_cost_na_when_multiple_models_in_one_run(tmp_path):
+def test_report_sums_request_costs_when_multiple_models_in_one_run(tmp_path):
     # Two distinct priced models in one experiment -> _distinct joins them into
     # a non-key string, so cost must degrade to n/a (never price against one).
     results = [
@@ -201,8 +206,10 @@ def test_report_cost_na_when_multiple_models_in_one_run(tmp_path):
     }
     report_path = eval_mod.write_report(tmp_path, experiment, aggregates, results)
     text = report_path.read_text(encoding="utf-8")
-    # no priced dollar figure in the token table; cost cells are n/a
-    assert "n/a (pricing unavailable)" in text
+    # Each request carries its own model; mixed models can safely aggregate.
+    assert "$0.0002" in text
+    assert "$0.0001" in text
+    assert "$0.0004" in text
 
 
 def test_format_cost_delta_sub_cent_precision():

@@ -430,11 +430,11 @@ def test_merge_subagent_metrics_rolls_up_tokens_and_preserves_breakdown():
     assert merged["uncached_input_tokens"] == 2000
     assert merged["output_tokens"] == 650
     assert merged["reasoning_output_tokens"] == 150
-    assert merged["billed_output_tokens"] == 800
+    assert merged["billed_output_tokens"] == 650
     assert merged["parent_token_usage"]["input_tokens"] == 4000
-    assert merged["parent_token_usage"]["billed_output_tokens"] == 500
+    assert merged["parent_token_usage"]["billed_output_tokens"] == 400
     assert merged["subagent_token_usage"]["input_tokens"] == 2500
-    assert merged["subagent_token_usage"]["billed_output_tokens"] == 300
+    assert merged["subagent_token_usage"]["billed_output_tokens"] == 250
     assert merged["subagent_spawn_count"] == 2
     assert merged["subagent_thread_ids"] == ["child-01", "grandchild-01"]
 
@@ -642,7 +642,7 @@ def test_trace_metrics_parses_persisted_rollout_format(tmp_path):
     assert m["uncached_input_tokens"] == 2000
     assert m["output_tokens"] == 500
     assert m["reasoning_output_tokens"] == 200
-    assert m["billed_output_tokens"] == 700
+    assert m["billed_output_tokens"] == 500
     assert m["subagent_spawn_count"] == 1
     assert m["subagent_wait_count"] == 1
     assert m["subagent_thread_ids"] == ["child-01"]

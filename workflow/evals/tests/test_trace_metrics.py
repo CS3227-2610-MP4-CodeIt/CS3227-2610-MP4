@@ -55,7 +55,7 @@ def test_captures_all_five_usage_fields(tmp_path):
 
 
 def test_derived_uncached_and_billed_output(tmp_path):
-    """Derived fields: uncached input = input - cached; billed output = output + reasoning."""
+    """Derived fields: uncached input = input - cached; billed output = output (reasoning is a subset)."""
     trace = _write_trace(
         tmp_path,
         [
@@ -74,7 +74,7 @@ def test_derived_uncached_and_billed_output(tmp_path):
     metrics = trace_metrics(trace)
 
     assert metrics["uncached_input_tokens"] == 360906 - 321792
-    assert metrics["billed_output_tokens"] == 6770 + 1079
+    assert metrics["billed_output_tokens"] == 6770
 
 
 def test_sums_across_multiple_turns(tmp_path):
@@ -111,7 +111,7 @@ def test_sums_across_multiple_turns(tmp_path):
     assert metrics["output_tokens"] == 50
     assert metrics["reasoning_output_tokens"] == 20
     assert metrics["uncached_input_tokens"] == 200
-    assert metrics["billed_output_tokens"] == 70
+    assert metrics["billed_output_tokens"] == 50
 
 
 def test_missing_fields_default_to_zero(tmp_path):

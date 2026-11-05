@@ -102,8 +102,8 @@ def test_compare_cell_improved_score_fewer_tokens():
     assert diff["pass_rate"]["new"] == 1.0
     assert diff["pass_rate"]["verdict"] == "improved"
     # billed = output + reasoning: 6000 -> 4100, fewer is better
-    assert diff["billed_output_tokens"]["old"] == 6000
-    assert diff["billed_output_tokens"]["new"] == 4100
+    assert diff["billed_output_tokens"]["old"] == 5000
+    assert diff["billed_output_tokens"]["new"] == 3500
     assert diff["billed_output_tokens"]["verdict"] == "improved"
 
 

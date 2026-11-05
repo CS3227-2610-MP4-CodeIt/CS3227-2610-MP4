@@ -49,7 +49,7 @@ def test_cell_has_mean_token_breakdown():
     assert cell["mean_tokens"]["cached_input_tokens"] == 300.0
     assert cell["mean_tokens"]["output_tokens"] == 30.0
     assert cell["mean_tokens"]["reasoning_output_tokens"] == 10.0
-    assert cell["mean_tokens"]["billed_output_tokens"] == 40.0
+    assert cell["mean_tokens"]["billed_output_tokens"] == 30.0
 
 
 def test_comparison_has_token_delta():

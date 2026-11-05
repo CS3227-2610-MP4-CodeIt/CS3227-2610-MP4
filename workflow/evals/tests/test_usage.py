@@ -230,7 +230,7 @@ def test_parse_session_rollout_extracts_skills_tokens_and_subagents(tmp_path):
     assert parsed["token_usage"]["cached_input_tokens"] == 6000
     assert parsed["token_usage"]["output_tokens"] == 800
     assert parsed["token_usage"]["reasoning_output_tokens"] == 300
-    assert parsed["token_usage"]["billed_output_tokens"] == 1100
+    assert parsed["token_usage"]["billed_output_tokens"] == 800
     assert len(parsed["subagents"]) == 1
     assert parsed["subagents"][0]["agent_role"] == "security-reviewer"
     assert parsed["subagents"][0]["thread_id"] == "thread-child-1"
@@ -474,7 +474,7 @@ def test_build_project_usage_scopes_sessions_and_rolls_up_subagents(tmp_path):
     assert tok["cached_input_tokens"] == 1500
     assert tok["output_tokens"] == 700
     assert tok["reasoning_output_tokens"] == 150
-    assert tok["billed_output_tokens"] == 850
+    assert tok["billed_output_tokens"] == 700
     assert summary["totals"]["est_cost"] > 0
 
     # Harness eval calls are tracked separately in `harness_evals`
@@ -483,10 +483,10 @@ def test_build_project_usage_scopes_sessions_and_rolls_up_subagents(tmp_path):
     assert hevals["totals"]["judge_call_count"] == 1
     assert hevals["totals"]["total_call_count"] == 2
     assert hevals["totals"]["worker_tokens"]["uncached_input_tokens"] == 8000
-    assert hevals["totals"]["worker_tokens"]["billed_output_tokens"] == 1000
+    assert hevals["totals"]["worker_tokens"]["billed_output_tokens"] == 900
     assert hevals["totals"]["judge_tokens"]["uncached_input_tokens"] == 2000
     assert hevals["totals"]["judge_tokens"]["billed_output_tokens"] == 400
-    assert hevals["totals"]["tokens"]["billed_output_tokens"] == 1400
+    assert hevals["totals"]["tokens"]["billed_output_tokens"] == 1300
     assert len(hevals["by_skill"]) == 1
     assert hevals["by_skill"][0]["skill"] == "code-review"
     assert hevals["by_skill"][0]["worker_trials"] == 1

@@ -214,3 +214,15 @@ def _fmt(value: Any) -> str:
         return f"{value:.2f}".rstrip("0").rstrip(".")
     return str(value)
 
+
+
+def markdown_metadata(value: Any) -> str:
+    """Render untrusted inline metadata inertly in Markdown prose or table cells.
+
+    Encode syntax before Markdown parsing, including line breaks and backticks;
+    raw trace values remain unchanged in machine-readable results.
+    """
+    text = str(value if value is not None else '')
+    text = text.replace('\r', r'\r').replace('\n', r'\n')
+    syntax = set('\\`*_{}[]()#+!|<>&"\'')
+    return '<code>' + ''.join(f'&#{ord(char)};' if char in syntax else char for char in text) + '</code>'

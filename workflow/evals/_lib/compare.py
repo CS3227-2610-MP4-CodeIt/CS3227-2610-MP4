@@ -9,11 +9,10 @@ from typing import Callable
 
 from _lib.common import _fmt, read_json
 from _lib.paths import trial_directory
+from _lib.accounting import observation_tokens
 from _lib.pricing import (
-    PRICING,
     PRICING_AS_OF,
     PRICING_SOURCE,
-    estimate_api_cost,
     format_cost,
     format_cost_delta,
     format_delta,
@@ -61,8 +60,8 @@ def compare_cell(old_cell: dict, new_cell: dict) -> dict:
 
     old_pass = _pass_rate(old_cell)
     new_pass = _pass_rate(new_cell)
-    old_tokens = old_cell.get("mean_tokens") or {}
-    new_tokens = new_cell.get("mean_tokens") or {}
+    old_tokens = observation_tokens(old_cell.get("mean_tokens") or {})
+    new_tokens = observation_tokens(new_cell.get("mean_tokens") or {})
 
     result = {
         "n_old": old_cell.get("total_trials", 0),
@@ -119,6 +118,8 @@ def compare_cell(old_cell: dict, new_cell: dict) -> dict:
         }
     # Carry the raw mean-token dicts so a caller that knows the model can derive
     # an API-equivalent cost estimate without recomputing per-axis values.
+    result["_cost_old"] = old_cell.get("mean_est_cost")
+    result["_cost_new"] = new_cell.get("mean_est_cost")
     result["_mean_tokens_old"] = old_tokens
     result["_mean_tokens_new"] = new_tokens
     return result
@@ -245,13 +246,6 @@ def render_comparison_markdown(
         and provenance["old_model"] == provenance["new_model"]
         and provenance.get("old_effort") == provenance.get("new_effort")
     )
-    cost_model = (
-        provenance.get("old_model")
-        if provenance.get("old_model") == provenance.get("new_model")
-        and provenance.get("old_model") in PRICING
-        else None
-    )
-
     title_suffix = f" ({config})" if config != "with-skill" else ""
     lines = [
         f"# Comparison: {skill}{title_suffix} — {old_id} (v1) vs {new_id} (v2)",
@@ -318,8 +312,8 @@ def render_comparison_markdown(
             if bo.get("old") and bo.get("new") is not None:
                 pct = (bo["new"] - bo["old"]) / bo["old"] * 100
                 bo_text += f" ({pct:+.1f}%)"
-            c_old = estimate_api_cost(diff.get("_mean_tokens_old", {}), cost_model)
-            c_new = estimate_api_cost(diff.get("_mean_tokens_new", {}), cost_model)
+            c_old = diff.get("_cost_old")
+            c_new = diff.get("_cost_new")
             if c_old is not None and c_new is not None:
                 cost_text = f"{format_cost(c_old)} -> {format_cost(c_new)}"
                 if c_old:
@@ -375,8 +369,8 @@ def render_comparison_markdown(
                 f"| {label} | {_fmt(a['old'])} | {_fmt(a['new'])} | "
                 f"{format_delta(a['old'], a['new'])} | {a['verdict']} |"
             )
-        cost_old = estimate_api_cost(diff.get("_mean_tokens_old", {}), cost_model)
-        cost_new = estimate_api_cost(diff.get("_mean_tokens_new", {}), cost_model)
+        cost_old = diff.get("_cost_old")
+        cost_new = diff.get("_cost_new")
         if cost_old is not None and cost_new is not None:
             cost_verdict = _axis_verdict(cost_old, cost_new, higher_is_better=False)
         else:
@@ -413,7 +407,7 @@ def render_comparison_markdown(
     lines.append("")
     lines.append(
         f"_Every per-case number is a MEAN over that cell's trials; "
-        f"`billed output` = output + reasoning (lower is better on token/cost axes); "
+        f"`billed output` = output (including reasoning) (lower is better on token/cost axes); "
         f"`est. API-equiv. cost` is an estimate at public API list prices "
         f"({PRICING_AS_OF}, {PRICING_SOURCE}) — NOT actual subscription or credit spend._"
     )

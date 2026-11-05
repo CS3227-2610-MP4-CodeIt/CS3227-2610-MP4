@@ -627,6 +627,7 @@ def _execute_trial(
         "semantic_judges": len(semantic.get("judges", [])),
         "worker_exit_code": worker_exit_code,
         "worker_elapsed_seconds": worker_seconds,
+        **_trial_accounting(run_dir, metrics.get("accounting"), len(semantic.get("judges", []))),
         "tokens": {
             "input_tokens": metrics.get("input_tokens", 0),
             "cached_input_tokens": metrics.get("cached_input_tokens", 0),
@@ -655,6 +656,17 @@ def _execute_trial(
     }
     write_json(run_dir / "result.json", result)
     return result
+
+
+def _trial_accounting(run_dir: Path, worker: dict | None, judge_count: int) -> dict:
+    """Keep worker/child and judge coverage separate in retained results."""
+    from _lib.accounting import combine_accounting, unavailable_accounting
+    worker_accounting = worker or unavailable_accounting(reason="worker accounting not captured")
+    judges = [trace_metrics(run_dir / "grades" / "semantic" / f"judge-{i:02d}" / "trace.jsonl")["accounting"]
+              for i in range(1, judge_count + 1)]
+    judge_accounting = combine_accounting(judges)
+    return {"worker_accounting": worker_accounting, "judge_accounting": judge_accounting,
+            "accounting": combine_accounting([worker_accounting, judge_accounting])}
 
 
 def regrade_with_semantic(
@@ -698,7 +710,6 @@ def regrade_with_semantic(
     outcome = grade_outcome(deterministic, semantic)
     graders_valid = outcome["graders_valid"]
     graders_pass = outcome["graders_pass"]
-    det_result = deterministic.get("result")
     sem_result = semantic.get("result")
     headline = outcome["headline"]
     protected = result["protected_inputs_intact"]
@@ -727,5 +738,7 @@ def regrade_with_semantic(
             "failure_reasons": list(dict.fromkeys(failure_reasons)),
         }
     )
+    result.update(_trial_accounting(run_dir, result.get("worker_accounting") or result.get("accounting"),
+                                    len(semantic.get("judges", []))))
     write_json(run_dir / "result.json", result)
     return result
