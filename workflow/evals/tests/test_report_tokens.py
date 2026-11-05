@@ -202,7 +202,7 @@ def test_report_cost_na_when_multiple_models_in_one_run(tmp_path):
     report_path = eval_mod.write_report(tmp_path, experiment, aggregates, results)
     text = report_path.read_text(encoding="utf-8")
     # no priced dollar figure in the token table; cost cells are n/a
-    assert "n/a (model not in price table)" in text
+    assert "n/a (pricing unavailable)" in text
 
 
 def test_format_cost_delta_sub_cent_precision():

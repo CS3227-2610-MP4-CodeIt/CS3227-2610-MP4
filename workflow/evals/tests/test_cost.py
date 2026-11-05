@@ -51,14 +51,14 @@ def test_cost_prices_cache_writes():
     assert cost == 12.50
 
 
-def test_cost_cache_write_rate_absent_is_zero_not_error():
+def test_cost_cache_write_rate_absent_is_unavailable():
     # gpt-5.5 lists no cache-write rate; 1M input context -> LONG tier
     # (input 10.00). cache-write tokens contribute 0, no crash.
     cost = evalmod.estimate_api_cost(
         _tokens(uncached=1_000_000, cache_write=5_000_000), "gpt-5.5"
     )
     # only the 1M input at the long rate 10.00 counts -> 10.00
-    assert cost == 10.00
+    assert cost is None
 
 
 def test_cost_unknown_model_is_none():
@@ -102,7 +102,7 @@ def test_format_cost_known():
 
 def test_format_cost_none_is_labelled_na():
     assert "n/a" in evalmod.format_cost(None)
-    assert "price table" in evalmod.format_cost(None)
+    assert "unavailable" in evalmod.format_cost(None)
 
 
 # --- pricing table provenance ---
@@ -151,11 +151,11 @@ def test_threshold_counts_uncached_plus_cached():
     assert cost == 0.084
 
 
-def test_model_with_only_short_tier_falls_back():
+def test_model_with_only_short_tier_cannot_price_long_request():
     # gpt-5.4 has no long tier; a huge context still uses its short rate (2.50).
     # 300,000 * 2.50 / 1e6 = 0.75
     cost = evalmod.estimate_api_cost(_tokens(uncached=300_000), "gpt-5.4")
-    assert cost == 0.75
+    assert cost is None
 
 
 def test_threshold_boundary_is_long_at_exactly_the_cutoff():

@@ -34,7 +34,7 @@ LONG_CONTEXT_THRESHOLD = 272_000
 # reasoning tokens bill as output, so billed_output uses the output rate.
 # cache_write None means the card lists no separate cache-write rate. A model
 # may omit a tier (e.g. its long-context column was not published/legible); the
-# estimator falls back to the tier that exists.
+# estimator reports unavailable pricing for that tier.
 PRICING: dict[str, dict[str, tuple[float, float | None, float | None, float]]] = {
     "gpt-6-astra": {
         "short": (10.00, 1.00, 12.50, 50.00),
@@ -79,26 +79,20 @@ PRICING: dict[str, dict[str, tuple[float, float | None, float | None, float]]] =
 }
 
 
-def _select_tier(model_rates: dict, input_context: float) -> tuple:
-    """Pick the (input, cached, cache_write, output) tuple for a request's input
-    context size. Uses long-context rates at/above the threshold; falls back to
-    whichever tier exists when a model omits one."""
+def _select_tier(model_rates: dict, input_context: float) -> tuple | None:
+    """An unpublished context tier is unavailable; never substitute a rate."""
     want = "long" if input_context >= LONG_CONTEXT_THRESHOLD else "short"
-    if want in model_rates:
-        return model_rates[want]
-    # Fall back to the only tier published for this model.
-    other = "short" if want == "long" else "long"
-    return model_rates[other]
+    return model_rates.get(want)
 
 
 def estimate_api_cost(mean_tokens: dict, model: str | None) -> float | None:
-    """Pure: estimate API-equivalent USD cost for one trial's mean token usage.
+    """Pure: estimate API-equivalent USD cost for one request's token usage.
 
     Returns None when the model is unknown or not supplied (never guess). Picks
     the short- or long-context rate tier from the request's input context size
     (uncached + cached), then prices uncached-input at the input rate,
     cached-input at the cached rate, cache-write input at the cache-write rate
-    (when the card lists one), and billed-output (output + reasoning) at the
+    (when the card lists one), and inclusive output (reasoning is a subset) at the
     output rate.
     """
     if not model:
@@ -111,9 +105,12 @@ def estimate_api_cost(mean_tokens: dict, model: str | None) -> float | None:
     cache_write = mean_tokens.get("cache_write_input_tokens", 0) or 0
     billed_out = mean_tokens.get("billed_output_tokens", 0) or 0
     input_context = uncached + cached
-    input_rate, cached_rate, cache_write_rate, output_rate = _select_tier(
-        model_rates, input_context
-    )
+    rates = _select_tier(model_rates, input_context)
+    if rates is None:
+        return None
+    input_rate, cached_rate, cache_write_rate, output_rate = rates
+    if (cached and cached_rate is None) or (cache_write and cache_write_rate is None):
+        return None
     cost = (
         uncached * input_rate
         + cached * (cached_rate or 0)
@@ -126,7 +123,7 @@ def estimate_api_cost(mean_tokens: dict, model: str | None) -> float | None:
 def format_cost(cost: float | None) -> str:
     """Render a cost estimate, or a clear 'n/a' when the model is unpriced."""
     if cost is None:
-        return "n/a (model not in price table)"
+        return "n/a (pricing unavailable)"
     return f"${cost:.4f}"
 
 
