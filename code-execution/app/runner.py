@@ -33,7 +33,7 @@ class RunResult:
 def _kill_group(proc: Process) -> None:
     try:
         os.killpg(proc.pid, signal.SIGKILL)
-    except (ProcessLookupError, PermissionError):
+    except ProcessLookupError, PermissionError:
         pass
 
 
@@ -59,7 +59,9 @@ async def run_test(
     memory_limit_mb: int,
     settings: Settings,
 ) -> RunResult:
-    stdout_cap = min(max(len(expected_stdout.encode()) * 2, MIN_STDOUT_CAP), settings.max_stdout_bytes)
+    stdout_cap = min(
+        max(len(expected_stdout.encode()) * 2, MIN_STDOUT_CAP), settings.max_stdout_bytes
+    )
     stdout, stderr = bytearray(), bytearray()
     output_limit_exceeded = False
     timed_out = False
@@ -72,10 +74,22 @@ async def run_test(
         # -P (no script dir on sys.path), -s (no user site), -B (no .pyc): the parts of -I we need.
         # -I itself would also ignore PYTHONHASHSEED, and the env is already a fresh minimal dict.
         proc = await asyncio.create_subprocess_exec(
-            sys.executable, "-P", "-s", "-B", "-X", "utf8", HARNESS_PATH,
-            "solution.py", str(time_limit_ms), str(memory_limit_mb),
-            str(settings.as_overhead_mb), str(settings.fsize_limit_bytes), str(report_w),
-            stdin=PIPE, stdout=PIPE, stderr=PIPE,
+            sys.executable,
+            "-P",
+            "-s",
+            "-B",
+            "-X",
+            "utf8",
+            HARNESS_PATH,
+            "solution.py",
+            str(time_limit_ms),
+            str(memory_limit_mb),
+            str(settings.as_overhead_mb),
+            str(settings.fsize_limit_bytes),
+            str(report_w),
+            stdin=PIPE,
+            stdout=PIPE,
+            stderr=PIPE,
             pass_fds=(report_w,),
             cwd=workdir,
             env=CHILD_ENV,
@@ -91,7 +105,7 @@ async def run_test(
             await proc.stdin.drain()
             proc.stdin.close()
             await proc.stdin.wait_closed()
-        except (BrokenPipeError, ConnectionResetError):
+        except BrokenPipeError, ConnectionResetError:
             pass
 
     async def read_capped(stream: asyncio.StreamReader, buf: bytearray, cap: int) -> None:

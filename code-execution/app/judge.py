@@ -13,7 +13,9 @@ from app.schemas import ExecuteRequest, ExecuteResponse, TestResult, Verdict
 PREVIEW_BYTES = 1024
 
 
-def classify(result: RunResult, req: ExecuteRequest, expected_stdout: str, workdir: str) -> tuple[Verdict, str | None]:
+def classify(
+    result: RunResult, req: ExecuteRequest, expected_stdout: str, workdir: str
+) -> tuple[Verdict, str | None]:
     """Spec §4.1: the first matching rule wins."""
     report = result.report or {}
     if result.timed_out:
@@ -51,12 +53,21 @@ async def run_job(req: ExecuteRequest, settings: Settings) -> ExecuteResponse:
 
         for index, test in enumerate(req.test_cases):
             run = await run_test(
-                workdir, test.stdin, test.expected_stdout, req.time_limit_ms, req.memory_limit_mb, settings
+                workdir,
+                test.stdin,
+                test.expected_stdout,
+                req.time_limit_ms,
+                req.memory_limit_mb,
+                settings,
             )
             status, message = classify(run, req, test.expected_stdout, workdir)
-            result = TestResult(index=index, status=status, time_ms=run.time_ms, memory_kb=run.peak_rss_kb)
+            result = TestResult(
+                index=index, status=status, time_ms=run.time_ms, memory_kb=run.peak_rss_kb
+            )
             if status != Verdict.ACCEPTED:
-                result.stdout_preview = head(run.stdout.decode("utf-8", errors="replace"), PREVIEW_BYTES)
+                result.stdout_preview = head(
+                    run.stdout.decode("utf-8", errors="replace"), PREVIEW_BYTES
+                )
                 result.stderr_preview = tail(sanitize_traceback(run.stderr, workdir), PREVIEW_BYTES)
                 verdict, error_message, failed_index = status, message, index
             results.append(result)

@@ -1,7 +1,14 @@
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field, SerializerFunctionWrapHandler, field_validator, model_serializer, model_validator
+from pydantic import (
+    BaseModel,
+    Field,
+    SerializerFunctionWrapHandler,
+    field_validator,
+    model_serializer,
+    model_validator,
+)
 
 MAX_CODE_BYTES = 64 * 1024
 MAX_IO_BYTES = 1024 * 1024

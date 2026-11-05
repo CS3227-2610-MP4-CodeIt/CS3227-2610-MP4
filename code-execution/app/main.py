@@ -29,7 +29,9 @@ class BodySizeLimit:
             return
         length = dict(scope["headers"]).get(b"content-length")
         if length is not None and length.isdigit() and int(length) > MAX_BODY_BYTES:
-            await JSONResponse({"detail": "Request body too large"}, status_code=413)(scope, receive, send)
+            await JSONResponse({"detail": "Request body too large"}, status_code=413)(
+                scope, receive, send
+            )
             return
 
         received = 0
@@ -56,14 +58,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         yield
 
     app = FastAPI(title="Code Execution Service", lifespan=lifespan)
-    app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+    app.add_middleware(
+        CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
+    )
     app.add_middleware(BodySizeLimit)
 
     @app.get("/health")
     async def health(request: Request) -> dict:
         settings: Settings = request.app.state.settings
         semaphore: asyncio.Semaphore = request.app.state.job_semaphore
-        return {"status": "ok", "available_slots": semaphore._value, "max_slots": settings.max_concurrent_jobs}
+        return {
+            "status": "ok",
+            "available_slots": semaphore._value,
+            "max_slots": settings.max_concurrent_jobs,
+        }
 
     @app.post("/v1/execute", dependencies=[Depends(require_token)])
     async def execute(body: ExecuteRequest, request: Request) -> ExecuteResponse:
@@ -74,7 +82,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 await semaphore.acquire()
         except TimeoutError:
             raise HTTPException(
-                status_code=503, detail="All execution slots are busy", headers={"Retry-After": str(RETRY_AFTER_S)}
+                status_code=503,
+                detail="All execution slots are busy",
+                headers={"Retry-After": str(RETRY_AFTER_S)},
             )
         try:
             return await judge.run_job(body, settings)

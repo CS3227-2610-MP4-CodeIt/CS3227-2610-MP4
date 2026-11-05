@@ -18,7 +18,9 @@ async def test_bad_token(client, headers):
 
 async def test_body_too_large(client):
     r = await client.post(
-        "/v1/execute", content=b"x" * (MAX_BODY_BYTES + 1), headers={**AUTH, "Content-Type": "application/json"}
+        "/v1/execute",
+        content=b"x" * (MAX_BODY_BYTES + 1),
+        headers={**AUTH, "Content-Type": "application/json"},
     )
     assert r.status_code == 413
 
