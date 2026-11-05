@@ -110,7 +110,7 @@ class LLMClient:
                 await asyncio.sleep(delays.pop(0))
                 continue
             if response.status_code != 200:
-                raise UserFacingError(UNAVAILABLE)
+                raise UserFacingError(UNAVAILABLE) from None
             return _parse(response)
 
 
@@ -120,7 +120,7 @@ def _parse(response: httpx.Response) -> ChatReply:
         choice = data["choices"][0]
         message = choice.get("message") or {}
     except ValueError, KeyError, IndexError, TypeError:
-        raise UserFacingError(UNAVAILABLE)
+        raise UserFacingError(UNAVAILABLE) from None
     return ChatReply(
         content=(message.get("content") or "").strip(),
         tool_calls=message.get("tool_calls") or [],

@@ -187,9 +187,12 @@ async def test_assignment_foreign_class_or_question_404(
     theirs = await make_class(members=[other, student])
     q = await make_question(teacher)
     oq = await make_question(other)
-    post = lambda **b: client.post(
-        "/api/teacher/assignments", json={"title": "x", **b}, headers=teacher.headers
-    )  # noqa: E731
+
+    async def post(**body):
+        return await client.post(
+            "/api/teacher/assignments", json={"title": "x", **body}, headers=teacher.headers
+        )
+
     assert (await post(class_id=theirs.id, question_ids=[q.id])).status_code == 404
     assert (await post(class_id=mine.id, question_ids=[oq.id])).status_code == 404
 

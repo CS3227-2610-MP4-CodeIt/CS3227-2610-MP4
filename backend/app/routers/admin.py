@@ -1,6 +1,7 @@
 import functools
 
 from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi.responses import JSONResponse
 
 from app.ai import summary
 from app.auth import hash_password, require_admin
@@ -190,7 +191,7 @@ async def new_summary(
     body: EmptyIn | None = None,
     admin: User = Depends(require_admin),
     ctx: AppContext = Depends(get_ctx),
-):
+) -> JSONResponse:
     if await assignments_repo.get(ctx.db, assignment_id) is None:
         raise HTTPException(status_code=404, detail="assignment not found")
     job, created = await start_job(

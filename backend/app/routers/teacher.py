@@ -32,7 +32,7 @@ router = APIRouter(prefix="/teacher", tags=["teacher"], dependencies=[Depends(re
 KIND = "question_gen"
 
 
-async def _own_question(ctx: AppContext, user: User, question_id: int):
+async def _own_question(ctx: AppContext, user: User, question_id: int) -> questions_repo.Question:
     question = await questions_repo.get(ctx.db, question_id)
     if question is None or question.created_by != user.id:
         raise HTTPException(status_code=404, detail="question not found")
@@ -44,21 +44,25 @@ async def _check_question_ids(ctx: AppContext, user: User, question_ids: list[in
         await _own_question(ctx, user, qid)
 
 
-async def _own_assignment(ctx: AppContext, user: User, assignment_id: int):
+async def _own_assignment(
+    ctx: AppContext, user: User, assignment_id: int
+) -> assignments_repo.Assignment:
     assignment = await assignments_repo.get(ctx.db, assignment_id)
     if assignment is None or not await classes_repo.is_member(ctx.db, assignment.class_id, user.id):
         raise HTTPException(status_code=404, detail="assignment not found")
     return assignment
 
 
-async def _created_assignment(ctx: AppContext, user: User, assignment_id: int):
+async def _created_assignment(
+    ctx: AppContext, user: User, assignment_id: int
+) -> assignments_repo.Assignment:
     assignment = await _own_assignment(ctx, user, assignment_id)
     if assignment.created_by != user.id:
         raise HTTPException(status_code=404, detail="assignment not found")
     return assignment
 
 
-async def _own_gen_job(ctx: AppContext, user: User, job_id: int):
+async def _own_gen_job(ctx: AppContext, user: User, job_id: int) -> jobs_repo.Job:
     job = await jobs_repo.get(ctx.db, job_id)
     if job is None or job.user_id != user.id or job.kind != KIND:
         raise HTTPException(status_code=404, detail="job not found")

@@ -6,7 +6,7 @@ import aiosqlite
 
 from app.db import Database, now_iso
 from app.repos import Conflict
-from app.schemas import QuestionIn
+from app.schemas import Difficulty, QuestionIn
 
 _COLUMNS = (
     "id, created_by, title, statement_md, difficulty, topics_json, time_limit_ms, memory_limit_mb, "
@@ -31,7 +31,7 @@ class Question:
     created_by: int | None
     title: str
     statement_md: str
-    difficulty: str
+    difficulty: Difficulty
     topics: list[str]
     time_limit_ms: int
     memory_limit_mb: int

@@ -1,7 +1,7 @@
 """Request / response models for every endpoint (spec §5, §7). Routers import from here only."""
 
 from datetime import datetime
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import (
     BaseModel,
@@ -25,9 +25,9 @@ Verdict = Literal[
     "ACCEPTED", "WRONG_ANSWER", "TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "RUNTIME_ERROR"
 ]
 
-USERNAME = {"min_length": 3, "max_length": 32, "pattern": r"^[A-Za-z0-9_.-]+$"}
-DISPLAY_NAME = {"min_length": 1, "max_length": 100}
-PASSWORD = {"min_length": 8, "max_length": 128}
+Username = Annotated[str, Field(min_length=3, max_length=32, pattern=r"^[A-Za-z0-9_.-]+$")]
+DisplayName = Annotated[str, Field(min_length=1, max_length=100)]
+Password = Annotated[str, Field(min_length=8, max_length=128)]
 
 
 def _check_bytes(value: str, limit: int) -> str:
@@ -88,18 +88,18 @@ class LoginOut(BaseModel):
 
 
 class UserCreate(BaseModel):
-    username: str = Field(**USERNAME)
-    display_name: str = Field(**DISPLAY_NAME)
-    password: str = Field(**PASSWORD)
+    username: Username
+    display_name: DisplayName
+    password: Password
     role: MemberRole  # admins only via bootstrap
 
 
 class UserUpdate(BaseModel):
     """PATCH: use `body.model_dump(exclude_unset=True)`."""
 
-    username: str | None = Field(default=None, **USERNAME)
-    display_name: str | None = Field(default=None, **DISPLAY_NAME)
-    password: str | None = Field(default=None, **PASSWORD)
+    username: Username | None = None
+    display_name: DisplayName | None = None
+    password: Password | None = None
 
     @field_validator("username", "display_name", "password")
     @classmethod
@@ -197,7 +197,7 @@ class FloatTolerance(OutModel):
     rel: float = Field(default=0, ge=0, le=1)
 
     @model_validator(mode="after")
-    def _one_positive(self) -> "FloatTolerance":
+    def _one_positive(self) -> FloatTolerance:
         if self.abs == 0 and self.rel == 0:
             raise ValueError("at least one of abs / rel must be > 0")
         return self
@@ -235,7 +235,7 @@ class QuestionIn(BaseModel):
         return topics
 
     @model_validator(mode="after")
-    def _visible_and_hidden(self) -> "QuestionIn":
+    def _visible_and_hidden(self) -> QuestionIn:
         if not any(not t.is_hidden for t in self.test_cases):
             raise ValueError("at least one visible test case is required")
         if not any(t.is_hidden for t in self.test_cases):
@@ -290,7 +290,7 @@ class QuestionGenIn(BaseModel):
         return _normalize_topics(value)
 
     @model_validator(mode="after")
-    def _feedback_with_parent(self) -> "QuestionGenIn":
+    def _feedback_with_parent(self) -> QuestionGenIn:
         if self.parent_job_id is not None and not (self.feedback and self.feedback.strip()):
             raise ValueError("feedback is required with parent_job_id")
         return self

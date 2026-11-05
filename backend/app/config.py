@@ -39,9 +39,9 @@ class AppContext:
     """Everything a router or job handler needs. One per app, stored in app.state.ctx."""
 
     settings: Settings
-    db: "Database"
-    llm: "LLMClient"
-    executor: "ExecutorClient"
+    db: Database
+    llm: LLMClient
+    executor: ExecutorClient
 
 
 def get_ctx(request: Request) -> AppContext:

@@ -5,6 +5,7 @@ import aiosqlite
 
 from app.db import Database, now_iso, to_iso
 from app.repos import Conflict
+from app.schemas import Difficulty
 
 _SELECT = """
 SELECT a.id, a.class_id, c.name AS class_name, a.created_by, a.title, a.description_md, a.due_at,
@@ -20,7 +21,7 @@ class AssignmentQuestion:
     id: int  # question id
     position: int
     title: str
-    difficulty: str
+    difficulty: Difficulty
 
 
 @dataclass

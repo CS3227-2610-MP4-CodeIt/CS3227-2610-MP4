@@ -2,6 +2,7 @@ import functools
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 
 from app import judging
 from app.ai import guards, hints
@@ -9,13 +10,14 @@ from app.auth import require_student
 from app.clients import executor
 from app.config import AppContext, get_ctx
 from app.jobs.runner import check_job_response, latest_job, new_job_response, start_job
+from app.repos import assignments as assignments_repo
 from app.repos import questions as questions_repo
 from app.repos import submissions as submissions_repo
 from app.repos.assignments import Assignment
-from app.repos import assignments as assignments_repo
 from app.repos.users import User
 from app.schemas import (
     CodeIn,
+    FloatTolerance,
     HintIn,
     JobCheckOut,
     StudentAssignmentOut,
@@ -96,7 +98,9 @@ async def get_question(
         topics=q.topics,
         time_limit_ms=q.time_limit_ms,
         memory_limit_mb=q.memory_limit_mb,
-        float_tolerance=q.float_tolerance,
+        float_tolerance=FloatTolerance.model_validate(q.float_tolerance)
+        if q.float_tolerance is not None
+        else None,
         test_cases=[
             VisibleTestCase(position=t.position, stdin=t.stdin, expected_stdout=t.expected_stdout)
             for t in q.test_cases
@@ -106,7 +110,9 @@ async def get_question(
     )
 
 
-async def _start_judge(kind: str, aid: int, qid: int, body: CodeIn, user: User, ctx: AppContext):
+async def _start_judge(
+    kind: str, aid: int, qid: int, body: CodeIn, user: User, ctx: AppContext
+) -> JSONResponse:
     a = await _get_assignment(ctx, user, aid, qid)
     if kind == "submit" and a.is_past_due():
         raise HTTPException(status_code=409, detail=DUE_MESSAGE)
@@ -142,7 +148,7 @@ async def run_code(
     body: CodeIn,
     user: User = Depends(require_student),
     ctx: AppContext = Depends(get_ctx),
-):
+) -> JSONResponse:
     return await _start_judge("run", aid, qid, body, user, ctx)
 
 
@@ -161,7 +167,7 @@ async def submit_code(
     body: CodeIn,
     user: User = Depends(require_student),
     ctx: AppContext = Depends(get_ctx),
-):
+) -> JSONResponse:
     return await _start_judge("submit", aid, qid, body, user, ctx)
 
 
@@ -208,7 +214,7 @@ async def request_hint(
     body: HintIn,
     user: User = Depends(require_student),
     ctx: AppContext = Depends(get_ctx),
-):
+) -> JSONResponse:
     await _get_assignment(ctx, user, aid, qid)
     guards.reject_injection(body.code, body.question)
     job_input = {

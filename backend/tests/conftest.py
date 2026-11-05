@@ -344,10 +344,10 @@ def make_assignment(db: Database) -> Callable[..., Awaitable[Assignment]]:
 
 @pytest.fixture
 def wait_for_job(db: Database) -> Callable[..., Awaitable[Job]]:
-    """`job = await wait_for_job(job_id, timeout=5)`: polls until the job is success / failed."""
+    """`job = await wait_for_job(job_id, timeout_s=5)`: polls until the job is success / failed."""
 
-    async def wait(job_id: int, timeout: float = 5.0) -> Job:
-        async with asyncio.timeout(timeout):
+    async def wait(job_id: int, timeout_s: float = 5.0) -> Job:
+        async with asyncio.timeout(timeout_s):
             while True:
                 job = await jobs_repo.get(db, job_id)
                 assert job is not None, f"job {job_id} does not exist"
@@ -423,9 +423,9 @@ class SSEStream:
         async with asyncio.timeout(5):
             await self._started.wait()
 
-    async def next_event(self, timeout: float = 5.0) -> tuple[str, dict | None]:
+    async def next_event(self, timeout_s: float = 5.0) -> tuple[str, dict | None]:
         """Next frame: ("ready", {}), ("job", {...}), ("ping", None), or ("end", None) when the stream closed."""
-        async with asyncio.timeout(timeout):
+        async with asyncio.timeout(timeout_s):
             while "\n\n" not in self._buffer:
                 chunk = await self._chunks.get()
                 if chunk is None:

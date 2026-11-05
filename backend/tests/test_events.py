@@ -71,7 +71,7 @@ async def test_only_owner_gets_events(
         assert (await mine.next_event())[1]["job_id"] == job.id  # type: ignore[index]
         assert (await mine.next_event())[1]["job_id"] == job.id  # type: ignore[index]
         with pytest.raises(TimeoutError):
-            await theirs.next_event(timeout=0.2)
+            await theirs.next_event(timeout_s=0.2)
 
 
 async def test_two_streams_of_one_user_both_get_events(
