@@ -28,7 +28,9 @@ export function ClassesPage() {
                     {list.map((c) => (
                       <tr key={c.id}>
                         <td>
-                          <Link to={`/admin/classes/${c.id}`} className="link">{c.name}</Link>
+                          <Link to={`/admin/classes/${c.id}`} className="link">
+                            {c.name}
+                          </Link>
                         </td>
                         <td>{c.teacher_count}</td>
                         <td>{c.student_count}</td>
@@ -54,19 +56,31 @@ function NewClassForm() {
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    create.mutate({ name, description }, { onSuccess: (cls) => navigate(`/admin/classes/${cls.id}`) });
+    create.mutate(
+      { name, description },
+      { onSuccess: (cls) => navigate(`/admin/classes/${cls.id}`) },
+    );
   };
 
   return (
     <form onSubmit={onSubmit} className="card space-y-3 self-start">
       <h2 className="font-medium">New class</h2>
       <div>
-        <label className="label" htmlFor="new-class-name">Name</label>
-        <input id="new-class-name" className="input" value={name} onChange={(e) => setName(e.target.value)} />
+        <label className="label" htmlFor="new-class-name">
+          Name
+        </label>
+        <input
+          id="new-class-name"
+          className="input"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
         <FieldError error={create.error} field="name" />
       </div>
       <div>
-        <label className="label" htmlFor="new-class-desc">Description</label>
+        <label className="label" htmlFor="new-class-desc">
+          Description
+        </label>
         <textarea
           id="new-class-desc"
           className="input"
@@ -76,8 +90,16 @@ function NewClassForm() {
         />
         <FieldError error={create.error} field="description" />
       </div>
-      <ErrorText error={create.error} fields={["name", "description"]} messages={{ 409: "Class name already taken" }} />
-      <button type="submit" className="btn btn-primary" disabled={create.isPending || !name.trim()}>
+      <ErrorText
+        error={create.error}
+        fields={["name", "description"]}
+        messages={{ 409: "Class name already taken" }}
+      />
+      <button
+        type="submit"
+        className="btn btn-primary"
+        disabled={create.isPending || !name.trim()}
+      >
         Create class
       </button>
     </form>

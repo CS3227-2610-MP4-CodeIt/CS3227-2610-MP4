@@ -34,10 +34,14 @@ export function SummaryPage() {
         return (
           <div className="space-y-6">
             <div className="flex flex-wrap items-baseline gap-4">
-              <Link to={`/admin/classes/${cid}`} className="link text-sm">← {c.name}</Link>
+              <Link to={`/admin/classes/${cid}`} className="link text-sm">
+                ← {c.name}
+              </Link>
               <h1 className="text-xl font-semibold">{assignment.title}</h1>
               <span className="text-sm text-slate-500">
-                {assignment.due_at ? `Due ${formatDate(assignment.due_at)}` : "No due date"}
+                {assignment.due_at
+                  ? `Due ${formatDate(assignment.due_at)}`
+                  : "No due date"}
               </span>
             </div>
             <SummaryPanel aid={aid} />
@@ -51,7 +55,10 @@ export function SummaryPage() {
 function SummaryPanel({ aid }: { aid: number }) {
   const key = targetKey.assignment(aid);
   const check = useJob<SummaryResult>("assignment_summary", key);
-  const start = useStartJob<Record<string, never>, SummaryResult>("assignment_summary", key);
+  const start = useStartJob<Record<string, never>, SummaryResult>(
+    "assignment_summary",
+    key,
+  );
   const job = check.data?.job ?? null;
   const running = job?.status === "in_process";
 
@@ -69,7 +76,9 @@ function SummaryPanel({ aid }: { aid: number }) {
         {job && <JobStatusBadge job={job} runningLabel="Summarising…" />}
       </div>
       {start.data?.created === false && (
-        <p className="text-sm text-slate-600">A summary is already being generated — showing it.</p>
+        <p className="text-sm text-slate-600">
+          A summary is already being generated — showing it.
+        </p>
       )}
       <ErrorText error={start.error} />
       {check.isPending ? (
@@ -82,7 +91,9 @@ function SummaryPanel({ aid }: { aid: number }) {
         <div className="grid gap-6 lg:grid-cols-2">
           <StatsTable stats={job.result.stats} />
           <div className="card">
-            <h2 className="mb-2 font-medium">AI summary — check against the numbers</h2>
+            <h2 className="mb-2 font-medium">
+              AI summary — check against the numbers
+            </h2>
             <Markdown>{job.result.summary_md}</Markdown>
           </div>
         </div>
@@ -96,7 +107,8 @@ function StatsTable({ stats }: { stats: SummaryStats }) {
     <div className="card space-y-3 overflow-x-auto">
       <h2 className="font-medium">Stats</h2>
       <p className="text-sm text-slate-600">
-        {stats.students_in_class} students in class · {stats.students_attempted_any} attempted any ·{" "}
+        {stats.students_in_class} students in class ·{" "}
+        {stats.students_attempted_any} attempted any ·{" "}
         {stats.students_solved_all} solved all
       </p>
       <table className="table">
@@ -109,7 +121,9 @@ function StatsTable({ stats }: { stats: SummaryStats }) {
             <th>Correct</th>
             <th>Submissions</th>
             {VERDICTS.map((v) => (
-              <th key={v.key} title={v.key}>{v.label}</th>
+              <th key={v.key} title={v.key}>
+                {v.label}
+              </th>
             ))}
           </tr>
         </thead>

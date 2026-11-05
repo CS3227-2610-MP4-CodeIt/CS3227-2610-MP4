@@ -5,12 +5,21 @@ import { ConfirmButton } from "../../components/ConfirmButton";
 import { formatDate } from "../../components/dates";
 import { ErrorText, FieldError } from "../../components/ErrorText";
 import { QueryView } from "../../components/QueryView";
-import { useAddMembers, useClass, useDeleteClass, useRemoveMember, useUpdateClass, useUsers } from "./api";
+import {
+  useAddMembers,
+  useClass,
+  useDeleteClass,
+  useRemoveMember,
+  useUpdateClass,
+  useUsers,
+} from "./api";
 
 export function ClassPage() {
   const id = Number(useParams().id);
   const cls = useClass(id);
-  return <QueryView query={cls}>{(c) => <ClassDetailView cls={c} />}</QueryView>;
+  return (
+    <QueryView query={cls}>{(c) => <ClassDetailView cls={c} />}</QueryView>
+  );
 }
 
 function ClassDetailView({ cls }: { cls: ClassDetail }) {
@@ -20,12 +29,17 @@ function ClassDetailView({ cls }: { cls: ClassDetail }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link to="/admin/classes" className="link text-sm">← Classes</Link>
+        <Link to="/admin/classes" className="link text-sm">
+          ← Classes
+        </Link>
         <h1 className="text-xl font-semibold">{cls.name}</h1>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Classes have no updated_at; keying on the editable fields remounts the form after a save. */}
-        <EditClassForm key={`${cls.id}:${cls.name}:${cls.description}`} cls={cls} />
+        <EditClassForm
+          key={`${cls.id}:${cls.name}:${cls.description}`}
+          cls={cls}
+        />
         <AssignmentsCard cls={cls} />
         <MembersCard cls={cls} title="Teachers" members={cls.teachers} />
         <MembersCard cls={cls} title="Students" members={cls.students} />
@@ -33,11 +47,17 @@ function ClassDetailView({ cls }: { cls: ClassDetail }) {
       <AddMembers cls={cls} />
       <div className="card space-y-2">
         <h2 className="font-medium">Delete class</h2>
-        <p className="text-sm text-slate-600">Removes its memberships, assignments and their submissions.</p>
+        <p className="text-sm text-slate-600">
+          Removes its memberships, assignments and their submissions.
+        </p>
         <ConfirmButton
           message={`Delete class ${cls.name}?`}
           disabled={remove.isPending}
-          onConfirm={() => remove.mutate(undefined, { onSuccess: () => navigate("/admin/classes") })}
+          onConfirm={() =>
+            remove.mutate(undefined, {
+              onSuccess: () => navigate("/admin/classes"),
+            })
+          }
         >
           Delete
         </ConfirmButton>
@@ -66,12 +86,21 @@ function EditClassForm({ cls }: { cls: ClassDetail }) {
     <form onSubmit={onSubmit} className="card space-y-3">
       <h2 className="font-medium">Edit</h2>
       <div>
-        <label className="label" htmlFor="class-name">Name</label>
-        <input id="class-name" className="input" value={name} onChange={(e) => setName(e.target.value)} />
+        <label className="label" htmlFor="class-name">
+          Name
+        </label>
+        <input
+          id="class-name"
+          className="input"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
         <FieldError error={update.error} field="name" />
       </div>
       <div>
-        <label className="label" htmlFor="class-desc">Description</label>
+        <label className="label" htmlFor="class-desc">
+          Description
+        </label>
         <textarea
           id="class-desc"
           className="input"
@@ -81,8 +110,16 @@ function EditClassForm({ cls }: { cls: ClassDetail }) {
         />
         <FieldError error={update.error} field="description" />
       </div>
-      <ErrorText error={update.error} fields={["name", "description"]} messages={{ 409: "Class name already taken" }} />
-      <button type="submit" className="btn btn-primary" disabled={update.isPending || !changed || !name.trim()}>
+      <ErrorText
+        error={update.error}
+        fields={["name", "description"]}
+        messages={{ 409: "Class name already taken" }}
+      />
+      <button
+        type="submit"
+        className="btn btn-primary"
+        disabled={update.isPending || !changed || !name.trim()}
+      >
         Save
       </button>
     </form>
@@ -99,8 +136,15 @@ function AssignmentsCard({ cls }: { cls: ClassDetail }) {
         <ul className="space-y-1 text-sm">
           {cls.assignments.map((a) => (
             <li key={a.id} className="flex justify-between gap-2">
-              <Link to={`/admin/classes/${cls.id}/assignments/${a.id}`} className="link">{a.title}</Link>
-              <span className="text-slate-500">{a.due_at ? `due ${formatDate(a.due_at)}` : "no due date"}</span>
+              <Link
+                to={`/admin/classes/${cls.id}/assignments/${a.id}`}
+                className="link"
+              >
+                {a.title}
+              </Link>
+              <span className="text-slate-500">
+                {a.due_at ? `due ${formatDate(a.due_at)}` : "no due date"}
+              </span>
             </li>
           ))}
         </ul>
@@ -109,7 +153,15 @@ function AssignmentsCard({ cls }: { cls: ClassDetail }) {
   );
 }
 
-function MembersCard({ cls, title, members }: { cls: ClassDetail; title: string; members: User[] }) {
+function MembersCard({
+  cls,
+  title,
+  members,
+}: {
+  cls: ClassDetail;
+  title: string;
+  members: User[];
+}) {
   const remove = useRemoveMember(cls.id);
   return (
     <div className="card space-y-3 self-start">
@@ -123,7 +175,8 @@ function MembersCard({ cls, title, members }: { cls: ClassDetail; title: string;
           {members.map((m) => (
             <li key={m.id} className="flex items-center justify-between py-1">
               <Link to={`/admin/users/${m.id}`} className="link">
-                {m.display_name} <span className="text-slate-400">@{m.username}</span>
+                {m.display_name}{" "}
+                <span className="text-slate-400">@{m.username}</span>
               </Link>
               <button
                 type="button"
@@ -149,13 +202,17 @@ function AddMembers({ cls }: { cls: ClassDetail }) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Set<number>>(new Set());
 
-  const memberIds = new Set([...cls.teachers, ...cls.students].map((m) => m.id));
+  const memberIds = new Set(
+    [...cls.teachers, ...cls.students].map((m) => m.id),
+  );
   const q = search.trim().toLowerCase();
   const candidates = (users.data ?? []).filter(
     (u) =>
       u.role !== "admin" &&
       !memberIds.has(u.id) &&
-      (!q || u.username.toLowerCase().includes(q) || u.display_name.toLowerCase().includes(q)),
+      (!q ||
+        u.username.toLowerCase().includes(q) ||
+        u.display_name.toLowerCase().includes(q)),
   );
   // Drop selections that became members (e.g. added from another tab).
   const chosen = [...selected].filter((id) => !memberIds.has(id));
@@ -188,8 +245,13 @@ function AddMembers({ cls }: { cls: ClassDetail }) {
           {candidates.map((u) => (
             <li key={u.id}>
               <label className="flex cursor-pointer items-center gap-2 px-2 py-1 hover:bg-slate-50">
-                <input type="checkbox" checked={selected.has(u.id)} onChange={() => toggle(u.id)} />
-                {u.display_name} <span className="text-slate-400">@{u.username}</span>
+                <input
+                  type="checkbox"
+                  checked={selected.has(u.id)}
+                  onChange={() => toggle(u.id)}
+                />
+                {u.display_name}{" "}
+                <span className="text-slate-400">@{u.username}</span>
                 <span className="ml-auto text-xs text-slate-500">{u.role}</span>
               </label>
             </li>
@@ -201,7 +263,9 @@ function AddMembers({ cls }: { cls: ClassDetail }) {
         type="button"
         className="btn btn-primary"
         disabled={add.isPending || chosen.length === 0}
-        onClick={() => add.mutate(chosen, { onSuccess: () => setSelected(new Set()) })}
+        onClick={() =>
+          add.mutate(chosen, { onSuccess: () => setSelected(new Set()) })
+        }
       >
         Add {chosen.length || ""} selected
       </button>

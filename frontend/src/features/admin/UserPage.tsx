@@ -11,7 +11,9 @@ import { useDeleteUser, useUpdateUser, useUser } from "./api";
 export function UserPage() {
   const id = Number(useParams().id);
   const user = useUser(id);
-  return <QueryView query={user}>{(u) => <UserDetailView user={u} />}</QueryView>;
+  return (
+    <QueryView query={user}>{(u) => <UserDetailView user={u} />}</QueryView>
+  );
 }
 
 function UserDetailView({ user }: { user: UserDetail }) {
@@ -21,13 +23,18 @@ function UserDetailView({ user }: { user: UserDetail }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link to="/admin/users" className="link text-sm">← Users</Link>
+        <Link to="/admin/users" className="link text-sm">
+          ← Users
+        </Link>
         <h1 className="text-xl font-semibold">{user.display_name}</h1>
         <span className="text-sm text-slate-500">{user.role}</span>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Users have no updated_at; keying on the editable fields remounts the form after a save. */}
-        <EditUserForm key={`${user.id}:${user.username}:${user.display_name}`} user={user} />
+        <EditUserForm
+          key={`${user.id}:${user.username}:${user.display_name}`}
+          user={user}
+        />
         <div className="card space-y-3 self-start">
           <h2 className="font-medium">Classes</h2>
           {user.classes.length === 0 ? (
@@ -36,7 +43,9 @@ function UserDetailView({ user }: { user: UserDetail }) {
             <ul className="space-y-1 text-sm">
               {user.classes.map((c) => (
                 <li key={c.id}>
-                  <Link to={`/admin/classes/${c.id}`} className="link">{c.name}</Link>
+                  <Link to={`/admin/classes/${c.id}`} className="link">
+                    {c.name}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -46,12 +55,17 @@ function UserDetailView({ user }: { user: UserDetail }) {
       <div className="card space-y-2">
         <h2 className="font-medium">Delete user</h2>
         <p className="text-sm text-slate-600">
-          Removes their sessions, class memberships, submissions and jobs. Questions and assignments they made stay.
+          Removes their sessions, class memberships, submissions and jobs.
+          Questions and assignments they made stay.
         </p>
         <ConfirmButton
           message={`Delete user ${user.username}?`}
           disabled={remove.isPending}
-          onConfirm={() => remove.mutate(undefined, { onSuccess: () => navigate("/admin/users") })}
+          onConfirm={() =>
+            remove.mutate(undefined, {
+              onSuccess: () => navigate("/admin/users"),
+            })
+          }
         >
           Delete
         </ConfirmButton>
@@ -85,17 +99,33 @@ function EditUserForm({ user }: { user: UserDetail }) {
     <form onSubmit={onSubmit} className="card space-y-3">
       <h2 className="font-medium">Edit</h2>
       <div>
-        <label className="label" htmlFor="edit-username">Username</label>
-        <input id="edit-username" className="input" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <label className="label" htmlFor="edit-username">
+          Username
+        </label>
+        <input
+          id="edit-username"
+          className="input"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
         <FieldError error={update.error} field="username" />
       </div>
       <div>
-        <label className="label" htmlFor="edit-display">Display name</label>
-        <input id="edit-display" className="input" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+        <label className="label" htmlFor="edit-display">
+          Display name
+        </label>
+        <input
+          id="edit-display"
+          className="input"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+        />
         <FieldError error={update.error} field="display_name" />
       </div>
       <div>
-        <label className="label" htmlFor="edit-password">New password</label>
+        <label className="label" htmlFor="edit-password">
+          New password
+        </label>
         <PasswordInput
           id="edit-password"
           autoComplete="new-password"
@@ -115,7 +145,11 @@ function EditUserForm({ user }: { user: UserDetail }) {
         fields={["username", "display_name", "password"]}
         messages={{ 409: "Username already taken" }}
       />
-      <button type="submit" className="btn btn-primary" disabled={update.isPending || !changed}>
+      <button
+        type="submit"
+        className="btn btn-primary"
+        disabled={update.isPending || !changed}
+      >
         Save
       </button>
     </form>

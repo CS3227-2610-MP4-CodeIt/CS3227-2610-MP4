@@ -22,7 +22,9 @@ export function UsersPage() {
         <select
           className="input w-auto"
           value={role ?? ""}
-          onChange={(e) => setParams(e.target.value ? { role: e.target.value } : {})}
+          onChange={(e) =>
+            setParams(e.target.value ? { role: e.target.value } : {})
+          }
         >
           <option value="">All roles</option>
           {ROLES.map((r) => (
@@ -96,17 +98,33 @@ function NewUserForm() {
     <form onSubmit={onSubmit} className="card space-y-3 self-start">
       <h2 className="font-medium">New user</h2>
       <div>
-        <label className="label" htmlFor="new-username">Username</label>
-        <input id="new-username" className="input" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <label className="label" htmlFor="new-username">
+          Username
+        </label>
+        <input
+          id="new-username"
+          className="input"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
         <FieldError error={create.error} field="username" />
       </div>
       <div>
-        <label className="label" htmlFor="new-display">Display name</label>
-        <input id="new-display" className="input" value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
+        <label className="label" htmlFor="new-display">
+          Display name
+        </label>
+        <input
+          id="new-display"
+          className="input"
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+        />
         <FieldError error={create.error} field="display_name" />
       </div>
       <div>
-        <label className="label" htmlFor="new-password">Password</label>
+        <label className="label" htmlFor="new-password">
+          Password
+        </label>
         <PasswordInput
           id="new-password"
           autoComplete="new-password"
@@ -116,8 +134,15 @@ function NewUserForm() {
         <FieldError error={create.error} field="password" />
       </div>
       <div>
-        <label className="label" htmlFor="new-role">Role</label>
-        <select id="new-role" className="input" value={role} onChange={(e) => setRole(e.target.value as MemberRole)}>
+        <label className="label" htmlFor="new-role">
+          Role
+        </label>
+        <select
+          id="new-role"
+          className="input"
+          value={role}
+          onChange={(e) => setRole(e.target.value as MemberRole)}
+        >
           <option value="student">student</option>
           <option value="teacher">teacher</option>
         </select>
