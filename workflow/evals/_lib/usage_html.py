@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 import difflib
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -48,13 +49,52 @@ def _cost(value: Any, *, zero_ok: bool = True) -> str:
     if isinstance(value, dict):
         coverage = value.get('coverage') or {}
         if coverage.get('status') in ('partial', 'unavailable'):
+            # Number-first: show the known subtotal as a plain dollar figure.
+            # These are all estimates, so no marker — the coverage breakdown
+            # lives in a tooltip (see `_cost_detail`).
             known = value.get('known_cost')
-            subtotal = f"; known subtotal {_format_cost(known)}" if known is not None else ''
-            return f"n/a ({coverage['status']}{subtotal}; {coverage.get('priced_count', 0)}/{coverage.get('request_count', 0)} requests priced)"
+            return _format_cost(known) if known is not None else "n/a"
         value = value.get('est_cost')
     if value is None:
         return "n/a"
     return _format_cost(value)
+
+
+def _cost_primary(value: Any) -> str:
+    """Short, layout-safe cost for a prominent slot (KPI value, cost-total).
+
+    For partial/unavailable coverage this returns the honest known subtotal as a
+    plain dollar figure (no marker — these are estimates). Pair it with
+    :func:`_cost_detail` for the coverage specifics in a tooltip.
+    """
+    if isinstance(value, dict):
+        coverage = value.get('coverage') or {}
+        status = coverage.get('status')
+        if status in ('partial', 'unavailable'):
+            known = value.get('known_cost')
+            if known is not None:
+                return _format_cost(known)
+            return "n/a"
+        value = value.get('est_cost')
+    if value is None:
+        return "n/a"
+    return _format_cost(value)
+
+
+def _cost_detail(value: Any) -> str:
+    """Secondary/muted coverage detail for a cost slot, or '' when complete."""
+    if not isinstance(value, dict):
+        return ""
+    coverage = value.get('coverage') or {}
+    status = coverage.get('status')
+    if status not in ('partial', 'unavailable'):
+        return ""
+    priced = coverage.get('priced_count', 0)
+    total = coverage.get('request_count', 0)
+    known = value.get('known_cost')
+    if known is not None:
+        return f"{status}: {_format_cost(known)} known · {priced}/{total} priced"
+    return f"{status}: {priced}/{total} priced"
 
 
 def _num(value: Any) -> str:
@@ -90,44 +130,131 @@ def _cost_meter(value: Any, maximum: float, *, color: str = "blue", zero_ok: boo
 
 def _real_skill_rows(summary: dict[str, Any]) -> str:
     rows = []
-    for skill in summary["skills"]:
+    skills = summary["skills"]
+    # Scale cost bars against the most expensive attributable skill so the
+    # meter widths stay meaningful in a dense table.
+    max_cost = max((float(s.get("est_cost") or 0.0) for s in skills), default=0.0)
+    for skill in skills:
         name = skill["skill"]
         vid = _slug("real-skill", name)
+        triggered = skill.get("sessions_triggered", 0) > 0
+        installed = skill.get("installed")
+        dot = "green" if installed else "slate"
+        origin = "installed" if installed else "external"
+        unused = "" if triggered else " <span class='quiet-status'>unused</span>"
+        tok = skill.get("tokens") or {}
+        cost_status = skill.get("cost_status", "none")
+        priced_count = skill.get("priced_count", 0)
+        est_cost = skill.get("est_cost") or 0.0
+        shared_turns = skill.get("shared_turn_count", 0)
+        attr_turns = skill.get("attributed_turn_count", 0)
+        # Number-first: show a dollar figure as a clean cost meter. When some of
+        # the skill's turns were shared with other skills (so this figure is a
+        # lower bound), keep the cell a number and move the caveat to a tooltip
+        # rather than printing a word beside it.
+        cost_title = ""
+        if priced_count > 0:
+            if cost_status == "attributed_shared":
+                cost_title = (
+                    f"Attributed from {attr_turns} single-skill turn(s); "
+                    f"{shared_turns} shared turn(s) excluded (lower bound)."
+                )
+            cost_cell = _cost_meter(est_cost, max_cost, color="blue")
+        elif cost_status == "shared":
+            # The user accepts a clean $0.00 here meaning "unattributable /
+            # shared across skills"; the honest caveat lives in the tooltip so
+            # the zero is never misread as literally free.
+            cost_cell = f"{_format_cost(0.0)}"
+            cost_title = (
+                "Shared / ambiguous: every turn using this skill also used "
+                "another skill, so no cost is attributed here. The real cost is "
+                "counted once at the session level."
+            )
+        elif cost_status == "unpriced":
+            cost_cell = "<span class='muted'>no priced requests</span>"
+        else:
+            cost_cell = "<span class='muted'>—</span>"
+        cost_title_attr = f" title='{_esc(cost_title)}'" if cost_title else ""
+        row_cls = "clickable-row" if triggered else ""
+        onclick = (
+            f" onclick=\"openSkillDetail('{vid}')\"" if triggered else ""
+        )
         rows.append(
-            f"<tr class='clickable-row' onclick=\"openSkillDetail('{vid}')\">"
+            f"<tr class='{row_cls}'{onclick}>"
             f"<td><div class='row-title'>{_esc(name)}</div>"
-            f"<span class='row-meta'>{'installed' if skill['installed'] else 'external'}</span></td>"
+            f"<span class='row-meta'><i class='status-dot {dot}'></i>{origin}</span>{unused}</td>"
             f"<td class='num'>{skill['sessions_triggered']}</td>"
             f"<td class='num'>{skill['explicit_count']} / {skill['implicit_count']}</td>"
-            "<td>Observed reads / mentions; association only</td></tr>")
-    return ''.join(rows) or "<tr><td colspan='4'>No skill activity observed.</td></tr>"
+            f"<td class='num'>{_num(tok.get('uncached_input_tokens', 0))}</td>"
+            f"<td class='num'>{_num(tok.get('cached_input_tokens', 0))}</td>"
+            f"<td class='num'>{_num(tok.get('billed_output_tokens', 0))}</td>"
+            f"<td class='num'{cost_title_attr}>{cost_cell}</td></tr>"
+        )
+    return ''.join(rows) or "<tr><td colspan='7' class='empty'>No skill activity observed.</td></tr>"
+
+
+def _acct_cost_meter(accounting: dict[str, Any], maximum: float, *, color: str) -> str:
+    """Cost meter for an accounting dict: short primary value + scaled bar.
+
+    Uses the complete est_cost when available, otherwise the known subtotal, so
+    the bar still conveys relative spend without asserting a complete figure.
+    """
+    est = accounting.get("est_cost")
+    known = accounting.get("known_cost")
+    magnitude = est if est is not None else (known or 0.0)
+    label = _cost_primary(accounting)
+    width = min(100.0, max(0.0, float(magnitude or 0) / maximum * 100)) if maximum else 0.0
+    return (
+        f"<div class='table-cost'><strong>{_esc(label)}</strong>"
+        f"<span><i class='meter-{color}' style='width:{width:.1f}%'></i></span></div>"
+    )
 
 
 def _real_subagent_rows(summary: dict[str, Any]) -> str:
-    rows = []
-    for actor in summary.get('workers', []):
-        direct, inclusive = actor['direct'], actor['inclusive']
-        rows.append(f"<tr class='clickable-row' onclick=\"openSessionDetail('real-sess-{actor['session_index']}')\">"
-                    f"<td><div class='row-title'>{_esc(actor['name'])}</div><code>{_esc(actor['thread_id'])}</code></td>"
-                    f"<td class='num'>{_num(direct['tokens']['input_tokens'])}</td>"
-                    f"<td class='num'>{_num(direct['tokens']['output_tokens'])}</td>"
-                    f"<td class='num'>{_esc(_cost(direct))}</td>"
-                    f"<td class='num'>{_num(inclusive['tokens']['input_tokens'])}</td>"
-                    f"<td class='num'>{_num(inclusive['tokens']['output_tokens'])}</td>"
-                    f"<td class='num'>{_esc(_cost(inclusive))}</td></tr>")
-    return ''.join(rows) or "<tr><td colspan='7' class='empty'>No recorded worker usage.</td></tr>"
+    rows: list[str] = []
 
+    def _mag(ag: dict[str, Any]) -> float:
+        d = ag.get("direct") or {}
+        v = d.get("est_cost")
+        if v is None:
+            v = d.get("known_cost")
+        return float(v or 0.0)
 
-def _online_turn_rows(summary: dict[str, Any]) -> str:
-    rows = []
-    for turn in summary.get('turns', []):
-        direct, inclusive = turn['direct'], turn['inclusive']
-        rows.append(f"<tr class='clickable-row' onclick=\"openSessionDetail('real-sess-{turn['session_index']}')\">"
-                    f"<td><code>{_esc(turn['root_turn_id'])}</code></td>"
-                    f"<td class='num'>{_num(direct['tokens']['output_tokens'])}</td><td class='num'>{_esc(_cost(direct))}</td>"
-                    f"<td class='num'>{_num(inclusive['tokens']['output_tokens'])}</td><td class='num'>{_esc(_cost(inclusive))}</td>"
-                    f"<td>{len(turn['actors'])} actors · {_esc(inclusive['coverage']['status'])}</td></tr>")
-    return ''.join(rows) or "<tr><td colspan='6' class='empty'>Request turn linkage unavailable.</td></tr>"
+    max_cost = max((_mag(ag) for ag in summary["subagents"]), default=0.0)
+    for ag in summary["subagents"]:
+        tok = ag["tokens"]
+        direct = ag.get("direct") or {}
+        if ag["spawns"] == 0:
+            # Configured but never spawned this run — honest zero, like an
+            # installed-but-unused skill.
+            cost_cell = "$0.0000"
+        elif ag["priced_count"] > 0 or (direct.get("known_cost") is not None):
+            # Coverage-aware meter: shows the known subtotal (with a partial
+            # marker + tooltip) when the complete figure is unavailable, rather
+            # than a bare "n/a" that hides real spend.
+            detail = _cost_detail(direct)
+            meter = _acct_cost_meter(direct, max_cost, color="violet")
+            cost_cell = f"<span title='{_esc(detail)}'>{meter}</span>" if detail else meter
+        else:
+            cost_cell = "n/a"
+        src = f"<span class='row-meta'><i class='status-dot {'violet' if ag['configured'] else 'slate'}'></i>{'configured' if ag['configured'] else 'built-in / ad-hoc'}</span>"
+        rows.append(
+            f"<tr>"
+            f"<td><div class='row-title'>{_esc(ag['role'])}</div>{src}</td>"
+            f"<td class='num'>{ag['spawns']}</td>"
+            f"<td class='num'>{ag['sessions_used']}</td>"
+            f"<td class='num'>{ag['command_count']} ({ag['failed_command_count']})</td>"
+            f"<td class='num'>{_num(tok['uncached_input_tokens'])}</td>"
+            f"<td class='num'>{_num(tok['billed_output_tokens'])}</td>"
+            f"<td class='num'>{cost_cell}</td>"
+            f"</tr>"
+        )
+    if not rows:
+        rows.append(
+            "<tr><td colspan='7' class='empty'>No subagent profiles or spawns "
+            "recorded.</td></tr>"
+        )
+    return "".join(rows)
 
 
 def _real_session_rows(summary: dict[str, Any]) -> str:
@@ -155,7 +282,7 @@ def _real_session_rows(summary: dict[str, Any]) -> str:
             f"<td>{badges}</td>"
             f"<td class='num'>{sess['subagent_spawn_count']}</td>"
             f"<td class='num'>{_num(tok['billed_output_tokens'])}</td>"
-            f"<td class='num'><strong>{_esc(_cost(sess))}</strong></td>"
+            f"<td class='num' title='{_esc(_cost_detail(sess))}'><strong>{_esc(_cost(sess))}</strong></td>"
             f"<td class='prompt-cell' title='{_esc(sess['first_prompt'])}'>"
             f"{_esc(sess['first_prompt'] or '—')}</td>"
             f"</tr>"
@@ -253,11 +380,13 @@ def _session_observation_panel(session: dict[str, Any], detail_id: str) -> str:
             f"<small>Analyzer {_esc(finding.get('analyzer_version'))} · {_esc(level)}</small></article>"
         )
     return (
-        "<section class='session-observations card'><div class='card-header'><div>"
-        "<div class='card-title'>Session observations</div>"
+        "<section class='session-observations card'>"
+        "<details class='obs-details'>"
+        "<summary class='obs-summary'>"
+        "<span class='obs-summary-title'>Session observations</span>"
+        f"<span class='badge badge-slate'>{len(findings)} findings</span></summary>"
         "<div class='card-subtitle'>Recorded events and evidence limits; these are not policy or correctness judgments</div>"
-        f"</div><span class='badge badge-slate'>{len(findings)} findings</span></div>"
-        f"<div class='observation-list'>{''.join(cards)}</div></section>"
+        f"<div class='observation-list'>{''.join(cards)}</div></details></section>"
     )
 
 
@@ -830,43 +959,195 @@ def _coverage_panel(target: dict[str, Any]) -> str:
     coverage = target.get('coverage')
     if not coverage:
         return ''
+    status = coverage.get('status', 'unknown')
+    status_badge = {
+        'complete': 'badge-green',
+        'partial': 'badge-amber',
+        'unavailable': 'badge-slate',
+        'no_calls': 'badge-slate',
+    }.get(status, 'badge-slate')
     unknown = ', '.join(coverage.get('unknown_models', [])) or 'none'
-    return ("<div class='card'><div class='card-title'>Request pricing coverage</div>"
-            f"<p>{_esc(coverage['status'])}: {coverage['priced_count']} priced / "
-            f"{coverage['request_count']} observed requests; {coverage['unavailable_count']} unavailable observations.</p>"
-            f"<p>Known subtotal: {_esc(_cost(target.get('known_cost')))} · Unknown models: {_esc(unknown)}</p>"
-            f"<p class='muted'>{_esc('; '.join(coverage.get('reasons', [])))} "
-            "Output includes reasoning once. API-equivalent estimates are hypothetical spend.</p></div>")
+    known = _cost(target.get('known_cost'))
+    priced = coverage.get('priced_count', 0)
+    requested = coverage.get('request_count', 0)
+    unavailable = coverage.get('unavailable_count', 0)
+    reasons = '; '.join(coverage.get('reasons', []))
+    reasons_html = f"{_esc(reasons)} " if reasons else ""
+    return (
+        "<div class='card coverage-card'>"
+        "<div class='card-header'><div>"
+        "<div class='card-title'>Request pricing coverage</div>"
+        "<div class='card-subtitle'>Honest estimate scope — not actual spend</div>"
+        f"</div><span class='badge {status_badge}'>{_esc(status)}</span></div>"
+        "<div class='coverage-stats'>"
+        f"<span><b>{priced}</b> / {requested} requests priced</span>"
+        f"<span><b>{_esc(known)}</b> known subtotal</span>"
+        f"<span><b>{unavailable}</b> unavailable</span>"
+        f"<span>Unknown models: <b>{_esc(unknown)}</b></span>"
+        "</div>"
+        f"<p class='muted coverage-note'>{reasons_html}"
+        "Output includes reasoning once. API-equivalent estimates are hypothetical spend.</p>"
+        "</div>"
+    )
 
 
-def _accounting_tables(session: dict[str, Any]) -> str:
+def _compact_tokens(value: Any) -> str:
+    """Short human token count, e.g. 14127 -> '14.1k', 905 -> '905'."""
+    try:
+        n = int(value)
+    except (TypeError, ValueError):
+        return "0"
+    if n < 1000:
+        return str(n)
+    if n < 1_000_000:
+        return f"{n / 1000:.1f}k".replace(".0k", "k")
+    return f"{n / 1_000_000:.1f}m".replace(".0m", "m")
+
+
+# Boilerplate that user prompts pick up from the IDE/editor wrapper. These are
+# never the real intent of a turn, so they are stripped before labelling.
+_TURN_LABEL_NOISE_RE = re.compile(
+    r"#\s*Context from my IDE setup:.*?(?=(?:\n\S)|\Z)", re.DOTALL
+)
+_TURN_SLASH_LINK_RE = re.compile(r"\[\$(\w[\w-]*)\]\([^)]*\)")
+
+
+def _clean_turn_label(text: str) -> str:
+    """Produce a short, human, display-safe label from a raw prompt/command."""
+    cleaned = str(text or "")
+    # Surface a slash command link like "[$commit](/abs/path)" as "/commit".
+    cleaned = _TURN_SLASH_LINK_RE.sub(lambda m: "/" + m.group(1), cleaned)
+    # Drop IDE context boilerplate ("# Context from my IDE setup: ...").
+    cleaned = _TURN_LABEL_NOISE_RE.sub(" ", cleaned)
+    cleaned = re.sub(r"\s+", " ", cleaned).strip()
+    return cleaned
+
+
+def _turn_label(session: dict[str, Any], turn: dict[str, Any]) -> tuple[str, str, Any]:
+    """Best human label for a turn, its full text, and the source event index.
+
+    Strategy: window the turn by its requests' timestamps, then prefer the last
+    user message at/just before the turn start; fall back to the last command in
+    that window; finally fall back to a short id. Pure over session['events'].
+    """
+    short_id = str(turn.get("root_turn_id") or "turn")
+    # Keep the semantic "unattributed" bucket readable rather than truncating it
+    # to a meaningless id fragment; UUID roots still collapse to 8 chars.
+    if short_id != "unattributed":
+        short_id = short_id[:8]
+    requests = (turn.get("inclusive") or {}).get("requests") or []
+    stamps = [_parse_trace_time(r.get("timestamp")) for r in requests]
+    stamps = [s for s in stamps if s is not None]
+    if not stamps:
+        return short_id, short_id, None
+    start = min(stamps)
+
+    events = session.get("events") or []
+    user_msgs: list[tuple[datetime, str, Any]] = []
+    commands: list[tuple[datetime, str, Any]] = []
+    for ev in events:
+        when = _parse_trace_time(ev.get("ts"))
+        if when is None:
+            continue
+        kind = ev.get("kind")
+        ev_index = ev.get("event_index")
+        if kind == "msg" and ev.get("role") == "user":
+            text = str(ev.get("text") or "").strip()
+            if text:
+                user_msgs.append((when, text, ev_index))
+        elif kind == "cmd":
+            cmd = str(ev.get("command") or "").strip()
+            if cmd:
+                commands.append((when, cmd, ev_index))
+
+    user_msgs.sort(key=lambda item: item[0])
+    commands.sort(key=lambda item: item[0])
+
+    picked = next(((text, idx) for when, text, idx in reversed(user_msgs) if when <= start), None)
+    if picked is None:
+        picked = next(((cmd, idx) for when, cmd, idx in reversed(commands) if when <= start), None)
+    if picked is None:
+        return short_id, short_id, None
+    raw, event_index = picked
+
+    cleaned = _clean_turn_label(raw)
+    if not cleaned:
+        return short_id, raw, event_index
+    label = cleaned if len(cleaned) <= 60 else cleaned[:59].rstrip() + "…"
+    return label, cleaned, event_index
+
+
+def _turn_cards(session: dict[str, Any], detail_id: str) -> str:
+    """Visual, readable list of turns: a human label + a cost meter + tokens.
+
+    Each turn is clickable: it switches to the Timeline tab and locates the
+    turn's originating event on the main actor's track.
+    """
+    turns = session.get("turns", [])
+    if not turns:
+        return "<p class='muted'>No turn-level request boundaries were recorded.</p>"
+    stage_id = f"{detail_id}-timeline-stage"
+    main_actor = f"{detail_id}-timeline-main"
+    # Scale meters against the most expensive turn so relative spend is visible.
+    max_cost = max(
+        (float((t.get("inclusive") or {}).get("est_cost")
+                or (t.get("inclusive") or {}).get("known_cost") or 0.0)
+         for t in turns),
+        default=0.0,
+    )
+    rows: list[str] = []
+    for turn in turns:
+        inclusive = turn.get("inclusive") or {}
+        label, full, event_index = _turn_label(session, turn)
+        out_tokens = _compact_tokens((inclusive.get("tokens") or {}).get("billed_output_tokens", 0))
+        actor_count = len(turn.get("actors") or [])
+        actor_label = f" · {actor_count} actor{'s' if actor_count != 1 else ''}" if actor_count else ""
+        # One honest cost (inclusive), folding any partial-coverage caveat into
+        # the meter's tooltip the way _cost_detail does for other slots.
+        detail = _cost_detail(inclusive)
+        meter = _acct_cost_meter(inclusive, max_cost, color="blue")
+        meter_title = f" title='{_esc(detail)}'" if detail else ""
+        # Clickable when we found the originating event; jump to it on the
+        # timeline so the reader can see what the turn actually did.
+        if isinstance(event_index, int):
+            idx = int(event_index)
+            onclick = (
+                f" onclick=\"selectDetailTab('{detail_id}','timeline');"
+                f"locateTimelineEvidence('{stage_id}','{main_actor}',{idx})\""
+            )
+            cls = "turn-row clickable-row"
+            hint = "<span class='turn-go' aria-hidden='true'>Timeline →</span>"
+        else:
+            onclick = ""
+            cls = "turn-row"
+            hint = ""
+        rows.append(
+            f"<div class='{cls}'{onclick}>"
+            f"<div class='turn-main'>"
+            f"<div class='turn-label' title='{_esc(full)}'>{_esc(label)}</div>"
+            f"<div class='turn-meta'>{_esc(out_tokens)} out{_esc(actor_label)}{hint}</div>"
+            f"</div>"
+            f"<div class='turn-cost'{meter_title}>{meter}</div>"
+            f"</div>"
+        )
+    return f"<div class='turn-list'>{''.join(rows)}</div>"
+
+
+def _accounting_tables(session: dict[str, Any], detail_id: str) -> str:
     actors = session.get('actors', [])
     if not actors:
         return _coverage_panel(session)
-    def cells(accounting: dict[str, Any]) -> str:
-        return (f"<td class='num'>{_num(accounting['tokens']['input_tokens'])}</td>"
-                f"<td class='num'>{_num(accounting['tokens']['output_tokens'])}</td>"
-                f"<td class='num'>{_esc(_cost(accounting['est_cost']))}</td>"
-                f"<td>{_esc(accounting['coverage']['status'])}</td>")
-    actor_rows = ''.join(f"<tr><td><code>{_esc(a['name'])}</code><small> {_esc(a.get('model'))}</small></td>"
-                         + cells(a['direct']) + cells(a['inclusive']) + '</tr>' for a in actors)
-    turn_rows = ''.join(f"<tr><td><code>{_esc(t['root_turn_id'])}</code></td>"
-                        + cells(t['direct']) + cells(t['inclusive']) + '</tr>' for t in session.get('turns', []))
-    head = ("<th>Name / ID</th><th>Direct input</th><th>Direct output</th><th>Direct cost</th><th>Coverage</th>"
-            "<th>Inclusive input</th><th>Inclusive output</th><th>Inclusive cost</th><th>Coverage</th>")
     request_rows = ''.join(f"<tr><td><code>{_esc(r['response_id'])}</code></td><td>{_esc(r['timestamp'])}</td>"
                            f"<td>{_esc(r['thread_id'])}</td><td>{_esc(r['turn_id'])}</td><td>{_esc(r['model'])}</td>"
                            f"<td>{_num(r['tokens']['input_tokens'])}</td><td>{_num(r['tokens']['output_tokens'])}</td>"
                            f"<td>{_esc(_cost(r['est_cost']))}</td></tr>"
                            for r in session['inclusive_accounting']['requests'])
     return (_coverage_panel(session)
-            + "<div class='card'><div class='card-title'>Named actors · direct and inclusive usage</div>"
-            + "<p class='muted'>Inclusive includes recorded descendants. Add direct usage across actors once.</p>"
-            + f"<div class='trial-token-table-wrap'><table><thead><tr>{head}</tr></thead><tbody>{actor_rows}</tbody></table></div></div>"
-            + "<div class='card'><div class='card-title'>Turns · direct and inclusive usage</div>"
-            + "<p class='muted'>Root-turn IDs link worker requests. Missing linkage stays unattributed. "
-            "Legacy observations without request boundaries remain in session totals.</p>"
-            + f"<div class='trial-token-table-wrap'><table><thead><tr>{head}</tr></thead><tbody>{turn_rows}</tbody></table></div></div>"
+            + "<div class='card'><div class='card-title'>Turns</div>"
+            + "<p class='muted card-subtitle'>What each turn was doing and what it cost "
+            "(inclusive of spawned workers). Scaled to the session's priciest turn.</p>"
+            + _turn_cards(session, detail_id)
+            + "</div>"
             + "<details class='card'><summary>Request ledger</summary><div class='trial-token-table-wrap'><table>"
             + "<thead><tr><th>Response</th><th>Timestamp</th><th>Thread</th><th>Turn</th><th>Model</th><th>Input</th><th>Output</th><th>Cost</th></tr></thead>"
             + f"<tbody>{request_rows}</tbody></table></div></details>")
@@ -887,7 +1168,7 @@ def _real_session_details(summary: dict[str, Any]) -> str:
             f"{_kpi('Turns', str(sess['turn_count']), turns_sub)}"
             "</div>"
             f"{_session_observation_panel(sess, detail_id)}"
-            f"{_accounting_tables(sess)}"
+            f"{_accounting_tables(sess, detail_id)}"
         )
         timeline = _timeline_component(sess.get("activity_tree"), f"{detail_id}-timeline")
         if not sess.get("activity_tree"):
@@ -900,7 +1181,7 @@ def _real_session_details(summary: dict[str, Any]) -> str:
             f"<div class='card-title'>Session <code>{_esc(str(sess['thread_id'])[:16])}</code></div>"
             f"<div class='card-subtitle'>{_esc(_ts(sess['started_at']))} · "
             f"{_esc(sess['model'] or 'unknown')} · skills: {_esc(skills)}</div></div>"
-            f"<span class='cost-total'>{_esc(_cost(sess))}</span></div></div>"
+            f"<span class='cost-total' title='{_esc(_cost_detail(sess) or _cost(sess))}'>{_esc(_cost_primary(sess))}</span></div></div>"
             f"{_detail_tabs(detail_id, overview, timeline, context)}"
             "</div>"
         )
@@ -1191,7 +1472,7 @@ def _eval_experiment_details(harness_evals: dict[str, Any]) -> str:
             f"<div class='kpi-grid'>"
             f"{_kpi('Outcome & score', outcome_value, outcome_sub)}"
             f"{_kpi('Worker trials', str(worker), worker_sub)}"
-            f"{_kpi('Est. cost', _cost(group_accounting), billed_sub)}"
+            f"{_kpi('Est. cost', _cost_primary(group_accounting), billed_sub, detail=_cost_detail(group_accounting))}"
             f"{_kpi('Setup', _esc(model_val), setup_sub)}"
             f"</div>"
             f"{_comparison_table(trials)}"
@@ -1448,7 +1729,7 @@ def _eval_trial_details(harness_evals: dict[str, Any]) -> str:
             "<th class='num'>Billed output</th></tr></thead><tbody>"
             f"{''.join(token_rows)}</tbody></table></div></section>"
         )
-        overview = overview_kpis + usage_summary + token_breakdown + _accounting_tables(t)
+        overview = overview_kpis + usage_summary + token_breakdown + _accounting_tables(t, vid)
         timeline = _timeline_component(tree, f"{vid}-timeline")
         if not tree:
             timeline += _command_timeline(t.get("commands") or [])
@@ -1485,11 +1766,12 @@ def _mini_bar(segments: list[tuple[float, str]]) -> str:
     return f"<div class='mini-bar'>{parts}</div>"
 
 
-def _kpi(label: str, value: str, sub: str = "", bar: str = "") -> str:
+def _kpi(label: str, value: str, sub: str = "", bar: str = "", detail: str = "") -> str:
     sub_html = f"<div class='kpi-sub'>{sub}</div>" if sub else ""
+    detail_html = f"<div class='kpi-detail muted'>{_esc(detail)}</div>" if detail else ""
     return (
         f"<div class='kpi-card'><div class='kpi-label'>{_esc(label)}</div>"
-        f"<div class='kpi-value'>{value}</div>{sub_html}{bar}</div>"
+        f"<div class='kpi-value'>{value}</div>{sub_html}{detail_html}{bar}</div>"
     )
 
 
@@ -1526,6 +1808,11 @@ def render_usage_html(summary: dict[str, Any]) -> str:
 
     real_cost = _cost(totals, zero_ok=totals["session_count"] > 0)
     eval_cost = _cost(etotals, zero_ok=etotals["total_call_count"] > 0)
+    # Short, layout-safe values for prominent slots, with coverage as muted detail.
+    real_cost_short = _cost_primary(totals)
+    real_cost_detail = _cost_detail(totals)
+    eval_cost_short = _cost_primary(etotals)
+    eval_cost_detail = _cost_detail(etotals)
     real_cost_bar = _mini_bar([
         (totals.get("parent_est_cost") or 0.0, "var(--primary)"),
         (totals.get("subagent_est_cost") or 0.0, "var(--indigo)"),
@@ -1538,6 +1825,7 @@ def render_usage_html(summary: dict[str, Any]) -> str:
         combined,
         zero_ok=(totals["session_count"] + etotals["total_call_count"]) > 0,
     )
+    combined_cost_short = _cost_primary(combined)
 
     # Latest-call spotlights
     real_sessions = summary["sessions"]
@@ -1589,9 +1877,9 @@ def render_usage_html(summary: dict[str, Any]) -> str:
             "yet.</div>"
         )
 
-    real_tab_pill = f"{real_cost} · {totals['session_count']} sessions"
+    real_tab_pill = f"{real_cost_short} · {totals['session_count']} sessions"
     eval_tab_pill = (
-        f"{eval_cost} · {len({(s['eval_skill'], s['experiment']) for s in eval_sessions})} exps"
+        f"{eval_cost_short} · {len({(s['eval_skill'], s['experiment']) for s in eval_sessions})} exps"
         f" · {etotals['worker_session_count']} trials"
     )
 
@@ -1627,8 +1915,9 @@ def render_usage_html(summary: dict[str, Any]) -> str:
 
 <main class="container">
   <div class="root-meta">Project root: <code>{project_root}</code> ·
-    Combined est. cost: <strong>{_esc(combined_cost)}</strong>
-    (real {_esc(real_cost)} · eval {_esc(eval_cost)})</div>
+    Combined est. cost: <strong title="{_esc(_cost_detail(combined) or combined_cost)}">{_esc(combined_cost_short)}</strong>
+    (real <span title="{_esc(real_cost_detail or real_cost)}">{_esc(real_cost_short)}</span> ·
+    eval <span title="{_esc(eval_cost_detail or eval_cost)}">{_esc(eval_cost_short)}</span>)</div>
 
   <!-- ============================ MODE: REAL ============================ -->
   <div id="mode-real">
@@ -1636,7 +1925,7 @@ def render_usage_html(summary: dict[str, Any]) -> str:
       <div class="note-box"><strong>Online eval · telemetry only.</strong> Real-session traces are collected and inspected here; scoring is not wired yet.</div>
       {real_banner}
       <div class="kpi-grid">
-        {_kpi("Total Est. Cost", real_cost, f"{totals['session_count']} sessions · {totals['subagent_spawn_count']} subagents", bar=real_cost_bar)}
+        {_kpi("Total Est. Cost", real_cost_short, f"{totals['session_count']} sessions · {totals['subagent_spawn_count']} subagents", bar=real_cost_bar, detail=real_cost_detail)}
         {_kpi("Billed Output", _num(tok['billed_output_tokens']), f"{totals['cache_hit_pct']}% cache hit")}
         {_kpi("Uncached Input", _num(tok['uncached_input_tokens']), f"{_num(tok['cached_input_tokens'])} cached")}
         {_kpi("Turns / Commands", str(totals['turn_count']), f"{totals['command_count']} cmds ({totals['failed_command_count']} failed)")}
@@ -1645,41 +1934,35 @@ def render_usage_html(summary: dict[str, Any]) -> str:
       {_online_observation_summary(summary['sessions'])}
       <div class="card">
         <div class="card-header"><div>
-          <div class="card-title">Skill activity</div>
-          <div class="card-subtitle">Observed reads and mentions; supporting skills are associations without charges</div>
+          <div class="card-title">Cost &amp; Health by Skill</div>
+          <div class="card-subtitle">Click a triggered skill to inspect it</div>
         </div><span class="badge badge-slate">{len(summary['skills'])} skills</span></div>
         <table><thead><tr><th>Skill</th><th class="num">Triggers</th>
-          <th class="num">Explicit / Implicit</th><th>Attribution</th></tr></thead>
+          <th class="num">Explicit / Implicit</th><th class="num">Uncached In</th>
+          <th class="num">Cached In</th><th class="num">Billed Out</th>
+          <th class="num">Total Cost</th></tr></thead>
           <tbody>{_real_skill_rows(summary)}</tbody></table>
       </div>
       <div class="card">
         <div class="card-header"><div>
-          <div class="card-title">Worker Usage</div>
-          <div class="card-subtitle">Named actors; direct usage sums once, inclusive usage includes descendants</div>
+          <div class="card-title">Subagents (Online eval)</div>
+          <div class="card-subtitle">Spawned by real project sessions</div>
         </div><span class="badge badge-slate">{totals['subagent_spawn_count']} spawns</span></div>
-        <table><thead><tr><th>Worker</th><th class="num">Direct input</th>
-          <th class="num">Direct output</th><th class="num">Direct cost</th>
-          <th class="num">Inclusive input</th><th class="num">Inclusive output</th>
-          <th class="num">Inclusive cost</th></tr></thead>
+        <table><thead><tr><th>Agent Role</th><th class="num">Spawns</th>
+          <th class="num">Sessions Used</th><th class="num">Cmds (fail)</th>
+          <th class="num">Uncached In</th><th class="num">Billed Out</th>
+          <th class="num">Est. Cost</th></tr></thead>
           <tbody>{_real_subagent_rows(summary)}</tbody></table>
-      </div>
-      <div class="card">
-        <div class="card-header"><div>
-          <div class="card-title">Turn Usage</div>
-          <div class="card-subtitle">Root-turn IDs link requests across actors; unknown linkage stays unattributed</div>
-        </div></div><table><thead><tr><th>Root turn</th><th>Direct output</th><th>Direct cost</th>
-          <th>Inclusive output</th><th>Inclusive cost</th><th>Coverage</th></tr></thead>
-          <tbody>{_online_turn_rows(summary)}</tbody></table>
       </div>
       <div class="card"><div class="card-header"><div>
           <div class="card-title">Session History</div>
           <div class="card-subtitle">Click a session to open its trace</div>
         </div><span class="badge badge-slate">{len(summary['sessions'])} sessions</span></div>
-        <table><thead><tr><th>Started (UTC)</th><th>Thread</th><th>Model</th>
+        <div class="table-scroll"><table><thead><tr><th>Started (UTC)</th><th>Thread</th><th>Model</th>
           <th class="num">Turns</th><th>Skills</th><th class="num">Subagents</th>
           <th class="num">Billed Out</th><th class="num">Est. Cost</th>
           <th>First Prompt</th></tr></thead>
-          <tbody>{_real_session_rows(summary)}</tbody></table>
+          <tbody>{_real_session_rows(summary)}</tbody></table></div>
       </div>
     </div>
     {_real_skill_details(summary)}
@@ -1692,7 +1975,7 @@ def render_usage_html(summary: dict[str, Any]) -> str:
       {_coverage_panel(etotals)}
       {eval_banner}
       <div class="kpi-grid">
-        {_kpi("Eval Est. Cost", eval_cost, f"{etotals['total_call_count']} total calls", bar=eval_cost_bar)}
+        {_kpi("Eval Est. Cost", eval_cost_short, f"{etotals['total_call_count']} total calls", bar=eval_cost_bar, detail=eval_cost_detail)}
         {_kpi("Worker Trials", str(etotals['worker_session_count']), f"{etotals['subagent_spawn_count']} subagents")}
         {_kpi("Semantic Judges", str(etotals['judge_call_count']), "grading calls")}
         {_kpi("Eval Billed Output", _num(etok['billed_output_tokens']), f"{etotals['cache_hit_pct']}% cache hit")}
@@ -1702,23 +1985,23 @@ def render_usage_html(summary: dict[str, Any]) -> str:
           <div class="card-title">Benchmarked Skills</div>
           <div class="card-subtitle">Worker + judge cost per evaluated skill</div>
         </div><span class="badge badge-blue">{len(harness_evals['by_skill'])} skills</span></div>
-        <table><thead><tr><th>Evaluated Skill</th><th class="num">Exps</th>
+        <div class="trial-token-table-wrap"><table><thead><tr><th>Evaluated Skill</th><th class="num">Exps</th>
           <th>Latest Outcome</th>
           <th class="num">Trials</th><th class="num">Subagents</th>
           <th class="num">Judges</th><th class="num">Worker Out</th>
           <th class="num">Judge Out</th><th class="num">Worker Cost</th>
           <th class="num">Judge Cost</th><th class="num">Total Cost</th></tr></thead>
-          <tbody>{_eval_skill_rows(harness_evals)}</tbody></table>
+          <tbody>{_eval_skill_rows(harness_evals)}</tbody></table></div>
       </div>
       <div class="card">
         <div class="card-header"><div>
           <div class="card-title">Experiment Run History</div>
           <div class="card-subtitle">Click an experiment to drill into its trials</div>
         </div></div>
-        <table><thead><tr><th>Skill</th><th>Experiment</th><th>Model</th>
+        <div class="trial-token-table-wrap"><table><thead><tr><th>Skill</th><th>Experiment</th><th>Model</th>
           <th class="num">Trials</th><th class="num">Judges</th>
           <th>Outcome</th><th class="num">Billed Out</th><th class="num">Total Cost</th></tr></thead>
-          <tbody>{_experiment_history_rows(harness_evals)}</tbody></table>
+          <tbody>{_experiment_history_rows(harness_evals)}</tbody></table></div>
       </div>
     </div>
     {_eval_experiment_details(harness_evals)}
@@ -1783,6 +2066,7 @@ body { margin:0; background:var(--bg); color:var(--text); line-height:1.5; }
   color:var(--text-muted); font-weight:600; }
 .kpi-value { font-size:22px; font-weight:700; font-variant-numeric:tabular-nums; margin-top:6px; }
 .kpi-sub { font-size:12px; color:var(--text-muted); margin-top:4px; }
+.kpi-detail { font-size:10px; margin-top:3px; font-variant-numeric:tabular-nums; }
 .mini-bar { display:flex; height:6px; border-radius:3px; overflow:hidden; margin-top:8px;
   background:#e2e8f0; }
 .mini-bar > div { height:100%; }
@@ -1790,12 +2074,38 @@ body { margin:0; background:var(--bg); color:var(--text); line-height:1.5; }
   padding:16px 18px; margin-bottom:18px; box-shadow:0 3px 12px rgba(25,45,80,.035); }
 .observation-summary { padding:14px 16px; }.observation-summary .card-header { margin-bottom:8px; }.observation-counts { display:flex; flex-wrap:wrap; gap:8px; }.observation-count { display:flex; align-items:center; gap:8px; border:1px solid var(--border); background:#f8fafc; border-radius:8px; padding:7px 10px; }.observation-count b { font:700 15px var(--mono); color:var(--text); }.observation-count span { font-size:11px; color:var(--text-muted); }.observation-footnote { margin:9px 0 0; color:var(--text-muted); font-size:11px; }
 .session-observations { padding:14px 16px; }.session-observations h3 { margin:0 0 8px; font-size:14px; }.observation-list { display:grid; gap:8px; }.observation-item { border:1px solid var(--border); border-radius:8px; padding:10px 12px; background:#fff; }.observation-item-head { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }.observation-item-head b { margin-right:auto; font-size:12px; }.observation-item p { color:var(--text-secondary); font-size:12px; line-height:1.5; margin:7px 0; }.observation-item small { display:block; margin-top:7px; color:var(--text-muted); font:10px var(--mono); }.observation-evidence-list { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }.observation-evidence { border:1px solid var(--border); background:#f3f6fb; color:#42536e; border-radius:6px; padding:4px 7px; font-size:10px; cursor:pointer; }.observation-evidence:hover { background:#e7edf8; border-color:#aebdd3; }
+/* Collapsed session observations: one intentional, clickable disclosure line. */
+.obs-details { margin:0; }
+.obs-details > summary { list-style:none; display:flex; align-items:center; gap:10px; cursor:pointer; padding:2px 0; }
+.obs-details > summary::-webkit-details-marker { display:none; }
+.obs-details > summary::before { content:"▸"; color:var(--text-muted); font-size:11px; transition:transform .15s ease; }
+.obs-details[open] > summary::before { transform:rotate(90deg); }
+.obs-summary-title { font-size:14px; font-weight:800; color:var(--text); margin-right:auto; }
+.obs-details .card-subtitle { margin:8px 0 10px; }
+/* Turns as labeled cost bars, matching the timeline/context aesthetic. */
+.turn-list { display:grid; gap:8px; }
+.turn-row { display:flex; align-items:center; gap:14px; border:1px solid var(--border); background:#f8fafc; border-radius:9px; padding:9px 12px; }
+.turn-main { min-width:0; flex:1; }
+.turn-label { font-size:13px; font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.turn-meta { margin-top:3px; color:var(--text-muted); font:10px var(--mono); display:flex; align-items:center; gap:8px; }
+.turn-cost { flex:none; }
+.turn-row.clickable-row { cursor:pointer; transition:background .1s,border-color .1s; }
+.turn-row.clickable-row:hover { background:#eef4fb; border-color:color-mix(in srgb,var(--primary) 35%,var(--border)); }
+.turn-go { margin-left:auto; color:var(--primary); font-weight:700; opacity:0; transition:opacity .1s; }
+.turn-row.clickable-row:hover .turn-go { opacity:1; }
 .card-header { display:flex; justify-content:space-between; align-items:flex-start;
   gap:12px; margin-bottom:10px; flex-wrap:wrap; }
 .overview-usage { margin:0 0 18px; }.overview-usage-head { display:flex; justify-content:space-between; align-items:flex-end; gap:12px; }.overview-usage-head > strong { font-size:16px; font-variant-numeric:tabular-nums; }.usage-legend { display:flex; flex-wrap:wrap; gap:10px 18px; margin-top:9px; color:var(--text-muted); font-size:11px; }.usage-legend span { display:inline-flex; align-items:center; gap:5px; }.usage-legend i { width:9px; height:9px; border-radius:2px; display:inline-block; }.usage-legend .usage-total { margin-left:auto; color:var(--text); font-weight:700; }
 .trial-token-breakdown { margin:0 0 18px; }.trial-token-breakdown h4 { margin:0 0 8px; font-size:13px; color:var(--text); }.trial-token-table-wrap { width:100%; overflow-x:auto; border:1px solid var(--border); border-radius:8px; }.trial-token-table-wrap table { width:100%; min-width:690px; border-collapse:collapse; font-size:12px; }.trial-token-table-wrap th,.trial-token-table-wrap td { padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap; }.trial-token-table-wrap thead { background:#f6f8fc; color:var(--text-muted); font-size:10px; text-transform:uppercase; letter-spacing:.04em; }.trial-token-table-wrap tbody tr:last-child { background:#f6f8fc; font-weight:700; }.trial-token-table-wrap tbody tr:last-child th,.trial-token-table-wrap tbody tr:last-child td { border-bottom:0; }
+.table-scroll { width:100%; overflow-x:auto; }
 .card-title { font-weight:700; font-size:15px; }
 .card-subtitle { font-size:12px; color:var(--text-muted); margin-top:2px; }
+.coverage-card { padding:14px 16px; }
+.coverage-card .card-header { margin-bottom:10px; }
+.coverage-stats { display:flex; flex-wrap:wrap; gap:8px; }
+.coverage-stats span { display:inline-flex; align-items:center; gap:5px; border:1px solid var(--border); background:#f8fafc; border-radius:8px; padding:6px 10px; font-size:11px; color:var(--text-muted); }
+.coverage-stats b { font:700 13px var(--mono); color:var(--text); font-variant-numeric:tabular-nums; }
+.coverage-note { margin:10px 0 0; font-size:11px; }
 .card-head-actions { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 .btn-link { font-size:12px; font-weight:600; color:var(--primary); text-decoration:none;
   border:1px solid #bfdbfe; border-radius:6px; padding:4px 8px; background:#eef4fb; }

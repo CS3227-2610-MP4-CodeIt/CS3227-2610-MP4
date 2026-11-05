@@ -255,3 +255,98 @@ def test_observation_locate_buttons_target_rendered_actor_events():
         assert stage_id == "real-sess-0-timeline-stage"
         assert actor_id in timeline.actor_indexes
         assert event_index in timeline.actor_indexes[actor_id]
+
+
+def test_session_observations_are_collapsed_behind_a_summary_disclosure():
+    session = {
+        "thread_id": "root-obs", "started_at": "2026-10-28T10:00:00Z",
+        "model": "test-model", "skills_used": [], "turn_count": 1,
+        "command_count": 1, "est_cost": 0, "token_usage": {
+            "billed_output_tokens": 0, "uncached_input_tokens": 0,
+            "cached_input_tokens": 0,
+        },
+        "observations": [{
+            "id": "obs-1", "kind": "command.nonzero_exit", "level": "info",
+            "status": "recorded", "completeness": "complete",
+            "summary": "A command exited non-zero.", "analyzer_version": "1.0.0",
+            "source_refs": [],
+        }],
+        "activity_tree": {
+            "thread_id": "root-obs", "start_ts": "2026-10-28T10:00:00Z",
+            "end_ts": "2026-10-28T10:00:04Z", "events": [], "children": [],
+        },
+    }
+
+    html = _real_session_details({"sessions": [session]})
+    # The panel body is wrapped in a closed <details>, with the headline count
+    # on the one-line <summary>.
+    assert "<details class='obs-details'>" in html
+    assert "<summary class='obs-summary'>" in html
+    assert "1 findings" in html
+    # The finding content is still present inside, for expansion on click.
+    assert "A command exited non-zero." in html
+
+
+def test_turns_render_as_labeled_cost_bars_not_a_uuid_table():
+    from _lib.usage_html import _turn_cards, _turn_label
+
+    session = {
+        "thread_id": "root-turns",
+        "events": [
+            {"kind": "msg", "role": "user", "ts": "2026-10-28T10:00:00Z", "event_index": 3,
+             "text": "# Context from my IDE setup: ## Active file: a.py\nfix telemetry report"},
+            {"kind": "msg", "role": "user", "ts": "2026-10-28T10:05:00Z", "event_index": 9,
+             "text": "[$commit](/abs/path/to/commit) now please"},
+        ],
+        "turns": [
+            {"root_turn_id": "01a1a986-first", "actors": ["root", "child"],
+             "inclusive": {
+                 "requests": [{"timestamp": "2026-10-28T10:00:05Z"}],
+                 "tokens": {"billed_output_tokens": 14127},
+                 "est_cost": 0.44, "known_cost": 0.44,
+                 "coverage": {"status": "complete"}}},
+            {"root_turn_id": "01a1a990-second", "actors": ["root"],
+             "inclusive": {
+                 "requests": [{"timestamp": "2026-10-28T10:05:10Z"}],
+                 "tokens": {"billed_output_tokens": 2100},
+                 "est_cost": 0.07, "known_cost": 0.07,
+                 "coverage": {"status": "complete"}}},
+        ],
+    }
+
+    # Labels are human, derived from the preceding user message, with IDE
+    # boilerplate stripped and slash-command links surfaced.
+    first_label, first_full, first_idx = _turn_label(session, session["turns"][0])
+    assert first_label == "fix telemetry report"
+    assert first_idx == 3
+    assert "Context from my IDE setup" not in first_label
+    second_label, _, second_idx = _turn_label(session, session["turns"][1])
+    assert second_label.startswith("/commit")
+    assert second_idx == 9
+
+    html = _turn_cards(session, "real-sess-0")
+    # Visual, not a raw table: cost meter bars + compact out-token labels.
+    assert "turn-row" in html and "table-cost" in html and "meter-blue" in html
+    assert "14.1k out" in html and "2.1k out" in html
+    # The raw UUID is not the visible label.
+    assert "01a1a986-first" not in html
+    # Clicking a turn navigates to that turn's event on the timeline.
+    assert "selectDetailTab('real-sess-0','timeline')" in html
+    assert "locateTimelineEvidence('real-sess-0-timeline-stage'," in html
+
+
+def test_turn_without_label_evidence_falls_back_to_short_id():
+    from _lib.usage_html import _turn_label
+
+    session = {"thread_id": "root", "events": []}
+    turn = {"root_turn_id": "01a1a986-560b-70a3-abcd", "actors": [],
+            "inclusive": {"requests": [{"timestamp": "2026-10-28T10:00:05Z"}],
+                          "tokens": {"billed_output_tokens": 0},
+                          "est_cost": None, "known_cost": None,
+                          "coverage": {"status": "unavailable"}}}
+    label, full, idx = _turn_label(session, turn)
+    assert label == "01a1a986"
+    # The unattributed sentinel stays readable rather than truncated.
+    turn["root_turn_id"] = "unattributed"
+    label, _, _ = _turn_label(session, turn)
+    assert label == "unattributed"
