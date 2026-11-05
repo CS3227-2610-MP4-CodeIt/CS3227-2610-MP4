@@ -114,20 +114,62 @@ def finalize_usage_accounting(summary: dict[str, Any]) -> dict[str, Any]:
                 attach_cost(row, combine_accounting([combine_accounting([s['direct_accounting']] + [record_accounting(c) for c in s.get('subagents', [])]) for s in matching]), 'worker_')
                 attach_cost(row, combine_accounting([record_accounting(j) for s in matching for j in s.get('judges', [])]), 'judge_')
     # Named workers stay distinct even when their configured role is identical.
+    installed_profiles = sorted(summary.get('agent_profiles') or [])
     for target, source in ((summary, sessions), (evals, trials)):
-        rows = []
+        # Group spawned actors by their configured profile (agent_role), not by
+        # the per-spawn task name/agent_path. A spawn that selected a real
+        # profile records that profile here; a profile-less spawn falls back to
+        # "default", matching how configured subagents are meant to appear.
+        groups: dict[str, dict[str, Any]] = {}
+        order: list[str] = []
+
+        def _blank_group(role: str) -> dict[str, Any]:
+            order.append(role)
+            group = {
+                'role': role, 'name': role,
+                'agent_role': role if role in installed_profiles else None,
+                'configured': role in installed_profiles,
+                'spawns': 0, 'sessions_used': 0,
+                'command_count': 0, 'failed_command_count': 0,
+                'task_names': [], 'thread_ids': [],
+                '_direct': [], '_inclusive': [],
+            }
+            groups[role] = group
+            return group
+
+        # Seed every installed profile so configured-but-unspawned agents still
+        # appear as rows (spawns=0), mirroring installed-but-unused skills.
+        for profile in installed_profiles:
+            _blank_group(profile)
+
         for session in source:
             for actor in session['actors'][1:]:
+                role = actor.get('agent_role') or 'default'
                 direct = actor['direct']
-                row = {'role': actor['name'], 'name': actor['name'], 'thread_id': actor['thread_id'],
-                       'agent_path': actor['agent_path'], 'agent_role': actor['agent_role'],
-                       'configured': False, 'spawns': 1, 'sessions_used': 1,
-                       'command_count': next((c.get('command_count', 0) for c in session.get('subagents', []) if c['thread_id'] == actor['thread_id']), 0),
-                       'failed_command_count': next((c.get('failed_command_count', 0) for c in session.get('subagents', []) if c['thread_id'] == actor['thread_id']), 0), 'tokens': direct['tokens'],
-                       'direct': direct, 'inclusive': actor['inclusive'],
-                       'priced_count': direct['coverage']['priced_count']}
-                attach_cost(row, direct)
-                rows.append(row)
+                sub = next((c for c in session.get('subagents', []) if c['thread_id'] == actor['thread_id']), {})
+                g = groups.get(role) or _blank_group(role)
+                if actor.get('agent_role'):
+                    g['agent_role'] = actor['agent_role']
+                g['spawns'] += 1
+                g['command_count'] += sub.get('command_count', 0)
+                g['failed_command_count'] += sub.get('failed_command_count', 0)
+                if actor.get('agent_path'):
+                    g['task_names'].append(actor['agent_path'])
+                g['thread_ids'].append(actor['thread_id'])
+                g['_direct'].append(direct)
+                g['_inclusive'].append(actor['inclusive'])
+        rows = []
+        for role in order:
+            g = groups[role]
+            direct = combine_accounting(g.pop('_direct'))
+            inclusive = combine_accounting(g.pop('_inclusive'))
+            g['sessions_used'] = len({tid for tid in g['thread_ids']})
+            g['tokens'] = direct['tokens']
+            g['direct'] = direct
+            g['inclusive'] = inclusive
+            g['priced_count'] = direct['coverage']['priced_count']
+            attach_cost(g, direct)
+            rows.append(g)
         target['subagents'] = rows
         target['workers'] = [{**actor, 'session_index': i} for i, session in enumerate(source) for actor in session['actors']]
         target['turns'] = [{**turn, 'session_index': i} for i, session in enumerate(source) for turn in session['turns']]

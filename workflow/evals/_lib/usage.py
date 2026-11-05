@@ -2584,6 +2584,7 @@ def build_project_usage(
             agent_stats.values(),
             key=lambda a: (-a["spawns"], not a["configured"], a["role"]),
         ),
+        "agent_profiles": sorted(installed_agents),
         "models": sorted(
             model_stats.values(),
             key=lambda m: (-m["sessions"], m["model"]),
