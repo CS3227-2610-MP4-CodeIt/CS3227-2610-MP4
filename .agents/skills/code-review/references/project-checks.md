@@ -53,9 +53,10 @@ assuming a separate typecheck script or introducing new checks.
 
 ## Scope and evidence
 
-Semgrep is **Not configured** in this checkout; the shared scan configuration
-and script are absent. If a scan is configured later, security review owns its
-execution and verification review should reuse matching evidence.
+Semgrep is configured through [the shared scan](../../../../workflow/security/semgrep.md).
+Security review owns execution and triage; verification review reuses matching
+source, rules/engine and coverage evidence. Findings are advisory; scanner failures
+and partial parsing remain explicit limitations.
 
 Run only applicable checks. Backend tests mock SoCLaaS and the executor; executor tests run real local
 submissions under Linux resource limits; frontend tests mock APIs. These do not prove live AI, browser end-to-end or deployed behaviour.
