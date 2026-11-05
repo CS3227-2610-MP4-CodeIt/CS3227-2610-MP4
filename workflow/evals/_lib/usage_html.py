@@ -21,6 +21,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from _lib.accounting import record_accounting, combine_accounting
 from _lib.pricing import PRICING_AS_OF, PRICING_SOURCE
 from _lib.pricing import format_cost as _format_cost
 
@@ -44,8 +45,15 @@ def _agent_label(agent: dict[str, Any], default: str = "subagent") -> str:
 
 
 def _cost(value: Any, *, zero_ok: bool = True) -> str:
+    if isinstance(value, dict):
+        coverage = value.get('coverage') or {}
+        if coverage.get('status') in ('partial', 'unavailable'):
+            known = value.get('known_cost')
+            subtotal = f"; known subtotal {_format_cost(known)}" if known is not None else ''
+            return f"n/a ({coverage['status']}{subtotal}; {coverage.get('priced_count', 0)}/{coverage.get('request_count', 0)} requests priced)"
+        value = value.get('est_cost')
     if value is None:
-        return "$0.0000" if zero_ok else "n/a"
+        return "n/a"
     return _format_cost(value)
 
 
@@ -81,76 +89,45 @@ def _cost_meter(value: Any, maximum: float, *, color: str = "blue", zero_ok: boo
 # --------------------------------------------------------------------------- #
 
 def _real_skill_rows(summary: dict[str, Any]) -> str:
-    rows: list[str] = []
-    max_cost = max((float(sk.get("est_cost") or 0) for sk in summary["skills"]), default=0.0)
-    for sk in summary["skills"]:
-        tok = sk["tokens"]
-        triggered = sk["sessions_triggered"]
-        cost = (
-            _cost(sk["est_cost"])
-            if sk["priced_count"] > 0
-            else ("$0.0000" if triggered == 0 else "n/a")
-        )
-        status = "installed" if sk["installed"] else "external"
-        unused = (
-            " <span class='quiet-status'>unused</span>"
-            if sk["installed"] and triggered == 0
-            else ""
-        )
-        clickable = "clickable-row" if triggered > 0 else ""
-        onclick = (
-            f"onclick=\"openSkillDetail('{_slug('real-skill', sk['skill'])}')\""
-            if triggered > 0
-            else ""
-        )
+    rows = []
+    for skill in summary["skills"]:
+        name = skill["skill"]
+        vid = _slug("real-skill", name)
         rows.append(
-            f"<tr class='{clickable}' {onclick}>"
-            f"<td><div class='row-title'>{_esc(sk['skill'])}</div>"
-            f"<span class='row-meta'><i class='status-dot {'green' if sk['installed'] else 'slate'}'></i>{status}</span>{unused}</td>"
-            f"<td class='num'>{triggered}</td>"
-            f"<td class='num'>{sk['explicit_count']} / {sk['implicit_count']}</td>"
-            f"<td class='num'>{_num(tok['uncached_input_tokens'])}</td>"
-            f"<td class='num'>{_num(tok['cached_input_tokens'])}</td>"
-            f"<td class='num'>{_num(tok['billed_output_tokens'])}</td>"
-            f"<td class='num'>{_cost_meter(sk.get('est_cost'), max_cost) if sk['priced_count'] > 0 else _esc(cost)}</td>"
-            f"</tr>"
-        )
-    if not rows:
-        rows.append(
-            "<tr><td colspan='7' class='empty'>No skills discovered in "
-            "<code>.agents/skills/</code> or session traces.</td></tr>"
-        )
-    return "".join(rows)
+            f"<tr class='clickable-row' onclick=\"openSkillDetail('{vid}')\">"
+            f"<td><div class='row-title'>{_esc(name)}</div>"
+            f"<span class='row-meta'>{'installed' if skill['installed'] else 'external'}</span></td>"
+            f"<td class='num'>{skill['sessions_triggered']}</td>"
+            f"<td class='num'>{skill['explicit_count']} / {skill['implicit_count']}</td>"
+            "<td>Observed reads / mentions; association only</td></tr>")
+    return ''.join(rows) or "<tr><td colspan='4'>No skill activity observed.</td></tr>"
 
 
 def _real_subagent_rows(summary: dict[str, Any]) -> str:
-    rows: list[str] = []
-    max_cost = max((float(ag.get("est_cost") or 0) for ag in summary["subagents"]), default=0.0)
-    for ag in summary["subagents"]:
-        tok = ag["tokens"]
-        cost = (
-            _cost(ag["est_cost"])
-            if ag["priced_count"] > 0
-            else ("$0.0000" if ag["spawns"] == 0 else "n/a")
-        )
-        src = f"<span class='row-meta'><i class='status-dot {'violet' if ag['configured'] else 'slate'}'></i>{'configured' if ag['configured'] else 'built-in / ad-hoc'}</span>"
-        rows.append(
-            f"<tr>"
-            f"<td><div class='row-title'>{_esc(ag['role'])}</div>{src}</td>"
-            f"<td class='num'>{ag['spawns']}</td>"
-            f"<td class='num'>{ag['sessions_used']}</td>"
-            f"<td class='num'>{ag['command_count']} ({ag['failed_command_count']})</td>"
-            f"<td class='num'>{_num(tok['uncached_input_tokens'])}</td>"
-            f"<td class='num'>{_num(tok['billed_output_tokens'])}</td>"
-            f"<td class='num'>{_cost_meter(ag.get('est_cost'), max_cost, color='violet') if ag['priced_count'] > 0 else _esc(cost)}</td>"
-            f"</tr>"
-        )
-    if not rows:
-        rows.append(
-            "<tr><td colspan='7' class='empty'>No subagent profiles or spawns "
-            "recorded.</td></tr>"
-        )
-    return "".join(rows)
+    rows = []
+    for actor in summary.get('workers', []):
+        direct, inclusive = actor['direct'], actor['inclusive']
+        rows.append(f"<tr class='clickable-row' onclick=\"openSessionDetail('real-sess-{actor['session_index']}')\">"
+                    f"<td><div class='row-title'>{_esc(actor['name'])}</div><code>{_esc(actor['thread_id'])}</code></td>"
+                    f"<td class='num'>{_num(direct['tokens']['input_tokens'])}</td>"
+                    f"<td class='num'>{_num(direct['tokens']['output_tokens'])}</td>"
+                    f"<td class='num'>{_esc(_cost(direct))}</td>"
+                    f"<td class='num'>{_num(inclusive['tokens']['input_tokens'])}</td>"
+                    f"<td class='num'>{_num(inclusive['tokens']['output_tokens'])}</td>"
+                    f"<td class='num'>{_esc(_cost(inclusive))}</td></tr>")
+    return ''.join(rows) or "<tr><td colspan='7' class='empty'>No recorded worker usage.</td></tr>"
+
+
+def _online_turn_rows(summary: dict[str, Any]) -> str:
+    rows = []
+    for turn in summary.get('turns', []):
+        direct, inclusive = turn['direct'], turn['inclusive']
+        rows.append(f"<tr class='clickable-row' onclick=\"openSessionDetail('real-sess-{turn['session_index']}')\">"
+                    f"<td><code>{_esc(turn['root_turn_id'])}</code></td>"
+                    f"<td class='num'>{_num(direct['tokens']['output_tokens'])}</td><td class='num'>{_esc(_cost(direct))}</td>"
+                    f"<td class='num'>{_num(inclusive['tokens']['output_tokens'])}</td><td class='num'>{_esc(_cost(inclusive))}</td>"
+                    f"<td>{len(turn['actors'])} actors · {_esc(inclusive['coverage']['status'])}</td></tr>")
+    return ''.join(rows) or "<tr><td colspan='6' class='empty'>Request turn linkage unavailable.</td></tr>"
 
 
 def _real_session_rows(summary: dict[str, Any]) -> str:
@@ -178,7 +155,7 @@ def _real_session_rows(summary: dict[str, Any]) -> str:
             f"<td>{badges}</td>"
             f"<td class='num'>{sess['subagent_spawn_count']}</td>"
             f"<td class='num'>{_num(tok['billed_output_tokens'])}</td>"
-            f"<td class='num'><strong>{_esc(_cost(sess['est_cost']))}</strong></td>"
+            f"<td class='num'><strong>{_esc(_cost(sess))}</strong></td>"
             f"<td class='prompt-cell' title='{_esc(sess['first_prompt'])}'>"
             f"{_esc(sess['first_prompt'] or '—')}</td>"
             f"</tr>"
@@ -648,7 +625,6 @@ def _timeline_component(tree: dict[str, Any] | None, prefix: str) -> str:
             rows.append("<p class='muted'>Trace not captured for this agent.</p>")
         name = actor.get("agent_nickname") or ("main" if actor.get("is_main") else actor.get("agent_role") or "subagent")
         prompt = actor.get("spawn_prompt") or actor.get("first_prompt")
-        prompt_status = actor.get("prompt_status")
         prompt_detail = f"<div class='u-prompt'><b>Spawn prompt</b><div>{_esc(prompt)}</div></div>" if prompt else ""
         profile_label = _agent_label(actor, "") if not actor.get("is_main") else actor.get("model") or ""
         agent_meta = f"{_esc(profile_label)} · {len(actor_events)} events" if profile_label else f"{len(actor_events)} events"
@@ -850,6 +826,52 @@ def _detail_tabs(prefix: str, overview: str, timeline: str, context: str, gradin
     return f"<nav class='detail-tabs'>{buttons}</nav>{content}"
 
 
+def _coverage_panel(target: dict[str, Any]) -> str:
+    coverage = target.get('coverage')
+    if not coverage:
+        return ''
+    unknown = ', '.join(coverage.get('unknown_models', [])) or 'none'
+    return ("<div class='card'><div class='card-title'>Request pricing coverage</div>"
+            f"<p>{_esc(coverage['status'])}: {coverage['priced_count']} priced / "
+            f"{coverage['request_count']} observed requests; {coverage['unavailable_count']} unavailable observations.</p>"
+            f"<p>Known subtotal: {_esc(_cost(target.get('known_cost')))} · Unknown models: {_esc(unknown)}</p>"
+            f"<p class='muted'>{_esc('; '.join(coverage.get('reasons', [])))} "
+            "Output includes reasoning once. API-equivalent estimates are hypothetical spend.</p></div>")
+
+
+def _accounting_tables(session: dict[str, Any]) -> str:
+    actors = session.get('actors', [])
+    if not actors:
+        return _coverage_panel(session)
+    def cells(accounting: dict[str, Any]) -> str:
+        return (f"<td class='num'>{_num(accounting['tokens']['input_tokens'])}</td>"
+                f"<td class='num'>{_num(accounting['tokens']['output_tokens'])}</td>"
+                f"<td class='num'>{_esc(_cost(accounting['est_cost']))}</td>"
+                f"<td>{_esc(accounting['coverage']['status'])}</td>")
+    actor_rows = ''.join(f"<tr><td><code>{_esc(a['name'])}</code><small> {_esc(a.get('model'))}</small></td>"
+                         + cells(a['direct']) + cells(a['inclusive']) + '</tr>' for a in actors)
+    turn_rows = ''.join(f"<tr><td><code>{_esc(t['root_turn_id'])}</code></td>"
+                        + cells(t['direct']) + cells(t['inclusive']) + '</tr>' for t in session.get('turns', []))
+    head = ("<th>Name / ID</th><th>Direct input</th><th>Direct output</th><th>Direct cost</th><th>Coverage</th>"
+            "<th>Inclusive input</th><th>Inclusive output</th><th>Inclusive cost</th><th>Coverage</th>")
+    request_rows = ''.join(f"<tr><td><code>{_esc(r['response_id'])}</code></td><td>{_esc(r['timestamp'])}</td>"
+                           f"<td>{_esc(r['thread_id'])}</td><td>{_esc(r['turn_id'])}</td><td>{_esc(r['model'])}</td>"
+                           f"<td>{_num(r['tokens']['input_tokens'])}</td><td>{_num(r['tokens']['output_tokens'])}</td>"
+                           f"<td>{_esc(_cost(r['est_cost']))}</td></tr>"
+                           for r in session['inclusive_accounting']['requests'])
+    return (_coverage_panel(session)
+            + "<div class='card'><div class='card-title'>Named actors · direct and inclusive usage</div>"
+            + "<p class='muted'>Inclusive includes recorded descendants. Add direct usage across actors once.</p>"
+            + f"<div class='trial-token-table-wrap'><table><thead><tr>{head}</tr></thead><tbody>{actor_rows}</tbody></table></div></div>"
+            + "<div class='card'><div class='card-title'>Turns · direct and inclusive usage</div>"
+            + "<p class='muted'>Root-turn IDs link worker requests. Missing linkage stays unattributed. "
+            "Legacy observations without request boundaries remain in session totals.</p>"
+            + f"<div class='trial-token-table-wrap'><table><thead><tr>{head}</tr></thead><tbody>{turn_rows}</tbody></table></div></div>"
+            + "<details class='card'><summary>Request ledger</summary><div class='trial-token-table-wrap'><table>"
+            + "<thead><tr><th>Response</th><th>Timestamp</th><th>Thread</th><th>Turn</th><th>Model</th><th>Input</th><th>Output</th><th>Cost</th></tr></thead>"
+            + f"<tbody>{request_rows}</tbody></table></div></details>")
+
+
 def _real_session_details(summary: dict[str, Any]) -> str:
     views: list[str] = []
     for idx, sess in enumerate(summary["sessions"]):
@@ -865,6 +887,7 @@ def _real_session_details(summary: dict[str, Any]) -> str:
             f"{_kpi('Turns', str(sess['turn_count']), turns_sub)}"
             "</div>"
             f"{_session_observation_panel(sess, detail_id)}"
+            f"{_accounting_tables(sess)}"
         )
         timeline = _timeline_component(sess.get("activity_tree"), f"{detail_id}-timeline")
         if not sess.get("activity_tree"):
@@ -877,7 +900,7 @@ def _real_session_details(summary: dict[str, Any]) -> str:
             f"<div class='card-title'>Session <code>{_esc(str(sess['thread_id'])[:16])}</code></div>"
             f"<div class='card-subtitle'>{_esc(_ts(sess['started_at']))} · "
             f"{_esc(sess['model'] or 'unknown')} · skills: {_esc(skills)}</div></div>"
-            f"<span class='cost-total'>{_esc(_cost(sess['est_cost']))}</span></div></div>"
+            f"<span class='cost-total'>{_esc(_cost(sess))}</span></div></div>"
             f"{_detail_tabs(detail_id, overview, timeline, context)}"
             "</div>"
         )
@@ -885,60 +908,23 @@ def _real_session_details(summary: dict[str, Any]) -> str:
 
 
 def _real_skill_details(summary: dict[str, Any]) -> str:
-    """One detail view per triggered skill, listing the sessions that used it."""
-    views: list[str] = []
-    sessions = summary["sessions"]
-    for sk in summary["skills"]:
-        if sk["sessions_triggered"] <= 0:
-            continue
-        name = sk["skill"]
-        vid = _slug("real-skill", name)
-        tok = sk["tokens"]
-        rows: list[str] = []
-        for idx, sess in enumerate(sessions):
-            if name not in sess.get("skills_used", []):
-                continue
-            mode = (sess.get("skill_invocations") or {}).get(name, "")
-            mode_badge = (
-                f"<span class='badge badge-blue'>{_esc(mode)}</span>" if mode else ""
-            )
-            rows.append(
-                f"<tr class='clickable-row' onclick=\"openSessionDetail('real-sess-{idx}')\">"
-                f"<td><code>{_esc(_ts(sess['started_at']))}</code></td>"
-                f"<td><code>{_esc(str(sess['thread_id'])[:12])}</code></td>"
-                f"<td>{mode_badge}</td>"
-                f"<td class='num'>{sess['turn_count']}</td>"
-                f"<td class='num'>{_num(sess['token_usage']['billed_output_tokens'])}</td>"
-                f"<td class='num'>{_esc(_cost(sess['est_cost']))}</td>"
-                f"<td class='prompt-cell' title='{_esc(sess['first_prompt'])}'>"
-                f"{_esc(sess['first_prompt'] or '—')}</td></tr>"
-            )
-        body = (
-            "<table><thead><tr><th>Started (UTC)</th><th>Thread</th><th>Mode</th>"
-            "<th class='num'>Turns</th><th class='num'>Billed Out</th>"
-            "<th class='num'>Est. Cost</th><th>First Prompt</th></tr></thead>"
-            f"<tbody>{''.join(rows)}</tbody></table>"
-            if rows
-            else "<p class='muted'>No sessions recorded for this skill.</p>"
-        )
-        cost_cell = _cost(sk["est_cost"]) if sk["priced_count"] > 0 else "n/a"
-        trig_sub = f"{sk['explicit_count']} explicit · {sk['implicit_count']} implicit"
-        views.append(
-            f"<div id='{vid}' class='detail-view hidden'>"
-            f"<button class='crumb-link' onclick='backToRealOverview()'>← Online eval</button>"
-            f"<div class='card'><div class='card-header'><div>"
-            f"<div class='card-title'>Skill: <code>{_esc(name)}</code></div>"
-            f"<div class='card-subtitle'>Sessions that triggered this skill — "
-            f"click a row for its full trace</div></div>"
-            f"<span class='badge badge-slate'>{_esc(cost_cell)}</span></div>"
-            f"<div class='kpi-grid'>"
-            f"{_kpi('Sessions triggered', str(sk['sessions_triggered']), trig_sub)}"
-            f"{_kpi('Billed output', _num(tok['billed_output_tokens']), 'tokens')}"
-            f"{_kpi('Uncached input', _num(tok['uncached_input_tokens']), 'tokens')}"
-            f"{_kpi('Est. cost', cost_cell, 'API-equiv.')}"
-            f"</div>{body}</div></div>"
-        )
-    return "".join(views)
+    views = []
+    for skill in summary["skills"]:
+        name = skill["skill"]
+        rows = []
+        for index, session in enumerate(summary['sessions']):
+            if name in session.get('skills_used', []):
+                rows.append(f"<tr class='clickable-row' onclick=\"openSessionDetail('real-sess-{index}')\">"
+                            f"<td>{_esc(_ts(session['started_at']))}</td><td>{_esc(session['thread_id'])}</td>"
+                            f"<td>{_esc(session.get('skill_invocations', {}).get(name))}</td></tr>")
+        views.append(f"<div id='{_slug('real-skill', name)}' class='detail-view hidden'>"
+                     "<button class='crumb-link' onclick='backToRealOverview()'>← Online eval</button>"
+                     f"<div class='card'><div class='card-title'>Skill: <code>{_esc(name)}</code></div>"
+                     "<p class='muted'>Observed skill activity is associated with these sessions. "
+                     "No exclusive token or cost attribution is available.</p>"
+                     f"<table><thead><tr><th>Started</th><th>Session</th><th>Observation</th></tr></thead>"
+                     f"<tbody>{''.join(rows)}</tbody></table></div></div>")
+    return ''.join(views)
 
 
 # --------------------------------------------------------------------------- #
@@ -1000,7 +986,7 @@ def _eval_skill_rows(harness_evals: dict[str, Any]) -> str:
             f"<td class='num'>{_num(jtok['billed_output_tokens'])}</td>"
             f"<td class='num'>{_cost_meter(es['worker_est_cost'], max_cost, zero_ok=es['priced_count'] > 0)}</td>"
             f"<td class='num'>{_cost_meter(es['judge_est_cost'], max_cost, color='amber', zero_ok=es['priced_count'] > 0)}</td>"
-            f"<td class='num'>{_cost_meter(es['est_cost'], max_cost, zero_ok=es['priced_count'] > 0)}</td>"
+            f"<td class='num'>{_esc(_cost(es))}</td>"
             f"</tr>"
         )
     if not rows:
@@ -1014,13 +1000,11 @@ def _eval_skill_rows(harness_evals: dict[str, Any]) -> str:
 def _experiment_history_rows(harness_evals: dict[str, Any]) -> str:
     grouped = _group_eval_by_experiment(harness_evals)
     rows: list[str] = []
-    max_cost = max((sum(float(t.get("est_cost") or 0) for t in trials) for trials in grouped.values()), default=0.0)
     for (skill, exp), trials in sorted(grouped.items(), reverse=True):
         worker = sum(1 for t in trials if t["configuration"] in ("with-skill", "baseline"))
         judges = sum(t.get("judge_call_count", 0) for t in trials)
         billed = sum(t["token_usage"]["billed_output_tokens"] for t in trials)
-        costs = [t["est_cost"] for t in trials if t["est_cost"] is not None]
-        total_cost = round(sum(costs), 6) if costs else None
+        group_accounting = combine_accounting([t.get("inclusive_accounting") or record_accounting(t) for t in trials])
         models = sorted({t["model"] or "unknown" for t in trials})
         model_label = models[0] + ("…" if len(models) > 1 else "")
         from _lib.usage import summarize_experiment_outcome
@@ -1036,7 +1020,7 @@ def _experiment_history_rows(harness_evals: dict[str, Any]) -> str:
             f"<td class='num'>{worker}</td>"
             f"<td class='num'>{judges}</td>"
             f"<td class='num'>{_num(billed)}</td>"
-            f"<td class='num'>{_cost_meter(total_cost, max_cost, zero_ok=bool(costs))}</td>"
+            f"<td class='num'>{_esc(_cost(group_accounting))}</td>"
             f"</tr>"
         )
     if not rows:
@@ -1071,7 +1055,7 @@ def _trial_rows_for_experiment(trials: list[dict[str, Any]]) -> str:
             f"<td class='num'>{t['subagent_spawn_count']}</td>"
             f"<td class='num'>{t.get('judge_call_count', 0)}</td>"
             f"<td class='num'>{_num(tok['billed_output_tokens'])}</td>"
-            f"<td class='num'><strong>{_esc(_cost(t['est_cost']))}</strong></td>"
+            f"<td class='num'><strong>{_esc(_cost(t))}</strong></td>"
             f"</tr>"
         )
     return "".join(rows)
@@ -1163,8 +1147,6 @@ def _eval_experiment_details(harness_evals: dict[str, Any]) -> str:
         judges = sum(t.get("judge_call_count", 0) for t in trials)
         subs = sum(t["subagent_spawn_count"] for t in trials)
         billed = sum(t["token_usage"]["billed_output_tokens"] for t in trials)
-        costs = [t["est_cost"] for t in trials if t["est_cost"] is not None]
-        total_cost = round(sum(costs), 6) if costs else None
         from _lib.usage import summarize_experiment_outcome
 
         oc = summarize_experiment_outcome(trials)
@@ -1190,6 +1172,7 @@ def _eval_experiment_details(harness_evals: dict[str, Any]) -> str:
         )
         billed_sub = f"{_num(billed)} billed out"
         # Setup card: model / reasoning effort / trials-per-cell (from trials)
+        group_accounting = combine_accounting([t.get("inclusive_accounting") or record_accounting(t) for t in trials])
         models = sorted({t["model"] or "unknown" for t in trials})
         efforts = sorted({t.get("reasoning_effort") or "default" for t in trials})
         model_val = models[0] + ("…" if len(models) > 1 else "")
@@ -1203,12 +1186,12 @@ def _eval_experiment_details(harness_evals: dict[str, Any]) -> str:
             f"<div class='card-subtitle'>Click a trial to open its trace &amp; grading</div>"
             f"</div><div class='card-head-actions'>"
             f"<a class='btn-link' href='../{_esc(skill)}/runs/{_esc(exp)}/report.md' target='_blank' rel='noopener'>Open raw report.md ↗</a>"
-            f"<span class='badge badge-slate'>{_esc(_cost(total_cost, zero_ok=bool(costs)))}</span>"
+            f"<span class='badge badge-slate'>{_esc(_cost(group_accounting))}</span>"
             f"</div></div>"
             f"<div class='kpi-grid'>"
             f"{_kpi('Outcome & score', outcome_value, outcome_sub)}"
             f"{_kpi('Worker trials', str(worker), worker_sub)}"
-            f"{_kpi('Est. cost', _cost(total_cost, zero_ok=bool(costs)), billed_sub)}"
+            f"{_kpi('Est. cost', _cost(group_accounting), billed_sub)}"
             f"{_kpi('Setup', _esc(model_val), setup_sub)}"
             f"</div>"
             f"{_comparison_table(trials)}"
@@ -1440,7 +1423,7 @@ def _eval_trial_details(harness_evals: dict[str, Any]) -> str:
             f"<div class='usage-legend'><span><i style='background:var(--primary)'></i>Worker {_num(ptok['billed_output_tokens'])}</span>"
             f"<span><i style='background:var(--indigo)'></i>Subagents {_num(stok['billed_output_tokens'])}</span>"
             f"<span><i style='background:var(--amber)'></i>Judges {_num(jtok['billed_output_tokens'])}</span>"
-            f"<span class='usage-total'>Estimated cost {_esc(_cost(t['est_cost']))}</span></div></div>"
+            f"<span class='usage-total'>Estimated cost {_esc(_cost(t))}</span></div></div>"
         )
         token_rows = []
         for label, usage in (
@@ -1465,7 +1448,7 @@ def _eval_trial_details(harness_evals: dict[str, Any]) -> str:
             "<th class='num'>Billed output</th></tr></thead><tbody>"
             f"{''.join(token_rows)}</tbody></table></div></section>"
         )
-        overview = overview_kpis + usage_summary + token_breakdown
+        overview = overview_kpis + usage_summary + token_breakdown + _accounting_tables(t)
         timeline = _timeline_component(tree, f"{vid}-timeline")
         if not tree:
             timeline += _command_timeline(t.get("commands") or [])
@@ -1541,8 +1524,8 @@ def render_usage_html(summary: dict[str, Any]) -> str:
     project_root = _esc(summary["project_root"])
     generated_at = _esc(_ts(summary["generated_at"]) + " UTC")
 
-    real_cost = _cost(totals["est_cost"], zero_ok=totals["session_count"] > 0)
-    eval_cost = _cost(etotals["est_cost"], zero_ok=etotals["total_call_count"] > 0)
+    real_cost = _cost(totals, zero_ok=totals["session_count"] > 0)
+    eval_cost = _cost(etotals, zero_ok=etotals["total_call_count"] > 0)
     real_cost_bar = _mini_bar([
         (totals.get("parent_est_cost") or 0.0, "var(--primary)"),
         (totals.get("subagent_est_cost") or 0.0, "var(--indigo)"),
@@ -1552,7 +1535,7 @@ def render_usage_html(summary: dict[str, Any]) -> str:
         (etotals.get("judge_est_cost") or 0.0, "var(--amber)"),
     ])
     combined_cost = _cost(
-        combined.get("est_cost"),
+        combined,
         zero_ok=(totals["session_count"] + etotals["total_call_count"]) > 0,
     )
 
@@ -1658,31 +1641,37 @@ def render_usage_html(summary: dict[str, Any]) -> str:
         {_kpi("Uncached Input", _num(tok['uncached_input_tokens']), f"{_num(tok['cached_input_tokens'])} cached")}
         {_kpi("Turns / Commands", str(totals['turn_count']), f"{totals['command_count']} cmds ({totals['failed_command_count']} failed)")}
       </div>
+      {_coverage_panel(totals)}
       {_online_observation_summary(summary['sessions'])}
       <div class="card">
         <div class="card-header"><div>
-          <div class="card-title">Cost &amp; Health by Skill</div>
-          <div class="card-subtitle">Click a triggered skill to inspect it</div>
+          <div class="card-title">Skill activity</div>
+          <div class="card-subtitle">Observed reads and mentions; supporting skills are associations without charges</div>
         </div><span class="badge badge-slate">{len(summary['skills'])} skills</span></div>
         <table><thead><tr><th>Skill</th><th class="num">Triggers</th>
-          <th class="num">Explicit / Implicit</th><th class="num">Uncached In</th>
-          <th class="num">Cached In</th><th class="num">Billed Out</th>
-          <th class="num">Total Cost</th></tr></thead>
+          <th class="num">Explicit / Implicit</th><th>Attribution</th></tr></thead>
           <tbody>{_real_skill_rows(summary)}</tbody></table>
       </div>
       <div class="card">
         <div class="card-header"><div>
-          <div class="card-title">Subagents (Online eval)</div>
-          <div class="card-subtitle">Spawned by real project sessions</div>
+          <div class="card-title">Worker Usage</div>
+          <div class="card-subtitle">Named actors; direct usage sums once, inclusive usage includes descendants</div>
         </div><span class="badge badge-slate">{totals['subagent_spawn_count']} spawns</span></div>
-        <table><thead><tr><th>Agent Role</th><th class="num">Spawns</th>
-          <th class="num">Sessions Used</th><th class="num">Cmds (fail)</th>
-          <th class="num">Uncached In</th><th class="num">Billed Out</th>
-          <th class="num">Est. Cost</th></tr></thead>
+        <table><thead><tr><th>Worker</th><th class="num">Direct input</th>
+          <th class="num">Direct output</th><th class="num">Direct cost</th>
+          <th class="num">Inclusive input</th><th class="num">Inclusive output</th>
+          <th class="num">Inclusive cost</th></tr></thead>
           <tbody>{_real_subagent_rows(summary)}</tbody></table>
       </div>
       <div class="card">
         <div class="card-header"><div>
+          <div class="card-title">Turn Usage</div>
+          <div class="card-subtitle">Root-turn IDs link requests across actors; unknown linkage stays unattributed</div>
+        </div></div><table><thead><tr><th>Root turn</th><th>Direct output</th><th>Direct cost</th>
+          <th>Inclusive output</th><th>Inclusive cost</th><th>Coverage</th></tr></thead>
+          <tbody>{_online_turn_rows(summary)}</tbody></table>
+      </div>
+      <div class="card"><div class="card-header"><div>
           <div class="card-title">Session History</div>
           <div class="card-subtitle">Click a session to open its trace</div>
         </div><span class="badge badge-slate">{len(summary['sessions'])} sessions</span></div>
@@ -1700,6 +1689,7 @@ def render_usage_html(summary: dict[str, Any]) -> str:
   <!-- ============================ MODE: EVAL ============================ -->
   <div id="mode-eval" class="hidden">
     <div id="eval-overview">
+      {_coverage_panel(etotals)}
       {eval_banner}
       <div class="kpi-grid">
         {_kpi("Eval Est. Cost", eval_cost, f"{etotals['total_call_count']} total calls", bar=eval_cost_bar)}

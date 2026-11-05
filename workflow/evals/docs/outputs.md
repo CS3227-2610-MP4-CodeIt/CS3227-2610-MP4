@@ -131,3 +131,33 @@ turn traces, and any exported evidence. Available worker usage remains recorded;
 missing measurements are not invented. The CLI includes retained trial results
 in failed/interrupted experiment reports. This is failure recording, not automatic
 resumption; forced process termination and unwritable storage can prevent it.
+
+### Request accounting and coverage
+
+Usage reports parse each native `token_usage_record.usage` once by response ID
+and owning thread, retaining the model at the response plus thread, turn, root
+turn and timestamp metadata. `output_tokens` already includes reasoning;
+`reasoning_output_tokens` is a subset and `billed_output_tokens` equals output.
+Historical derived billed-output fields are normalized when reading reports,
+without rewriting retained traces or results.
+
+Costs use the pinned, dated API list table per request before aggregation. They
+are hypothetical API-equivalent estimates, never actual subscription spend.
+Missing models, required rates, context tiers, traces or request boundaries leave
+the full estimate unavailable. Coverage exposes complete, partial, unavailable
+and no-calls states, request/priced/unavailable counts, unknown models and the
+known subtotal. A recorded zero-usage request differs from missing evidence.
+Legacy `token_count.last_token_usage` is priced only when it reconciles with
+cumulative observations; cumulative-only and CLI turn totals retain tokens
+without inventing a request context tier. Parse gaps and native cumulative
+reconciliation gaps leave coverage incomplete.
+
+Online skill rows describe observed reads/mentions as associations, with no
+exclusive token or cost allocation. Worker Usage keeps named actors distinct;
+Turn Usage links requests by recorded root-turn IDs, leaving missing linkage
+unattributed. Direct usage across actors counts each actor once; inclusive
+usage adds recorded descendants. Session details retain Timeline and Context
+alongside actor, turn and request tables. Offline attribution stays by evaluated
+skill, trial and configuration, with worker/child and judge coverage separate.
+The parse cache schema invalidates earlier accounting, and tests isolate CLI
+output within temporary evaluation roots.

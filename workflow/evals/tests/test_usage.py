@@ -475,7 +475,7 @@ def test_build_project_usage_scopes_sessions_and_rolls_up_subagents(tmp_path):
     assert tok["output_tokens"] == 700
     assert tok["reasoning_output_tokens"] == 150
     assert tok["billed_output_tokens"] == 700
-    assert summary["totals"]["est_cost"] > 0
+    assert summary["totals"]["est_cost"] is None  # cumulative-only fixture has no request boundaries
 
     # Harness eval calls are tracked separately in `harness_evals`
     hevals = summary["harness_evals"]
@@ -499,11 +499,10 @@ def test_build_project_usage_scopes_sessions_and_rolls_up_subagents(tmp_path):
     assert skills_by_name["unused-skill"]["sessions_triggered"] == 0
     assert skills_by_name["unused-skill"]["installed"] is True
 
-    # Configured subagents include both spawned (security-reviewer) and unused (unused-agent)
-    subagents_by_role = {a["role"]: a for a in summary["subagents"]}
-    assert subagents_by_role["security-reviewer"]["spawns"] == 1
-    assert subagents_by_role["unused-agent"]["spawns"] == 0
-    assert subagents_by_role["unused-agent"]["configured"] is True
+    # Observed workers stay distinct; unspawned profiles are not billed actors.
+    assert len(summary["subagents"]) == 1
+    assert summary["subagents"][0]["agent_role"] == "security-reviewer"
+    assert summary["subagents"][0]["spawns"] == 1
 
     # Render Markdown and HTML and verify key sections exist
     md = render_usage_markdown(summary)
@@ -511,7 +510,7 @@ def test_build_project_usage_scopes_sessions_and_rolls_up_subagents(tmp_path):
     assert "Real Project Work" in md
     assert "Harness Eval Calls" in md
     assert "`unused-skill`" in md
-    assert "`security-reviewer`" in md
+    assert "thread-child-1" in md
 
     html = render_usage_html(summary)
     assert "<!doctype html>" in html.lower()

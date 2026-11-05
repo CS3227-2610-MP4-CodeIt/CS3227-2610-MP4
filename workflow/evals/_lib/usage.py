@@ -12,12 +12,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from _lib.common import markdown_cell, now, read_json, write_json
+from _lib.usage_accounting import finalize_usage_accounting
+from _lib.accounting import observation_tokens, agent_path, parse_accounting, record_accounting
+from _lib.common import markdown_metadata, markdown_cell, now, read_json, write_json
 from _lib.pricing import (
     LONG_CONTEXT_THRESHOLD,
     PRICING_AS_OF,
     PRICING_SOURCE,
-    estimate_api_cost,
     format_cost,
 )
 from _lib.trace import (
@@ -30,7 +31,7 @@ from _lib.trace import (
 )
 
 
-CACHE_SCHEMA_VERSION = 9
+CACHE_SCHEMA_VERSION = 12
 ONLINE_OBSERVATION_ANALYZER_VERSION = "1.0.0"
 ROLLOUT_FILENAME_RE = re.compile(
     r"^rollout-(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2})-(.+)\.jsonl$"
@@ -475,12 +476,6 @@ def parse_session_rollout(rollout: Path) -> dict[str, Any]:
     injected_skills: set[str] = set()
     command_read_skills: set[str] = set()
 
-    turn_completed_seen = False
-    tc_input = 0
-    tc_cached = 0
-    tc_cache_write = 0
-    tc_output = 0
-    tc_reasoning = 0
     latest_total_usage: dict[str, Any] | None = None
 
     events: list[dict[str, Any]] = []
@@ -509,7 +504,7 @@ def parse_session_rollout(rollout: Path) -> dict[str, Any]:
                     thread_id = event["thread_id"]
             elif ev_type == "session_meta":
                 payload = event.get("payload")
-                if isinstance(payload, dict):
+                if isinstance(payload, dict) and (thread_id is None or payload.get("id", thread_id) == thread_id):
                     if isinstance(payload.get("id"), str) and thread_id is None:
                         thread_id = payload["id"]
                     if isinstance(payload.get("timestamp"), str) and started_at is None:
@@ -584,15 +579,8 @@ def parse_session_rollout(rollout: Path) -> dict[str, Any]:
                         task_complete_count += 1
                         final_status = "completed"
 
-            if ev_type == "turn.completed" and isinstance(event.get("usage"), dict):
-                turn_completed_seen = True
+            if ev_type == "turn.completed":
                 turn_completed_count += 1
-                usage = event["usage"]
-                tc_input += int(usage.get("input_tokens", 0) or 0)
-                tc_cached += int(usage.get("cached_input_tokens", 0) or 0)
-                tc_cache_write += int(usage.get("cache_write_input_tokens", 0) or 0)
-                tc_output += int(usage.get("output_tokens", 0) or 0)
-                tc_reasoning += int(usage.get("reasoning_output_tokens", 0) or 0)
 
             command_item = _extract_command_item(event)
             if command_item is not None:
@@ -615,20 +603,8 @@ def parse_session_rollout(rollout: Path) -> dict[str, Any]:
             rollout.stat().st_mtime, tz=timezone.utc
         ).isoformat()
 
-    if turn_completed_seen:
-        token_usage = _finalize_token_usage(
-            tc_input, tc_cached, tc_cache_write, tc_output, tc_reasoning
-        )
-    elif latest_total_usage is not None:
-        token_usage = _finalize_token_usage(
-            int(latest_total_usage.get("input_tokens", 0) or 0),
-            int(latest_total_usage.get("cached_input_tokens", 0) or 0),
-            int(latest_total_usage.get("cache_write_input_tokens", 0) or 0),
-            int(latest_total_usage.get("output_tokens", 0) or 0),
-            int(latest_total_usage.get("reasoning_output_tokens", 0) or 0),
-        )
-    else:
-        token_usage = _empty_token_usage()
+    accounting = parse_accounting(events, thread_id, parse_errors)
+    token_usage = accounting["tokens"]
 
     collab_calls = _collab_calls(events)
     seen_call_ids = {
@@ -723,7 +699,9 @@ def parse_session_rollout(rollout: Path) -> dict[str, Any]:
         "turn_count": turn_count,
         "event_count": event_count,
         "parse_errors": parse_errors,
-        "usage_observed": turn_completed_seen or latest_total_usage is not None,
+        "usage_observed": accounting["coverage"]["request_count"] > 0 or latest_total_usage is not None or turn_completed_count > 0,
+        "accounting": accounting,
+        "agent_path": agent_path(events, thread_id),
         "command_count": len(commands),
         "failed_command_count": failed_command_count,
         "commands": commands,
@@ -1069,8 +1047,8 @@ def _traverse_subagent_tree(
         stub = stub_by_tid.get(child_tid, {})
         if child is not None:
             c_tokens = dict(child.get("token_usage") or _empty_token_usage())
-            c_model = child.get("model") or root.get("model")
-            c_cost = estimate_api_cost(c_tokens, c_model) if child.get("rollout_captured") is not False else None
+            c_model = child.get("model")
+            c_cost = record_accounting(child)["est_cost"]
             c_role = (
                 child.get("agent_role")
                 or stub.get("agent_role")
@@ -1093,7 +1071,9 @@ def _traverse_subagent_tree(
                     "agent_nickname": child.get("agent_nickname"),
                     "requested_profile": child.get("requested_profile") or stub.get("requested_profile"),
                     "profile_status": child.get("profile_status") or stub.get("profile_status", "not_captured"),
-                    "spawn_task_name": stub.get("spawn_task_name"),
+                    "spawn_task_name": child.get("agent_path") or stub.get("spawn_task_name"),
+                    "agent_path": child.get("agent_path"),
+                    "accounting": record_accounting(child),
                     "depth": child.get("depth") or inferred_depth,
                     "model": c_model,
                     "reasoning_effort": child.get("reasoning_effort"),
@@ -1371,7 +1351,7 @@ def derive_experiment_comparison(trials: list[dict[str, Any]]) -> list[dict[str,
             "n": len(group),
             "mean_score": _mean(scores),
             "mean_billed_output": _mean([float(b) for b in billed]),
-            "mean_cost": round(sum(costs) / len(costs), 6) if costs else None,
+            "mean_cost": round(sum(costs) / len(costs), 6) if costs and len(costs) == len(group) else None,
         }
 
     comparison: list[dict[str, Any]] = []
@@ -1499,6 +1479,8 @@ def _inject_captured_subagents(
         parent = meta.get("parent_thread_id") or parsed.get("parent_thread_id") or worker_tid
         if not isinstance(parent, str):
             parent = worker_tid
+        if not live_trace and child_tid not in captured and isinstance(meta.get("token_usage"), dict):
+            parsed["token_usage"] = observation_tokens(meta["token_usage"])
         parsed["thread_id"] = child_tid
         parsed["parent_thread_id"] = parent
         parsed["rollout_captured"] = live_trace or child_tid in captured
@@ -1596,12 +1578,26 @@ def _collect_harness_eval_usage(
                 worker_trace.parent, tid, by_tid, children_by_parent
             )
 
+    if evals_root.is_dir():
+        for run_file in sorted(evals_root.glob("*/runs/*/trials/*/*/*/run.json")):
+            trial_dir = run_file.parent.resolve()
+            if str(trial_dir) in seen_trial_dirs:
+                continue
+            missing = parse_session_rollout(trial_dir / "worker" / "trace.jsonl")
+            missing.update({"thread_id": str(trial_dir), "cwd": str(trial_dir / "workspace"),
+                            "rollout_path": str(trial_dir / "worker" / "trace.jsonl")})
+            eval_root_sessions.append(missing)
+            seen_trial_dirs.add(str(trial_dir))
+
     # Scan semantic judge traces on disk (`grades/semantic/judge-*/trace.jsonl`)
     judges_by_trial_dir: dict[str, list[dict[str, Any]]] = defaultdict(list)
     if evals_root.is_dir():
-        for judge_trace in sorted(
-            evals_root.glob("*/runs/*/trials/*/*/*/grades/semantic/judge-*/trace.jsonl")
+        for judge_dir in sorted(
+            evals_root.glob("*/runs/*/trials/*/*/*/grades/semantic/judge-*")
         ):
+            if not judge_dir.is_dir():
+                continue
+            judge_trace = judge_dir / "trace.jsonl"
             trial_dir = judge_trace.parents[3].resolve()
             trial_dir_str = str(trial_dir)
             run_meta = read_json(trial_dir / "run.json")
@@ -1609,20 +1605,18 @@ def _collect_harness_eval_usage(
             j_model = parsed_judge.get("model")
             j_effort = parsed_judge.get("reasoning_effort")
             j_started = parsed_judge.get("started_at")
-            if isinstance(run_meta, dict):
-                if not j_model and isinstance(run_meta.get("resolved_model"), str):
-                    j_model = run_meta["resolved_model"]
-                if not j_effort and isinstance(
-                    run_meta.get("resolved_reasoning_effort"), str
-                ):
-                    j_effort = run_meta["resolved_reasoning_effort"]
-                if isinstance(run_meta.get("started_at"), str):
-                    j_started = run_meta["started_at"]
             j_tokens = dict(parsed_judge.get("token_usage") or _empty_token_usage())
-            j_cost = estimate_api_cost(j_tokens, j_model)
+            j_cost = record_accounting(parsed_judge)["est_cost"]
+            if trial_dir_str not in seen_trial_dirs:
+                missing = parse_session_rollout(trial_dir / "worker" / "trace.jsonl")
+                missing.update({"thread_id": trial_dir_str, "cwd": str(trial_dir / "workspace"),
+                                "rollout_path": str(trial_dir / "worker" / "trace.jsonl")})
+                eval_root_sessions.append(missing)
+                seen_trial_dirs.add(trial_dir_str)
             judges_by_trial_dir[trial_dir_str].append(
                 {
                     "judge_id": judge_trace.parent.name,
+                    "accounting": record_accounting(parsed_judge),
                     "trace_path": str(judge_trace),
                     "started_at": j_started,
                     "model": j_model,
@@ -1741,7 +1735,7 @@ def _collect_harness_eval_usage(
                     r_effort = run_meta["resolved_reasoning_effort"]
 
         parent_tokens = dict(root.get("token_usage") or _empty_token_usage())
-        parent_cost = estimate_api_cost(parent_tokens, r_model)
+        parent_cost = record_accounting(root)["est_cost"]
         (
             subagent_records,
             subagent_tokens,
@@ -1779,7 +1773,7 @@ def _collect_harness_eval_usage(
                 astat["priced_count"] += 1
             roles_in_trial.add(c_role)
             _record_eval_model(
-                sub.get("model") or r_model,
+                sub.get("model"),
                 sub.get("reasoning_effort") or r_effort,
                 "subagent",
                 1,
@@ -1828,7 +1822,7 @@ def _collect_harness_eval_usage(
                 priced_judge_calls += 1
             total_judge_turns += int(j.get("turn_count", 1) or 1)
             _record_eval_model(
-                j.get("model") or r_model,
+                j.get("model"),
                 j.get("reasoning_effort") or r_effort,
                 "judge",
                 1,
@@ -1960,6 +1954,8 @@ def _collect_harness_eval_usage(
                 "judge_call_count": len(trial_judges),
                 "judge_tokens": trial_judge_tokens,
                 "judge_est_cost": trial_judge_cost,
+                "accounting": record_accounting(root),
+                "judges": trial_judges,
                 "parent_token_usage": parent_tokens,
                 "subagent_token_usage": subagent_tokens,
                 "worker_tokens": trial_worker_tokens,
@@ -2195,7 +2191,7 @@ def build_project_usage(
     for root in root_sessions:
         root_tid = root.get("thread_id") or root["rollout_path"]
         parent_tokens = dict(root.get("token_usage") or _empty_token_usage())
-        parent_cost = estimate_api_cost(parent_tokens, root.get("model"))
+        parent_cost = record_accounting(root)["est_cost"]
 
         (
             subagent_records,
@@ -2273,10 +2269,6 @@ def build_project_usage(
                 sstat["explicit_count"] += 1
             else:
                 sstat["implicit_count"] += 1
-            sstat["tokens"] = _add_token_dicts(sstat["tokens"], combined_tokens)
-            if session_cost is not None:
-                sstat["est_cost"] = round(sstat["est_cost"] + session_cost, 6)
-                sstat["priced_count"] += 1
 
         turns = int(root.get("turn_count", 1) or 1)
         cmds = int(root.get("command_count", 0) or 0) + sum(
@@ -2390,6 +2382,7 @@ def build_project_usage(
                 "skill_invocations": session_skills,
                 "subagent_spawn_count": spawns,
                 "subagents": subagent_records,
+                "accounting": record_accounting(root),
                 "parent_token_usage": parent_tokens,
                 "subagent_token_usage": subagent_tokens,
                 "token_usage": combined_tokens,
@@ -2429,7 +2422,7 @@ def build_project_usage(
     else:
         combined_est_cost = None
 
-    return {
+    return finalize_usage_accounting({
         "project_name": project_root.name,
         "project_root": str(project_root),
         "generated_at": now(),
@@ -2484,7 +2477,7 @@ def build_project_usage(
             "tokens": combined_all_tokens,
             "est_cost": combined_est_cost,
         },
-    }
+    })
 
 
 def _default_harness_evals() -> dict[str, Any]:
@@ -2585,31 +2578,16 @@ def render_usage_markdown(summary: dict[str, Any]) -> str:
         "",
         f"> **Cost note:** `Est. API cost` is an API-equivalent estimate at public OpenAI list prices (as of {PRICING_AS_OF}, {PRICING_SOURCE}; long-context tier at {LONG_CONTEXT_THRESHOLD:,} input tokens). It is not actual subscription or credit spend.",
         "",
-        "## 1. Real project work — Skill usage",
+        "## 1. Real project work — Skill activity",
         "",
-        "| Skill | Installed in project | Sessions triggered | Explicit / Implicit | Uncached input | Cached input | Billed output | Est. cost |",
-        "|---|---|---:|---:|---:|---:|---:|---:|",
+        "Observed reads/mentions associate skills with sessions; no exclusive token or cost attribution.",
+        "",
+        "| Skill | Installed in project | Sessions | Explicit / Implicit |",
+        "|---|---|---:|---:|",
     ]
-
-    if summary["skills"]:
-        for sk in summary["skills"]:
-            stok = sk["tokens"]
-            cost_cell = (
-                format_cost(sk["est_cost"])
-                if sk["priced_count"] > 0
-                else ("$0.0000" if sk["sessions_triggered"] == 0 else "n/a")
-            )
-            lines.append(
-                f"| `{markdown_cell(sk['skill'])}` | "
-                f"{'Yes' if sk['installed'] else 'No (external)'} | "
-                f"{sk['sessions_triggered']} | "
-                f"{sk['explicit_count']} / {sk['implicit_count']} | "
-                f"{stok['uncached_input_tokens']:,} | "
-                f"{stok['cached_input_tokens']:,} | "
-                f"{stok['billed_output_tokens']:,} | {cost_cell} |"
-            )
-    else:
-        lines.append("| (none) | — | 0 | 0 / 0 | 0 | 0 | 0 | $0.0000 |")
+    for sk in summary["skills"]:
+        lines.append(f"| `{markdown_cell(sk['skill'])}` | {'Yes' if sk['installed'] else 'External'} | "
+                     f"{sk['sessions_triggered']} | {sk['explicit_count']} / {sk['implicit_count']} |")
 
     lines.extend(
         [
@@ -2629,7 +2607,7 @@ def render_usage_markdown(summary: dict[str, Any]) -> str:
                 else ("$0.0000" if ag["spawns"] == 0 else "n/a")
             )
             lines.append(
-                f"| `{markdown_cell(ag['role'])}` | "
+                f"| {markdown_metadata(ag['role'])} | "
                 f"{'Yes' if ag['configured'] else 'Built-in / ad-hoc'} | "
                 f"{ag['spawns']} | {ag['sessions_used']} | "
                 f"{ag['command_count']} ({ag['failed_command_count']}) | "
@@ -2664,7 +2642,7 @@ def render_usage_markdown(summary: dict[str, Any]) -> str:
             short_tid = str(sess["thread_id"])[:12]
             lines.append(
                 f"| `{markdown_cell(sess['started_at'][:19])}` | `{short_tid}` | "
-                f"`{markdown_cell(model_label)}` | {sess['turn_count']} | "
+                f"{markdown_metadata(model_label)} | {sess['turn_count']} | "
                 f"{skills_label} | {sess['subagent_spawn_count']} | "
                 f"{stok['billed_output_tokens']:,} | "
                 f"{format_cost(sess['est_cost'])} | {prompt_preview} |"
@@ -2699,6 +2677,24 @@ def render_usage_markdown(summary: dict[str, Any]) -> str:
         lines.append("| (none) | 0 | 0 (0 / 0) | 0 | 0 | 0 | 0 | $0.0000 | $0.0000 | $0.0000 |")
 
     lines.append("")
+    lines.extend(["", "## Request accounting", "", "Output includes reasoning once. Costs are hypothetical API-equivalent spend."])
+    for label, target in (("Online", totals), ("Offline", etotals), ("Combined", combined)):
+        coverage = target.get("coverage", {})
+        lines.append(f"- {label}: {coverage.get('status', 'unavailable')}; "
+                     f"{coverage.get('priced_count', 0)} / {coverage.get('request_count', 0)} requests priced; "
+                     f"{coverage.get('unavailable_count', 0)} unavailable observations; "
+                     f"known subtotal {format_cost(target.get('known_cost'))}; "
+                     f"unknown models: {', '.join(markdown_metadata(model) for model in coverage.get('unknown_models', [])) or 'none'}.")
+    for session in summary['sessions'] + harness_evals['sessions']:
+        lines.extend(["", f"### Session {markdown_metadata(session['thread_id'])}", "",
+                      "| Actor / root turn | Direct input | Direct output | Direct cost | Inclusive input | Inclusive output | Inclusive cost | Coverage |",
+                      "|---|---:|---:|---|---:|---:|---|---|"])
+        for item in session.get('actors', []) + session.get('turns', []):
+            direct, inclusive = item['direct'], item['inclusive']
+            name = item.get('name') or item.get('root_turn_id')
+            lines.append(f"| {markdown_metadata(name)} | {direct['tokens']['input_tokens']} | {direct['tokens']['output_tokens']} | "
+                         f"{format_cost(direct['est_cost'])} | {inclusive['tokens']['input_tokens']} | {inclusive['tokens']['output_tokens']} | "
+                         f"{format_cost(inclusive['est_cost'])} | {inclusive['coverage']['status']} |")
     return "\n".join(lines)
 
 
