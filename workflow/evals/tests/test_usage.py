@@ -614,7 +614,10 @@ def test_setup_and_usage_cli_end_to_end(tmp_path):
     assert skipped["skipped"] is True
 
     # Test CLI invocation with --quiet and positional legacy event payload
-    eval_py = REPO_ROOT / "eval.py"
+    import shutil
+    shutil.copy2(REPO_ROOT / "eval.py", evals_root / "eval.py")
+    shutil.copytree(REPO_ROOT / "_lib", evals_root / "_lib", dirs_exist_ok=True)
+    eval_py = evals_root / "eval.py"
     proc = subprocess.run(
         [
             sys.executable,
