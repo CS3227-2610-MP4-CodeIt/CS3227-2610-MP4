@@ -48,6 +48,17 @@ PRICING: dict[str, dict[str, tuple[float, float | None, float | None, float]]] =
         "short": (0.10, 0.01, 0.125, 0.50),
         "long": (0.20, 0.02, 0.25, 0.75),
     },
+    # `codex-auto-review` is Codex's automatic sandbox-approval reviewer model,
+    # invoked to approve/deny escalations during a run. It has no published API
+    # list price. Its usage is tiny (approve/deny verdicts: large cached input,
+    # negligible output) and contributes ~1% of run tokens, so we price it as a
+    # PROXY at the cheapest listed tier (`gpt-6-luna`) to keep coverage complete
+    # rather than leaving the whole run's total perpetually "partial" over a
+    # sub-dollar reviewer. This is an explicit approximation, not a list price.
+    "codex-auto-review": {
+        "short": (0.10, 0.01, 0.125, 0.50),
+        "long": (0.20, 0.02, 0.25, 0.75),
+    },
     "gpt-6-sol": {
         "short": (2.00, 0.20, 2.50, 10.00),
         "long": (4.00, 0.40, 5.00, 15.00),

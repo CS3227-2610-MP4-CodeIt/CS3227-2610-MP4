@@ -31,7 +31,7 @@ from _lib.trace import (
 )
 
 
-CACHE_SCHEMA_VERSION = 12
+CACHE_SCHEMA_VERSION = 14  # bumped: priced codex-auto-review (pricing table change)
 ONLINE_OBSERVATION_ANALYZER_VERSION = "1.0.0"
 ROLLOUT_FILENAME_RE = re.compile(
     r"^rollout-(\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2})-(.+)\.jsonl$"
