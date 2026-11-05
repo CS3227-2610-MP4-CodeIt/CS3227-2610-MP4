@@ -128,8 +128,13 @@ async def run_test(
             pidfd = None
         if pidfd is not None:
             loop = asyncio.get_running_loop()
-            exited = loop.create_future()
-            loop.add_reader(pidfd, lambda: exited.done() or exited.set_result(None))
+            exited: asyncio.Future[None] = loop.create_future()
+
+            def mark_exited() -> None:
+                if not exited.done():
+                    exited.set_result(None)
+
+            loop.add_reader(pidfd, mark_exited)
             try:
                 await exited
             finally:

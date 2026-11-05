@@ -25,7 +25,7 @@ class FloatTolerance(BaseModel):
     rel: float = Field(default=0, ge=0, le=1)
 
     @model_validator(mode="after")
-    def _one_positive(self) -> "FloatTolerance":
+    def _one_positive(self) -> FloatTolerance:
         if self.abs == 0 and self.rel == 0:
             raise ValueError("at least one of abs / rel must be > 0")
         return self

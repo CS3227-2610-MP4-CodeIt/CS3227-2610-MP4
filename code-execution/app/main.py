@@ -80,12 +80,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             async with asyncio.timeout(settings.queue_timeout_s):
                 await semaphore.acquire()
-        except TimeoutError:
+        except TimeoutError as exc:
             raise HTTPException(
                 status_code=503,
                 detail="All execution slots are busy",
                 headers={"Retry-After": str(RETRY_AFTER_S)},
-            )
+            ) from exc
         try:
             return await judge.run_job(body, settings)
         finally:

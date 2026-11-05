@@ -47,7 +47,7 @@ def classify(
 async def run_job(req: ExecuteRequest, settings: Settings) -> ExecuteResponse:
     workdir = await asyncio.to_thread(tempfile.mkdtemp, dir=settings.work_root)  # mode 0o700
     try:
-        Path(workdir, "solution.py").write_text(req.code, encoding="utf-8")
+        await asyncio.to_thread(Path(workdir, "solution.py").write_text, req.code, encoding="utf-8")
         results: list[TestResult] = []
         verdict, error_message, failed_index = Verdict.ACCEPTED, None, None
 

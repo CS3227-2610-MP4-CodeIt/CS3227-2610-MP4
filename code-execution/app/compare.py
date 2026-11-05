@@ -19,7 +19,9 @@ def compare(actual: bytes, expected: str, tolerance: FloatTolerance | None) -> s
     if len(actual_lines) != len(expected_lines):
         return f"Line count differs: expected {len(expected_lines)}, got {len(actual_lines)}"
 
-    for line_no, (a_line, e_line) in enumerate(zip(actual_lines, expected_lines), start=1):
+    for line_no, (a_line, e_line) in enumerate(
+        zip(actual_lines, expected_lines, strict=True), start=1
+    ):
         if tolerance is None:
             if a_line != e_line:
                 return f"Line {line_no} differs"
@@ -28,7 +30,7 @@ def compare(actual: bytes, expected: str, tolerance: FloatTolerance | None) -> s
         a_tokens, e_tokens = a_line.split(), e_line.split()
         if len(a_tokens) != len(e_tokens):
             return f"Line {line_no}: expected {len(e_tokens)} tokens, got {len(a_tokens)}"
-        for token_no, (a, e) in enumerate(zip(a_tokens, e_tokens), start=1):
+        for token_no, (a, e) in enumerate(zip(a_tokens, e_tokens, strict=True), start=1):
             if a == e:
                 continue
             if NUMBER_RE.fullmatch(a) and NUMBER_RE.fullmatch(e):
