@@ -499,10 +499,15 @@ def test_build_project_usage_scopes_sessions_and_rolls_up_subagents(tmp_path):
     assert skills_by_name["unused-skill"]["sessions_triggered"] == 0
     assert skills_by_name["unused-skill"]["installed"] is True
 
-    # Observed workers stay distinct; unspawned profiles are not billed actors.
-    assert len(summary["subagents"]) == 1
-    assert summary["subagents"][0]["agent_role"] == "security-reviewer"
-    assert summary["subagents"][0]["spawns"] == 1
+    # Every installed profile appears as a row (mirroring installed-but-unused
+    # skills); the spawned one carries its spawn, the unspawned one shows zero.
+    subagents_by_role = {a["role"]: a for a in summary["subagents"]}
+    assert subagents_by_role.keys() >= {"security-reviewer", "unused-agent"}
+    assert subagents_by_role["security-reviewer"]["agent_role"] == "security-reviewer"
+    assert subagents_by_role["security-reviewer"]["configured"] is True
+    assert subagents_by_role["security-reviewer"]["spawns"] == 1
+    assert subagents_by_role["unused-agent"]["configured"] is True
+    assert subagents_by_role["unused-agent"]["spawns"] == 0
 
     # Render Markdown and HTML and verify key sections exist
     md = render_usage_markdown(summary)

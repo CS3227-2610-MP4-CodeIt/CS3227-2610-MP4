@@ -97,12 +97,27 @@ def test_nested_named_workers_turns_and_skill_activity(tmp_path):
     actors = {a['thread_id']: a for a in session['actors']}
     assert actors['child']['direct']['tokens']['input_tokens'] == 700
     assert actors['child']['inclusive']['tokens']['input_tokens'] == 1200
-    assert len(summary['subagents']) == 2
+    # Profile-less spawns fall back to the `default` role and group together,
+    # matching how configured subagents are summarized (one row per role, not
+    # per spawn). The per-actor detail still keeps each worker distinct.
+    assert len(summary['subagents']) == 1
+    assert summary['subagents'][0]['role'] == 'default'
+    assert summary['subagents'][0]['spawns'] == 2
+    assert summary['subagents'][0]['configured'] is False
     assert len(summary['skills']) == 2
-    assert all('tokens' not in s and 'est_cost' not in s for s in summary['skills'])
+    # Both skills were read in the same command, and this fixture's turn_context
+    # carries no turn_id, so the reads cannot be anchored to a priced turn. The
+    # honest result is NO attributed cost for either skill — never a fabricated
+    # or duplicated figure (the old bug charged every skill an identical total).
+    skills_by_name = {s['skill']: s for s in summary['skills']}
+    for name in ('plan-task', 'implement-task'):
+        skill = skills_by_name[name]
+        assert skill['est_cost'] == 0.0
+        assert skill['priced_count'] == 0
+        assert skill['cost_status'] in ('none', 'shared')
     html = render_usage_html(summary)
     assert 'worker&lt;script&gt;' in html and 'worker<script>' not in html
-    assert 'Turns · direct and inclusive usage' in html
+    assert "<div class='card-title'>Turns</div>" in html
     assert 'Timeline' in html and 'Context' in html
     assert 'Request accounting' in render_usage_markdown(summary)
 
