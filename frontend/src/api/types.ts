@@ -33,7 +33,9 @@ export interface UserCreate {
   role: MemberRole;
 }
 
-export type UserUpdate = Partial<Pick<UserCreate, "username" | "display_name" | "password">>;
+export type UserUpdate = Partial<
+  Pick<UserCreate, "username" | "display_name" | "password">
+>;
 
 export interface ClassBrief {
   id: number;

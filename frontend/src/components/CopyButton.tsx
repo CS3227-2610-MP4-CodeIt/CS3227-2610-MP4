@@ -1,7 +1,13 @@
 import { useState } from "react";
 
 /** Small "Copy" button that shows "Copied" for a moment. */
-export function CopyButton({ text, label = "Copy" }: { text: string; label?: string }) {
+export function CopyButton({
+  text,
+  label = "Copy",
+}: {
+  text: string;
+  label?: string;
+}) {
   const [copied, setCopied] = useState(false);
   const copy = () =>
     void navigator.clipboard.writeText(text).then(() => {

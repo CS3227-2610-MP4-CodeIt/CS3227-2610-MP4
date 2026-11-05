@@ -15,7 +15,12 @@ export function ConfirmButton({
   children: ReactNode;
 }) {
   return (
-    <button type="button" className={className} disabled={disabled} onClick={() => confirm(message) && onConfirm()}>
+    <button
+      type="button"
+      className={className}
+      disabled={disabled}
+      onClick={() => confirm(message) && onConfirm()}
+    >
       {children}
     </button>
   );

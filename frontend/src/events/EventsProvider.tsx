@@ -1,6 +1,14 @@
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { useQueryClient } from "@tanstack/react-query";
-import { createContext, use, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  use,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { API_BASE } from "../api/client";
 import { useAuth } from "../auth/AuthProvider";
 import { registerStream } from "../auth/session";
@@ -56,7 +64,8 @@ export function EventsProvider({ children }: { children: ReactNode }) {
         return BACKOFF_MS[Math.min(attempt++, BACKOFF_MS.length - 1)];
       },
     }).catch((err) => {
-      if (err instanceof FatalAuthError && !controller.signal.aborted) logoutRef.current();
+      if (err instanceof FatalAuthError && !controller.signal.aborted)
+        logoutRef.current();
     });
 
     return () => {

@@ -20,7 +20,11 @@ export function parseAuth(raw: string | null): StoredAuth | null {
   if (!raw) return null;
   try {
     const value = JSON.parse(raw);
-    if (typeof value?.token === "string" && typeof value?.user?.role === "string") return value;
+    if (
+      typeof value?.token === "string" &&
+      typeof value?.user?.role === "string"
+    )
+      return value;
   } catch {
     // corrupt entry: treat as logged out
   }
@@ -66,7 +70,10 @@ export function registerStream(fn: () => void): () => void {
  * cache, remove the stored auth. `keepStorage` is for a cross-tab switch, where storage already
  * holds the other tab's new login.
  */
-export function clearSession(queryClient: QueryClient, { keepStorage = false } = {}) {
+export function clearSession(
+  queryClient: QueryClient,
+  { keepStorage = false } = {},
+) {
   abortStream?.();
   abortStream = null;
   queryClient.clear();

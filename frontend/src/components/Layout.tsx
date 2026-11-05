@@ -29,7 +29,11 @@ function ReconnectingBar() {
     };
   }, [status]);
   if (status !== "reconnecting" || !late) return null;
-  return <div className="bg-amber-100 px-4 py-1 text-center text-xs text-amber-800">Reconnecting live updates…</div>;
+  return (
+    <div className="bg-amber-100 px-4 py-1 text-center text-xs text-amber-800">
+      Reconnecting live updates…
+    </div>
+  );
 }
 
 export function Layout() {
@@ -50,7 +54,8 @@ export function Layout() {
             ))}
           </nav>
           <span className="ml-auto text-sm text-slate-600">
-            {auth.user.display_name} <span className="text-slate-400">({auth.user.role})</span>
+            {auth.user.display_name}{" "}
+            <span className="text-slate-400">({auth.user.role})</span>
           </span>
           <button type="button" className="btn" onClick={() => void logout()}>
             Log out

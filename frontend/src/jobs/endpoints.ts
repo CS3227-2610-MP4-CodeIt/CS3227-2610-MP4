@@ -7,7 +7,9 @@ export const targetKey = {
   none: "-",
 } as const;
 
-export function parseQuestionKey(key: string): { aid: number; qid: number } | null {
+export function parseQuestionKey(
+  key: string,
+): { aid: number; qid: number } | null {
   const m = /^a(\d+):q(\d+)$/.exec(key);
   return m ? { aid: Number(m[1]), qid: Number(m[2]) } : null;
 }

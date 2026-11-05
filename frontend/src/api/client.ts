@@ -34,7 +34,10 @@ interface FetchOptions {
   signal?: AbortSignal;
 }
 
-export async function apiFetch<T>(path: string, { method = "GET", body, signal }: FetchOptions = {}): Promise<T> {
+export async function apiFetch<T>(
+  path: string,
+  { method = "GET", body, signal }: FetchOptions = {},
+): Promise<T> {
   const token = currentToken();
   const headers: Record<string, string> = {};
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -50,7 +53,13 @@ export async function apiFetch<T>(path: string, { method = "GET", body, signal }
   if (!res.ok) {
     const data = await res.json().catch(() => null);
     // Only log out if the rejected token is still the current one (another tab may have logged in since).
-    if (res.status === 401 && path !== "/auth/login" && token && token === currentToken()) onUnauthorized();
+    if (
+      res.status === 401 &&
+      path !== "/auth/login" &&
+      token &&
+      token === currentToken()
+    )
+      onUnauthorized();
     throw new ApiError(res.status, data?.detail ?? res.statusText);
   }
   if (res.status === 204) return undefined as T;

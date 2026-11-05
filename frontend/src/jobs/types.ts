@@ -1,4 +1,10 @@
-export const JOB_KINDS = ["run", "submit", "hint", "question_gen", "assignment_summary"] as const;
+export const JOB_KINDS = [
+  "run",
+  "submit",
+  "hint",
+  "question_gen",
+  "assignment_summary",
+] as const;
 export type JobKind = (typeof JOB_KINDS)[number];
 export type JobStatus = "in_process" | "success" | "failed";
 
@@ -21,6 +27,8 @@ export interface JobNewOut<R = Record<string, unknown>> {
   job: Job<R>;
 }
 
-export const isJobKind = (kind: unknown): kind is JobKind => JOB_KINDS.includes(kind as JobKind);
+export const isJobKind = (kind: unknown): kind is JobKind =>
+  JOB_KINDS.includes(kind as JobKind);
 
-export const isFinal = (status: JobStatus) => status === "success" || status === "failed";
+export const isFinal = (status: JobStatus) =>
+  status === "success" || status === "failed";

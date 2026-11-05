@@ -12,7 +12,9 @@ export function useJob<R>(kind: JobKind, targetKey: string) {
   return useQuery({
     queryKey,
     queryFn: async ({ signal }) => {
-      const next = await apiFetch<JobCheckOut<R>>(jobUrl(kind, targetKey), { signal });
+      const next = await apiFetch<JobCheckOut<R>>(jobUrl(kind, targetKey), {
+        signal,
+      });
       return mergeJob(queryClient.getQueryData<JobCheckOut<R>>(queryKey), next);
     },
   });

@@ -1,5 +1,14 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createContext, use, useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useNavigate } from "react-router";
 import { apiFetch, setUnauthorizedHandler } from "../api/client";
 import { keys } from "../api/keys";
@@ -53,7 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (username: string, password: string) => {
-      const res = await apiFetch<LoginOut>("/auth/login", { method: "POST", body: { username, password } });
+      const res = await apiFetch<LoginOut>("/auth/login", {
+        method: "POST",
+        body: { username, password },
+      });
       clearSession(queryClient, { keepStorage: true });
       saveAuth(res);
       setAuth(res);
@@ -76,7 +88,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const fresh = await apiFetch<User>("/auth/me", { signal });
       setAuth((prev) => {
         if (!prev || prev.token !== sentWith) return prev;
-        if (prev.user.username === fresh.username && prev.user.display_name === fresh.display_name) return prev;
+        if (
+          prev.user.username === fresh.username &&
+          prev.user.display_name === fresh.display_name
+        )
+          return prev;
         const next = { ...prev, user: fresh };
         saveAuth(next);
         return next;
@@ -109,5 +125,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("storage", onStorage);
   }, [logoutLocal]);
 
-  return <AuthContext value={{ auth, login, logout, logoutLocal }}>{children}</AuthContext>;
+  return (
+    <AuthContext value={{ auth, login, logout, logoutLocal }}>
+      {children}
+    </AuthContext>
+  );
 }

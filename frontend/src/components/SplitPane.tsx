@@ -1,4 +1,11 @@
-import { useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
+import {
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 
 const MIN = 25;
 const MAX = 75;
@@ -25,7 +32,8 @@ export function SplitPane({
   const [split, setSplit] = useState(initial);
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (!e.currentTarget.hasPointerCapture(e.pointerId) || !container.current) return;
+    if (!e.currentTarget.hasPointerCapture(e.pointerId) || !container.current)
+      return;
     const box = container.current.getBoundingClientRect();
     setSplit(clamp(((e.clientX - box.left) / box.width) * 100));
   };

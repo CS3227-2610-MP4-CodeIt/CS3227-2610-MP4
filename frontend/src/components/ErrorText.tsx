@@ -8,18 +8,29 @@ const itemField = (loc: (string | number)[]) => {
 
 /** Message for one form field from a 422 validation list (frontend-spec §3.4). */
 function fieldError(error: unknown, field: string): string | null {
-  if (!(error instanceof ApiError) || typeof error.detail === "string") return null;
+  if (!(error instanceof ApiError) || typeof error.detail === "string")
+    return null;
   const item = error.detail.find((i) => itemField(i.loc) === field);
   return item ? item.msg : null;
 }
 
-export function FieldError({ error, field }: { error: unknown; field: string }) {
+export function FieldError({
+  error,
+  field,
+}: {
+  error: unknown;
+  field: string;
+}) {
   const msg = fieldError(error, field);
   return msg ? <p className="mt-1 text-xs text-red-600">{msg}</p> : null;
 }
 
 /** Lines to show for an error; `fields` are left out because the form shows them by its inputs. */
-function errorLines(error: unknown, fields: string[], messages: Record<number, string>): string[] | null {
+function errorLines(
+  error: unknown,
+  fields: string[],
+  messages: Record<number, string>,
+): string[] | null {
   if (!(error instanceof ApiError) || error.status >= 500) return null;
   if (messages[error.status]) return [messages[error.status]];
   if (error.status === 403) return ["Not allowed."];

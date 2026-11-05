@@ -1,6 +1,13 @@
 import { QueryClient } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AUTH_KEY, clearSession, currentToken, loadAuth, registerStream, saveAuth } from "./session";
+import {
+  AUTH_KEY,
+  clearSession,
+  currentToken,
+  loadAuth,
+  registerStream,
+  saveAuth,
+} from "./session";
 
 function fakeStorage() {
   const data = new Map<string, string>();
@@ -11,7 +18,10 @@ function fakeStorage() {
   };
 }
 
-const auth = { token: "tok", user: { id: 1, username: "a", display_name: "A", role: "admin" as const } };
+const auth = {
+  token: "tok",
+  user: { id: 1, username: "a", display_name: "A", role: "admin" as const },
+};
 
 describe("session", () => {
   beforeEach(() => vi.stubGlobal("localStorage", fakeStorage()));

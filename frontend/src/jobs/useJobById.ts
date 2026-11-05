@@ -9,6 +9,7 @@ export function useJobById<R>(id: number | null) {
     queryKey: keys.job(id ?? 0),
     queryFn: ({ signal }) => apiFetch<Job<R>>(`/jobs/${id}`, { signal }),
     enabled: id !== null,
-    staleTime: (query) => (query.state.data && isFinal(query.state.data.status) ? Infinity : 30_000),
+    staleTime: (query) =>
+      query.state.data && isFinal(query.state.data.status) ? Infinity : 30_000,
   });
 }

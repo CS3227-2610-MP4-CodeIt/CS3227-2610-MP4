@@ -11,7 +11,13 @@ import { PasswordInput } from "../../components/PasswordInput";
 /** `?next=` is only followed when it is a path under the user's own role. */
 function nextPath(next: string | null, role: Role): string {
   const home = homePath(role);
-  if (next && (next === home || next.startsWith(`${home}/`) || next.startsWith(`${home}?`))) return next;
+  if (
+    next &&
+    (next === home ||
+      next.startsWith(`${home}/`) ||
+      next.startsWith(`${home}?`))
+  )
+    return next;
   return home;
 }
 
@@ -24,13 +30,15 @@ export function LoginPage() {
 
   const mutation = useMutation({
     mutationFn: () => login(username, password),
-    onSuccess: (user) => navigate(nextPath(params.get("next"), user.role), { replace: true }),
+    onSuccess: (user) =>
+      navigate(nextPath(params.get("next"), user.role), { replace: true }),
     onError: (err) => {
       if (err instanceof ApiError && err.status === 401) setPassword("");
     },
   });
 
-  if (auth && !mutation.isPending) return <Navigate to={homePath(auth.user.role)} replace />;
+  if (auth && !mutation.isPending)
+    return <Navigate to={homePath(auth.user.role)} replace />;
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -65,7 +73,10 @@ export function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <ErrorText error={mutation.error} messages={{ 401: "Invalid username or password." }} />
+        <ErrorText
+          error={mutation.error}
+          messages={{ 401: "Invalid username or password." }}
+        />
         <button
           type="submit"
           className="btn btn-primary w-full justify-center"

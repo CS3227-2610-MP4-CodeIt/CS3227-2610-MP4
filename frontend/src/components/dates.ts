@@ -1,6 +1,9 @@
 // Backend sends UTC ISO strings; show them in the browser's local time (frontend-spec §6).
 
-const dateTime = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
+const dateTime = new Intl.DateTimeFormat(undefined, {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
 const relative = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
 
 export const formatDate = (iso: string) => dateTime.format(new Date(iso));
@@ -28,4 +31,5 @@ export function toLocalInput(iso: string) {
 }
 
 /** `datetime-local` value (local time) → UTC ISO; empty → null. */
-export const fromLocalInput = (value: string) => (value ? new Date(value).toISOString() : null);
+export const fromLocalInput = (value: string) =>
+  value ? new Date(value).toISOString() : null;

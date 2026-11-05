@@ -14,15 +14,27 @@ function useNow(active: boolean) {
 }
 
 /** Status line of a job (frontend-spec §4.7). The feature panel renders the result itself. */
-export function JobStatusBadge({ job, runningLabel = "Running…" }: { job: Job<unknown>; runningLabel?: string }) {
+export function JobStatusBadge({
+  job,
+  runningLabel = "Running…",
+}: {
+  job: Job<unknown>;
+  runningLabel?: string;
+}) {
   const now = useNow(job.status === "in_process");
   if (job.status === "in_process") {
-    return <Spinner label={`${runningLabel} ${formatElapsed(job.created_at, now)}`} />;
+    return (
+      <Spinner
+        label={`${runningLabel} ${formatElapsed(job.created_at, now)}`}
+      />
+    );
   }
   if (job.status === "failed") {
     return <p className="text-sm text-red-600">{job.error ?? "Failed."}</p>;
   }
   return (
-    <p className="text-xs text-slate-500">finished {formatRelative(job.finished_at ?? job.created_at, now)}</p>
+    <p className="text-xs text-slate-500">
+      finished {formatRelative(job.finished_at ?? job.created_at, now)}
+    </p>
   );
 }

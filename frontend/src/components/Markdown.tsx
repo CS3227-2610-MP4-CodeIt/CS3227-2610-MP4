@@ -11,7 +11,9 @@ export function Markdown({ children }: { children: string }) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          a: ({ node: _node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />,
+          a: ({ node: _node, ...props }) => (
+            <a {...props} target="_blank" rel="noopener noreferrer" />
+          ),
           img: ({ src, alt }) =>
             typeof src === "string" && src ? (
               <a href={src} target="_blank" rel="noopener noreferrer">

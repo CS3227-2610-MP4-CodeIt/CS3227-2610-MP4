@@ -8,7 +8,8 @@ export function createQueryClient() {
       queries: {
         staleTime: 30_000,
         refetchOnWindowFocus: true,
-        retry: (n, err) => !(err instanceof ApiError && err.status < 500) && n < 1,
+        retry: (n, err) =>
+          !(err instanceof ApiError && err.status < 500) && n < 1,
       },
       mutations: { retry: false },
     },
