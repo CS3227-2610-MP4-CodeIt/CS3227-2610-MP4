@@ -8,8 +8,12 @@ export function QuestionsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-semibold">Questions</h1>
-        <Link to="/teacher/questions/new" className="btn btn-primary ml-auto">New question</Link>
-        <Link to="/teacher/generate" className="btn">Generate with AI</Link>
+        <Link to="/teacher/questions/new" className="btn btn-primary ml-auto">
+          New question
+        </Link>
+        <Link to="/teacher/generate" className="btn">
+          Generate with AI
+        </Link>
       </div>
       <div className="card overflow-x-auto">
         <QueryView query={questions}>
@@ -29,9 +33,16 @@ export function QuestionsPage() {
                   {list.map((q) => (
                     <tr key={q.id}>
                       <td>
-                        <Link to={`/teacher/questions/${q.id}`} className="link">{q.title}</Link>
+                        <Link
+                          to={`/teacher/questions/${q.id}`}
+                          className="link"
+                        >
+                          {q.title}
+                        </Link>
                         {q.source_job_id !== null && (
-                          <span className="ml-2 rounded bg-violet-100 px-1.5 py-0.5 text-xs text-violet-700">AI</span>
+                          <span className="ml-2 rounded bg-violet-100 px-1.5 py-0.5 text-xs text-violet-700">
+                            AI
+                          </span>
                         )}
                       </td>
                       <td>{q.difficulty}</td>

@@ -1,12 +1,28 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "../../api/client";
-import { checkQuestion, emptyForm, moveItem, newRow, parseTopics, questionErrors, toQuestionIn } from "./questionForm";
+import {
+  checkQuestion,
+  emptyForm,
+  moveItem,
+  newRow,
+  parseTopics,
+  questionErrors,
+  toQuestionIn,
+} from "./questionForm";
 
-const validForm = () => ({ ...emptyForm(), title: "Sum", statement_md: "Add two numbers." });
+const validForm = () => ({
+  ...emptyForm(),
+  title: "Sum",
+  statement_md: "Add two numbers.",
+});
 
 describe("parseTopics", () => {
   it("trims, lower-cases and de-duplicates, dropping empty entries", () => {
-    expect(parseTopics(" BFS, trees,, bfs ,Graphs ")).toEqual(["bfs", "trees", "graphs"]);
+    expect(parseTopics(" BFS, trees,, bfs ,Graphs ")).toEqual([
+      "bfs",
+      "trees",
+      "graphs",
+    ]);
   });
 });
 
@@ -17,17 +33,23 @@ describe("checkQuestion", () => {
 
   it("needs a visible and a hidden test case", () => {
     const f = { ...validForm(), test_cases: [newRow(false), newRow(false)] };
-    expect(checkQuestion(f)).toContain("At least one test case must be hidden.");
+    expect(checkQuestion(f)).toContain(
+      "At least one test case must be hidden.",
+    );
     const g = { ...validForm(), test_cases: [newRow(true), newRow(true)] };
-    expect(checkQuestion(g)).toContain("At least one test case must be visible.");
+    expect(checkQuestion(g)).toContain(
+      "At least one test case must be visible.",
+    );
   });
 
   it("needs 2–50 test cases", () => {
-    expect(checkQuestion({ ...validForm(), test_cases: [newRow(true)] })).toContain(
+    expect(
+      checkQuestion({ ...validForm(), test_cases: [newRow(true)] }),
+    ).toContain("A question needs 2–50 test cases.");
+    const many = Array.from({ length: 51 }, (_, i) => newRow(i % 2 === 0));
+    expect(checkQuestion({ ...validForm(), test_cases: many })).toContain(
       "A question needs 2–50 test cases.",
     );
-    const many = Array.from({ length: 51 }, (_, i) => newRow(i % 2 === 0));
-    expect(checkQuestion({ ...validForm(), test_cases: many })).toContain("A question needs 2–50 test cases.");
   });
 
   it("checks title, statement, topics and limits", () => {
@@ -53,11 +75,20 @@ describe("checkQuestion", () => {
 
 describe("toQuestionIn", () => {
   it("normalises topics, converts numbers and drops row keys", () => {
-    const body = toQuestionIn({ ...validForm(), topics: "Math, math", tolerance: true, tol_abs: "0.001" });
+    const body = toQuestionIn({
+      ...validForm(),
+      topics: "Math, math",
+      tolerance: true,
+      tol_abs: "0.001",
+    });
     expect(body.topics).toEqual(["math"]);
     expect(body.time_limit_ms).toBe(2000);
     expect(body.float_tolerance).toEqual({ abs: 0.001, rel: 0 });
-    expect(body.test_cases[0]).toEqual({ stdin: "", expected_stdout: "", is_hidden: false });
+    expect(body.test_cases[0]).toEqual({
+      stdin: "",
+      expected_stdout: "",
+      is_hidden: false,
+    });
   });
 
   it("sends no tolerance when it is off", () => {
@@ -80,7 +111,11 @@ describe("questionErrors", () => {
   });
 
   it("ignores non-422 errors", () => {
-    expect(questionErrors(new ApiError(409, "in use"))).toEqual({ fields: {}, rows: {}, other: [] });
+    expect(questionErrors(new ApiError(409, "in use"))).toEqual({
+      fields: {},
+      rows: {},
+      other: [],
+    });
   });
 });
 

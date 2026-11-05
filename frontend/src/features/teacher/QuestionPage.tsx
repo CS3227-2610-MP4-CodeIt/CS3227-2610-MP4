@@ -5,7 +5,12 @@ import type { Difficulty, Question } from "../../api/types";
 import { ConfirmButton } from "../../components/ConfirmButton";
 import { ErrorText } from "../../components/ErrorText";
 import { QueryView } from "../../components/QueryView";
-import { useCreateQuestion, useDeleteQuestion, useQuestion, useUpdateQuestion } from "./api";
+import {
+  useCreateQuestion,
+  useDeleteQuestion,
+  useQuestion,
+  useUpdateQuestion,
+} from "./api";
 import { MarkdownField } from "./MarkdownField";
 import {
   checkQuestion,
@@ -27,7 +32,9 @@ export function NewQuestionPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link to="/teacher/questions" className="link text-sm">← Questions</Link>
+        <Link to="/teacher/questions" className="link text-sm">
+          ← Questions
+        </Link>
         <h1 className="text-xl font-semibold">New question</h1>
       </div>
       <QuestionEditor
@@ -36,7 +43,10 @@ export function NewQuestionPage() {
         pending={create.isPending}
         submitLabel="Create question"
         onSave={(body) =>
-          create.mutate(body, { onSuccess: (q) => navigate(`/teacher/questions/${q.id}`, { replace: true }) })
+          create.mutate(body, {
+            onSuccess: (q) =>
+              navigate(`/teacher/questions/${q.id}`, { replace: true }),
+          })
         }
       />
     </div>
@@ -60,10 +70,14 @@ function QuestionDetail({ question }: { question: Question }) {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-4">
-        <Link to="/teacher/questions" className="link text-sm">← Questions</Link>
+        <Link to="/teacher/questions" className="link text-sm">
+          ← Questions
+        </Link>
         <h1 className="text-xl font-semibold">{question.title}</h1>
         {question.source_job_id !== null && (
-          <span className="rounded bg-violet-100 px-1.5 py-0.5 text-xs text-violet-700">AI</span>
+          <span className="rounded bg-violet-100 px-1.5 py-0.5 text-xs text-violet-700">
+            AI
+          </span>
         )}
       </div>
       {update.isSuccess && <p className="text-sm text-green-700">Saved.</p>}
@@ -76,11 +90,17 @@ function QuestionDetail({ question }: { question: Question }) {
       />
       <div className="card space-y-2">
         <h2 className="font-medium">Delete question</h2>
-        <p className="text-sm text-slate-600">Not possible while an assignment uses it.</p>
+        <p className="text-sm text-slate-600">
+          Not possible while an assignment uses it.
+        </p>
         <ConfirmButton
           message={`Delete question "${question.title}"?`}
           disabled={remove.isPending}
-          onConfirm={() => remove.mutate(undefined, { onSuccess: () => navigate("/teacher/questions") })}
+          onConfirm={() =>
+            remove.mutate(undefined, {
+              onSuccess: () => navigate("/teacher/questions"),
+            })
+          }
         >
           Delete
         </ConfirmButton>
@@ -105,15 +125,19 @@ function QuestionEditor({
   onSave: (body: ReturnType<typeof toQuestionIn>) => void;
 }) {
   const [form, setForm] = useState(initial);
-  const set = <K extends keyof QuestionForm>(field: K, value: QuestionForm[K]) =>
-    setForm((f) => ({ ...f, [field]: value }));
+  const set = <K extends keyof QuestionForm>(
+    field: K,
+    value: QuestionForm[K],
+  ) => setForm((f) => ({ ...f, [field]: value }));
   const setRows = (fn: (rows: TestCaseRow[]) => TestCaseRow[]) =>
     setForm((f) => ({ ...f, test_cases: fn(f.test_cases) }));
 
   const problems = checkQuestion(form);
   const server = questionErrors(error);
   const fieldError = (field: string) =>
-    server.fields[field] ? <p className="mt-1 text-xs text-red-600">{server.fields[field]}</p> : null;
+    server.fields[field] ? (
+      <p className="mt-1 text-xs text-red-600">{server.fields[field]}</p>
+    ) : null;
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -124,12 +148,21 @@ function QuestionEditor({
     <form onSubmit={onSubmit} className="space-y-6">
       <div className="card space-y-3">
         <div>
-          <label className="label" htmlFor="q-title">Title</label>
-          <input id="q-title" className="input" value={form.title} onChange={(e) => set("title", e.target.value)} />
+          <label className="label" htmlFor="q-title">
+            Title
+          </label>
+          <input
+            id="q-title"
+            className="input"
+            value={form.title}
+            onChange={(e) => set("title", e.target.value)}
+          />
           {fieldError("title")}
         </div>
         <div>
-          <label className="label" htmlFor="q-statement">Statement (Markdown)</label>
+          <label className="label" htmlFor="q-statement">
+            Statement (Markdown)
+          </label>
           <MarkdownField
             id="q-statement"
             value={form.statement_md}
@@ -140,7 +173,9 @@ function QuestionEditor({
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <label className="label" htmlFor="q-difficulty">Difficulty</label>
+            <label className="label" htmlFor="q-difficulty">
+              Difficulty
+            </label>
             <select
               id="q-difficulty"
               className="input"
@@ -148,12 +183,16 @@ function QuestionEditor({
               onChange={(e) => set("difficulty", e.target.value as Difficulty)}
             >
               {DIFFICULTIES.map((d) => (
-                <option key={d} value={d}>{d}</option>
+                <option key={d} value={d}>
+                  {d}
+                </option>
               ))}
             </select>
           </div>
           <div>
-            <label className="label" htmlFor="q-topics">Topics (comma-separated)</label>
+            <label className="label" htmlFor="q-topics">
+              Topics (comma-separated)
+            </label>
             <input
               id="q-topics"
               className="input"
@@ -164,7 +203,9 @@ function QuestionEditor({
             {fieldError("topics")}
           </div>
           <div>
-            <label className="label" htmlFor="q-time">Time limit (ms)</label>
+            <label className="label" htmlFor="q-time">
+              Time limit (ms)
+            </label>
             <input
               id="q-time"
               type="number"
@@ -175,7 +216,9 @@ function QuestionEditor({
             {fieldError("time_limit_ms")}
           </div>
           <div>
-            <label className="label" htmlFor="q-memory">Memory limit (MB)</label>
+            <label className="label" htmlFor="q-memory">
+              Memory limit (MB)
+            </label>
             <input
               id="q-memory"
               type="number"
@@ -188,13 +231,19 @@ function QuestionEditor({
         </div>
         <div className="flex flex-wrap items-end gap-3">
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={form.tolerance} onChange={(e) => set("tolerance", e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={form.tolerance}
+              onChange={(e) => set("tolerance", e.target.checked)}
+            />
             Compare floats with a tolerance
           </label>
           {form.tolerance && (
             <>
               <div>
-                <label className="label" htmlFor="q-abs">Absolute</label>
+                <label className="label" htmlFor="q-abs">
+                  Absolute
+                </label>
                 <input
                   id="q-abs"
                   type="number"
@@ -205,7 +254,9 @@ function QuestionEditor({
                 />
               </div>
               <div>
-                <label className="label" htmlFor="q-rel">Relative</label>
+                <label className="label" htmlFor="q-rel">
+                  Relative
+                </label>
                 <input
                   id="q-rel"
                   type="number"
@@ -224,7 +275,8 @@ function QuestionEditor({
       <div className="card space-y-3">
         <div className="flex items-center gap-3">
           <h2 className="font-medium">
-            Test cases <span className="text-slate-400">({form.test_cases.length})</span>
+            Test cases{" "}
+            <span className="text-slate-400">({form.test_cases.length})</span>
           </h2>
           <button
             type="button"
@@ -242,9 +294,13 @@ function QuestionEditor({
             index={i}
             count={form.test_cases.length}
             error={server.rows[i]}
-            onChange={(next) => setRows((rows) => rows.map((r) => (r.key === row.key ? next : r)))}
+            onChange={(next) =>
+              setRows((rows) => rows.map((r) => (r.key === row.key ? next : r)))
+            }
             onMove={(dir) => setRows((rows) => moveItem(rows, i, dir))}
-            onRemove={() => setRows((rows) => rows.filter((r) => r.key !== row.key))}
+            onRemove={() =>
+              setRows((rows) => rows.filter((r) => r.key !== row.key))
+            }
           />
         ))}
       </div>
@@ -258,11 +314,19 @@ function QuestionEditor({
           </ul>
         )}
         {server.other.map((msg) => (
-          <p key={msg} className="text-sm text-red-600">{msg}</p>
+          <p key={msg} className="text-sm text-red-600">
+            {msg}
+          </p>
         ))}
         {/* 422s are shown by their fields above; this covers network errors and anything else. */}
-        {!(error instanceof ApiError && error.status === 422) && <ErrorText error={error} />}
-        <button type="submit" className="btn btn-primary" disabled={pending || problems.length > 0}>
+        {!(error instanceof ApiError && error.status === 422) && (
+          <ErrorText error={error} />
+        )}
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={pending || problems.length > 0}
+        >
           {submitLabel}
         </button>
       </div>
@@ -300,9 +364,31 @@ function TestCaseEditor({
           Hidden
         </label>
         <div className="ml-auto flex gap-1">
-          <button type="button" className="btn px-2 py-0.5" disabled={index === 0} onClick={() => onMove(-1)} aria-label="Move up">↑</button>
-          <button type="button" className="btn px-2 py-0.5" disabled={index === count - 1} onClick={() => onMove(1)} aria-label="Move down">↓</button>
-          <button type="button" className="btn btn-danger px-2 py-0.5" onClick={onRemove}>Remove</button>
+          <button
+            type="button"
+            className="btn px-2 py-0.5"
+            disabled={index === 0}
+            onClick={() => onMove(-1)}
+            aria-label="Move up"
+          >
+            ↑
+          </button>
+          <button
+            type="button"
+            className="btn px-2 py-0.5"
+            disabled={index === count - 1}
+            onClick={() => onMove(1)}
+            aria-label="Move down"
+          >
+            ↓
+          </button>
+          <button
+            type="button"
+            className="btn btn-danger px-2 py-0.5"
+            onClick={onRemove}
+          >
+            Remove
+          </button>
         </div>
       </div>
       <div className="grid gap-2 md:grid-cols-2">
@@ -320,7 +406,9 @@ function TestCaseEditor({
           placeholder="expected stdout"
           aria-label={`Test ${index + 1} expected stdout`}
           value={row.expected_stdout}
-          onChange={(e) => onChange({ ...row, expected_stdout: e.target.value })}
+          onChange={(e) =>
+            onChange({ ...row, expected_stdout: e.target.value })
+          }
         />
       </div>
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}

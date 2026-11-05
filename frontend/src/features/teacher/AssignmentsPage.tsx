@@ -19,16 +19,24 @@ export function AssignmentsPage() {
         <select
           className="input w-auto"
           value={classId ?? ""}
-          onChange={(e) => setParams(e.target.value ? { class_id: e.target.value } : {})}
+          onChange={(e) =>
+            setParams(e.target.value ? { class_id: e.target.value } : {})
+          }
           aria-label="Class"
         >
           <option value="">All my classes</option>
           {classes.data?.map((c) => (
-            <option key={c.id} value={c.id}>{c.name}</option>
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
           ))}
         </select>
         <Link
-          to={classId ? `/teacher/assignments/new?class_id=${classId}` : "/teacher/assignments/new"}
+          to={
+            classId
+              ? `/teacher/assignments/new?class_id=${classId}`
+              : "/teacher/assignments/new"
+          }
           className="btn btn-primary ml-auto"
         >
           New assignment
@@ -53,11 +61,26 @@ export function AssignmentsPage() {
                   {list.map((a) => (
                     <tr key={a.id}>
                       <td>
-                        <Link to={`/teacher/assignments/${a.id}`} className="link">{a.title}</Link>
-                        {a.created_by === auth?.user.id && <span className="ml-2 text-xs text-slate-400">yours</span>}
+                        <Link
+                          to={`/teacher/assignments/${a.id}`}
+                          className="link"
+                        >
+                          {a.title}
+                        </Link>
+                        {a.created_by === auth?.user.id && (
+                          <span className="ml-2 text-xs text-slate-400">
+                            yours
+                          </span>
+                        )}
                       </td>
                       <td>{a.class_name}</td>
-                      <td>{a.due_at ? formatDate(a.due_at) : <span className="text-slate-400">none</span>}</td>
+                      <td>
+                        {a.due_at ? (
+                          formatDate(a.due_at)
+                        ) : (
+                          <span className="text-slate-400">none</span>
+                        )}
+                      </td>
                       <td>{a.questions.length}</td>
                     </tr>
                   ))}

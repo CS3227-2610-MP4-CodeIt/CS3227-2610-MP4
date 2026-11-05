@@ -27,7 +27,12 @@ export interface QuestionForm {
 export const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 
 let nextKey = 1;
-export const newRow = (is_hidden = false): TestCaseRow => ({ key: nextKey++, stdin: "", expected_stdout: "", is_hidden });
+export const newRow = (is_hidden = false): TestCaseRow => ({
+  key: nextKey++,
+  stdin: "",
+  expected_stdout: "",
+  is_hidden,
+});
 
 export const emptyForm = (): QuestionForm => ({
   title: "",
@@ -52,7 +57,11 @@ export const formFromQuestion = (q: Question): QuestionForm => ({
   tolerance: q.float_tolerance !== null,
   tol_abs: String(q.float_tolerance?.abs ?? 0),
   tol_rel: String(q.float_tolerance?.rel ?? 0),
-  test_cases: q.test_cases.map((t) => ({ ...newRow(t.is_hidden), stdin: t.stdin, expected_stdout: t.expected_stdout })),
+  test_cases: q.test_cases.map((t) => ({
+    ...newRow(t.is_hidden),
+    stdin: t.stdin,
+    expected_stdout: t.expected_stdout,
+  })),
 });
 
 /** Comma-separated text → trimmed, lower-cased, de-duplicated topics (as the backend does). */
@@ -73,28 +82,44 @@ export function toQuestionIn(f: QuestionForm): QuestionIn {
     topics: parseTopics(f.topics),
     time_limit_ms: Number(f.time_limit_ms),
     memory_limit_mb: Number(f.memory_limit_mb),
-    float_tolerance: f.tolerance ? { abs: Number(f.tol_abs), rel: Number(f.tol_rel) } : null,
-    test_cases: f.test_cases.map(({ stdin, expected_stdout, is_hidden }) => ({ stdin, expected_stdout, is_hidden })),
+    float_tolerance: f.tolerance
+      ? { abs: Number(f.tol_abs), rel: Number(f.tol_rel) }
+      : null,
+    test_cases: f.test_cases.map(({ stdin, expected_stdout, is_hidden }) => ({
+      stdin,
+      expected_stdout,
+      is_hidden,
+    })),
   };
 }
 
 const inRange = (value: string, min: number, max: number, int = true) => {
   const n = Number(value);
-  return value.trim() !== "" && Number.isFinite(n) && (!int || Number.isInteger(n)) && n >= min && n <= max;
+  return (
+    value.trim() !== "" &&
+    Number.isFinite(n) &&
+    (!int || Number.isInteger(n)) &&
+    n >= min &&
+    n <= max
+  );
 };
 
 /** Client-side checks mirroring the backend; the backend is still the authority. */
 export function checkQuestion(f: QuestionForm): string[] {
   const problems: string[] = [];
-  if (f.title.trim().length < 1 || f.title.length > 200) problems.push("Title must be 1–200 characters.");
+  if (f.title.trim().length < 1 || f.title.length > 200)
+    problems.push("Title must be 1–200 characters.");
   if (f.statement_md.trim().length < 1 || f.statement_md.length > 20_000) {
     problems.push("Statement must be 1–20 000 characters.");
   }
   const topics = parseTopics(f.topics);
   if (topics.length > 5) problems.push("At most 5 topics.");
-  if (topics.some((t) => t.length > 30)) problems.push("Each topic must be at most 30 characters.");
-  if (!inRange(f.time_limit_ms, 100, 10_000)) problems.push("Time limit must be 100–10 000 ms.");
-  if (!inRange(f.memory_limit_mb, 16, 1024)) problems.push("Memory limit must be 16–1024 MB.");
+  if (topics.some((t) => t.length > 30))
+    problems.push("Each topic must be at most 30 characters.");
+  if (!inRange(f.time_limit_ms, 100, 10_000))
+    problems.push("Time limit must be 100–10 000 ms.");
+  if (!inRange(f.memory_limit_mb, 16, 1024))
+    problems.push("Memory limit must be 16–1024 MB.");
   if (f.tolerance) {
     if (!inRange(f.tol_abs, 0, 1, false) || !inRange(f.tol_rel, 0, 1, false)) {
       problems.push("Tolerances must be between 0 and 1.");
@@ -104,8 +129,10 @@ export function checkQuestion(f: QuestionForm): string[] {
   }
   const n = f.test_cases.length;
   if (n < 2 || n > 50) problems.push("A question needs 2–50 test cases.");
-  if (!f.test_cases.some((t) => !t.is_hidden)) problems.push("At least one test case must be visible.");
-  if (!f.test_cases.some((t) => t.is_hidden)) problems.push("At least one test case must be hidden.");
+  if (!f.test_cases.some((t) => !t.is_hidden))
+    problems.push("At least one test case must be visible.");
+  if (!f.test_cases.some((t) => t.is_hidden))
+    problems.push("At least one test case must be hidden.");
   return problems;
 }
 

@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { emptyHistory, historyKey, loadHistory, saveHistory, started, withJob } from "./draftHistory";
+import {
+  emptyHistory,
+  historyKey,
+  loadHistory,
+  saveHistory,
+  started,
+  withJob,
+} from "./draftHistory";
 
 const store = new Map<string, string>();
 globalThis.sessionStorage = {
@@ -24,7 +31,10 @@ describe("draft history", () => {
   it("treats a corrupt entry as empty", () => {
     store.set(historyKey(7), "{not json");
     expect(loadHistory(7)).toEqual(emptyHistory());
-    store.set(historyKey(7), JSON.stringify({ jobIds: ["x"], selectedId: null, prompt: "" }));
+    store.set(
+      historyKey(7),
+      JSON.stringify({ jobIds: ["x"], selectedId: null, prompt: "" }),
+    );
     expect(loadHistory(7)).toEqual(emptyHistory());
   });
 

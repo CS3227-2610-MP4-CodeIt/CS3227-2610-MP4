@@ -1,6 +1,11 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router";
-import type { Difficulty, QuestionDraft, QuestionGenIn, QuestionGenResult } from "../../api/types";
+import type {
+  Difficulty,
+  QuestionDraft,
+  QuestionGenIn,
+  QuestionGenResult,
+} from "../../api/types";
 import { useAuth } from "../../auth/AuthProvider";
 import { formatDate } from "../../components/dates";
 import { ErrorText } from "../../components/ErrorText";
@@ -12,7 +17,13 @@ import { useJob } from "../../jobs/useJob";
 import { useJobById } from "../../jobs/useJobById";
 import { useStartJob } from "../../jobs/useStartJob";
 import { useApproveDraft, useQuestions } from "./api";
-import { loadHistory, saveHistory, started, withJob, type DraftHistory } from "./draftHistory";
+import {
+  loadHistory,
+  saveHistory,
+  started,
+  withJob,
+  type DraftHistory,
+} from "./draftHistory";
 import { DIFFICULTIES, parseTopics } from "./questionForm";
 import { QuestionPreview } from "./QuestionPreview";
 
@@ -23,8 +34,14 @@ export function GeneratePage() {
   const { auth } = useAuth();
   const userId = auth!.user.id;
   const latestQuery = useJob<QuestionGenResult>("question_gen", targetKey.none);
-  const generate = useStartJob<QuestionGenIn, QuestionGenResult>("question_gen", targetKey.none);
-  const revise = useStartJob<QuestionGenIn, QuestionGenResult>("question_gen", targetKey.none);
+  const generate = useStartJob<QuestionGenIn, QuestionGenResult>(
+    "question_gen",
+    targetKey.none,
+  );
+  const revise = useStartJob<QuestionGenIn, QuestionGenResult>(
+    "question_gen",
+    targetKey.none,
+  );
   const latest = latestQuery.data?.job ?? null;
 
   const [stored, setStored] = useState<DraftHistory>(() => loadHistory(userId));
@@ -41,13 +58,25 @@ export function GeneratePage() {
   const [prompt, setPrompt] = useState(history.prompt);
   const topicList = parseTopics(topics);
   const requestOk =
-    topicList.length >= 1 && topicList.length <= 5 && topicList.every((t) => t.length <= 30) &&
-    prompt.trim().length >= 1 && prompt.length <= 2000;
+    topicList.length >= 1 &&
+    topicList.length <= 5 &&
+    topicList.every((t) => t.length <= 30) &&
+    prompt.trim().length >= 1 &&
+    prompt.length <= 2000;
 
   const onGenerate = (e: FormEvent) => {
     e.preventDefault();
-    const body = { difficulty, topics: topicList, prompt, parent_job_id: null, feedback: null };
-    generate.mutate(body, { onSuccess: (res) => setStored((h) => started(withJob(h, latest?.id), res.job.id, prompt)) });
+    const body = {
+      difficulty,
+      topics: topicList,
+      prompt,
+      parent_job_id: null,
+      feedback: null,
+    };
+    generate.mutate(body, {
+      onSuccess: (res) =>
+        setStored((h) => started(withJob(h, latest?.id), res.job.id, prompt)),
+    });
   };
 
   const onRevise = (draftJob: GenJob, feedback: string, onDone: () => void) => {
@@ -62,18 +91,23 @@ export function GeneratePage() {
     };
     revise.mutate(body, {
       onSuccess: (res) => {
-        setStored((h) => started(withJob(h, latest?.id), res.job.id, revisePrompt));
+        setStored((h) =>
+          started(withJob(h, latest?.id), res.job.id, revisePrompt),
+        );
         onDone();
       },
     });
   };
 
-  const notCreated = generate.data?.created === false || revise.data?.created === false;
+  const notCreated =
+    generate.data?.created === false || revise.data?.created === false;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Link to="/teacher/questions" className="link text-sm">← Questions</Link>
+        <Link to="/teacher/questions" className="link text-sm">
+          ← Questions
+        </Link>
         <h1 className="text-xl font-semibold">Generate a question with AI</h1>
       </div>
       <div className="grid gap-6 lg:grid-cols-[22rem_1fr]">
@@ -81,7 +115,9 @@ export function GeneratePage() {
           <form onSubmit={onGenerate} className="card space-y-3">
             <h2 className="font-medium">Request</h2>
             <div>
-              <label className="label" htmlFor="gen-difficulty">Difficulty</label>
+              <label className="label" htmlFor="gen-difficulty">
+                Difficulty
+              </label>
               <select
                 id="gen-difficulty"
                 className="input"
@@ -89,12 +125,16 @@ export function GeneratePage() {
                 onChange={(e) => setDifficulty(e.target.value as Difficulty)}
               >
                 {DIFFICULTIES.map((d) => (
-                  <option key={d} value={d}>{d}</option>
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="label" htmlFor="gen-topics">Topics (1–5, comma-separated)</label>
+              <label className="label" htmlFor="gen-topics">
+                Topics (1–5, comma-separated)
+              </label>
               <input
                 id="gen-topics"
                 className="input"
@@ -104,7 +144,9 @@ export function GeneratePage() {
               />
             </div>
             <div>
-              <label className="label" htmlFor="gen-prompt">Prompt</label>
+              <label className="label" htmlFor="gen-prompt">
+                Prompt
+              </label>
               <textarea
                 id="gen-prompt"
                 className="input"
@@ -116,28 +158,40 @@ export function GeneratePage() {
               />
             </div>
             <ErrorText error={generate.error} />
-            <button type="submit" className="btn btn-primary" disabled={busy || !requestOk}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={busy || !requestOk}
+            >
               Generate
             </button>
             {notCreated && (
               <p className="text-sm text-slate-600">
-                A generation is already in progress — showing it. Your request was not sent.
+                A generation is already in progress — showing it. Your request
+                was not sent.
               </p>
             )}
           </form>
           <HistoryList
             ids={history.jobIds}
             selectedId={selectedId}
-            onSelect={(id) => setStored((h) => ({ ...withJob(h, latest?.id), selectedId: id }))}
+            onSelect={(id) =>
+              setStored((h) => ({ ...withJob(h, latest?.id), selectedId: id }))
+            }
           />
         </div>
         <div>
           {latestQuery.isPending ? (
             <Spinner />
           ) : latestQuery.isError ? (
-            <ErrorText error={latestQuery.error} onRetry={() => void latestQuery.refetch()} />
+            <ErrorText
+              error={latestQuery.error}
+              onRetry={() => void latestQuery.refetch()}
+            />
           ) : selectedId === null ? (
-            <p className="text-sm text-slate-500">No drafts yet. Fill in the request and click Generate.</p>
+            <p className="text-sm text-slate-500">
+              No drafts yet. Fill in the request and click Generate.
+            </p>
           ) : (
             <DraftView
               key={selectedId}
@@ -169,14 +223,27 @@ function HistoryList({
       <h2 className="font-medium">Drafts this session</h2>
       <ul className="space-y-1 text-sm">
         {[...ids].reverse().map((id) => (
-          <HistoryItem key={id} id={id} selected={id === selectedId} onSelect={() => onSelect(id)} />
+          <HistoryItem
+            key={id}
+            id={id}
+            selected={id === selectedId}
+            onSelect={() => onSelect(id)}
+          />
         ))}
       </ul>
     </div>
   );
 }
 
-function HistoryItem({ id, selected, onSelect }: { id: number; selected: boolean; onSelect: () => void }) {
+function HistoryItem({
+  id,
+  selected,
+  onSelect,
+}: {
+  id: number;
+  selected: boolean;
+  onSelect: () => void;
+}) {
   const job = useJobById<QuestionGenResult>(id);
   const label = job.isPending
     ? "Loading…"
@@ -195,7 +262,11 @@ function HistoryItem({ id, selected, onSelect }: { id: number; selected: boolean
         className={`w-full rounded px-2 py-1 text-left ${selected ? "bg-slate-200 font-medium" : "hover:bg-slate-100"}`}
       >
         <span className="text-slate-400">#{id}</span> {label}
-        {job.data && <span className="block text-xs text-slate-500">{formatDate(job.data.created_at)}</span>}
+        {job.data && (
+          <span className="block text-xs text-slate-500">
+            {formatDate(job.data.created_at)}
+          </span>
+        )}
       </button>
     </li>
   );
@@ -219,20 +290,31 @@ function DraftView({
   const job = latest?.id === id ? latest : byId.data;
 
   if (!job) {
-    if (byId.isError) return <ErrorText error={byId.error} onRetry={() => void byId.refetch()} />;
+    if (byId.isError)
+      return (
+        <ErrorText error={byId.error} onRetry={() => void byId.refetch()} />
+      );
     return <Spinner />;
   }
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <h2 className="font-medium">Draft #{job.id}</h2>
-        <JobStatusBadge job={job} runningLabel="Generating… this can take a minute." />
+        <JobStatusBadge
+          job={job}
+          runningLabel="Generating… this can take a minute."
+        />
       </div>
       {job.status === "success" && job.result && (
         <>
           <ApproveBox job={job} />
           <DraftDetails draft={job.result.draft} />
-          <ReviseBox job={job} canRevise={canRevise} error={reviseError} onRevise={onRevise} />
+          <ReviseBox
+            job={job}
+            canRevise={canRevise}
+            error={reviseError}
+            onRevise={onRevise}
+          />
         </>
       )}
     </div>
@@ -249,7 +331,10 @@ function ApproveBox({ job }: { job: GenJob }) {
   if (approved) {
     return (
       <div className="card text-sm">
-        Approved — <Link to={`/teacher/questions/${approved.id}`} className="link">open question</Link>
+        Approved —{" "}
+        <Link to={`/teacher/questions/${approved.id}`} className="link">
+          open question
+        </Link>
       </div>
     );
   }
@@ -259,12 +344,21 @@ function ApproveBox({ job }: { job: GenJob }) {
         type="button"
         className="btn btn-primary"
         disabled={approve.isPending || questions.isPending}
-        onClick={() => approve.mutate(job.id, { onSuccess: (q) => navigate(`/teacher/questions/${q.id}`) })}
+        onClick={() =>
+          approve.mutate(job.id, {
+            onSuccess: (q) => navigate(`/teacher/questions/${q.id}`),
+          })
+        }
       >
         Approve
       </button>
-      <span className="text-sm text-slate-600">Creates a question you can then edit.</span>
-      <ErrorText error={approve.error} messages={{ 409: "This draft was already approved." }} />
+      <span className="text-sm text-slate-600">
+        Creates a question you can then edit.
+      </span>
+      <ErrorText
+        error={approve.error}
+        messages={{ 409: "This draft was already approved." }}
+      />
     </div>
   );
 }
@@ -283,14 +377,19 @@ function DraftDetails({ draft }: { draft: QuestionDraft }) {
         question={draft}
         testsNote={
           <p className="text-sm text-amber-700">
-            Expected outputs are written by the AI and may be wrong. Check them against the reference solution.
+            Expected outputs are written by the AI and may be wrong. Check them
+            against the reference solution.
           </p>
         }
       />
       <div className="card space-y-2">
         <div className="flex items-center gap-3">
           <h3 className="font-medium">Reference solution</h3>
-          <button type="button" className="btn ml-auto px-2 py-0.5 text-xs" onClick={copy}>
+          <button
+            type="button"
+            className="btn ml-auto px-2 py-0.5 text-xs"
+            onClick={copy}
+          >
             {copied ? "Copied" : "Copy"}
           </button>
         </div>
@@ -332,10 +431,17 @@ function ReviseBox({
         aria-label="Feedback"
       />
       {!canRevise && (
-        <p className="text-xs text-slate-500">Fill in the prompt in the request form first, or wait for the running draft.</p>
+        <p className="text-xs text-slate-500">
+          Fill in the prompt in the request form first, or wait for the running
+          draft.
+        </p>
       )}
       <ErrorText error={error} />
-      <button type="submit" className="btn btn-primary" disabled={!canRevise || !ok}>
+      <button
+        type="submit"
+        className="btn btn-primary"
+        disabled={!canRevise || !ok}
+      >
         Revise
       </button>
     </form>

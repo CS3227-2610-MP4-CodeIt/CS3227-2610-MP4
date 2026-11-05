@@ -19,12 +19,28 @@ export function MarkdownField({
   return (
     <div className="space-y-1">
       <div className="flex gap-1">
-        <button type="button" className={tab(!preview)} onClick={() => setPreview(false)}>Write</button>
-        <button type="button" className={tab(preview)} onClick={() => setPreview(true)}>Preview</button>
+        <button
+          type="button"
+          className={tab(!preview)}
+          onClick={() => setPreview(false)}
+        >
+          Write
+        </button>
+        <button
+          type="button"
+          className={tab(preview)}
+          onClick={() => setPreview(true)}
+        >
+          Preview
+        </button>
       </div>
       {preview ? (
         <div className="min-h-24 rounded border border-slate-200 p-2">
-          {value.trim() ? <Markdown>{value}</Markdown> : <p className="text-sm text-slate-400">Nothing to preview.</p>}
+          {value.trim() ? (
+            <Markdown>{value}</Markdown>
+          ) : (
+            <p className="text-sm text-slate-400">Nothing to preview.</p>
+          )}
         </div>
       ) : (
         <textarea
