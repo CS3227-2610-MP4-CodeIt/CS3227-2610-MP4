@@ -67,7 +67,9 @@ async def get_user(user_id: int, ctx: AppContext = Depends(get_ctx)) -> UserDeta
 
 
 @router.patch("/users/{user_id}")
-async def update_user(user_id: int, body: UserUpdate, ctx: AppContext = Depends(get_ctx)) -> UserOut:
+async def update_user(
+    user_id: int, body: UserUpdate, ctx: AppContext = Depends(get_ctx)
+) -> UserOut:
     fields = body.model_dump(exclude_unset=True)
     if "password" in fields:
         fields["password_hash"] = await hash_password(fields.pop("password"))
@@ -109,7 +111,8 @@ async def _class_detail(ctx: AppContext, class_id: int) -> ClassDetailOut:
         teachers=[UserOut.model_validate(u) for u in members if u.role == "teacher"],
         students=[UserOut.model_validate(u) for u in members if u.role == "student"],
         assignments=[
-            AssignmentBrief(id=a.id, title=a.title, due_at=a.due_at, created_at=a.created_at) for a in assignments
+            AssignmentBrief(id=a.id, title=a.title, due_at=a.due_at, created_at=a.created_at)
+            for a in assignments
         ],
     )
 
@@ -134,7 +137,9 @@ async def get_class(class_id: int, ctx: AppContext = Depends(get_ctx)) -> ClassD
 
 
 @router.patch("/classes/{class_id}")
-async def update_class(class_id: int, body: ClassUpdate, ctx: AppContext = Depends(get_ctx)) -> ClassOut:
+async def update_class(
+    class_id: int, body: ClassUpdate, ctx: AppContext = Depends(get_ctx)
+) -> ClassOut:
     try:
         row = await classes_repo.update(ctx.db, class_id, **body.model_dump(exclude_unset=True))
     except Conflict as e:
@@ -152,7 +157,9 @@ async def delete_class(class_id: int, ctx: AppContext = Depends(get_ctx)) -> Res
 
 
 @router.post("/classes/{class_id}/members")
-async def add_members(class_id: int, body: MembersAdd, ctx: AppContext = Depends(get_ctx)) -> ClassDetailOut:
+async def add_members(
+    class_id: int, body: MembersAdd, ctx: AppContext = Depends(get_ctx)
+) -> ClassDetailOut:
     if await classes_repo.get(ctx.db, class_id) is None:
         raise HTTPException(status_code=404, detail="class not found")
     ids = list(dict.fromkeys(body.user_ids))
@@ -166,7 +173,9 @@ async def add_members(class_id: int, body: MembersAdd, ctx: AppContext = Depends
 
 
 @router.delete("/classes/{class_id}/members/{user_id}", status_code=204)
-async def remove_member(class_id: int, user_id: int, ctx: AppContext = Depends(get_ctx)) -> Response:
+async def remove_member(
+    class_id: int, user_id: int, ctx: AppContext = Depends(get_ctx)
+) -> Response:
     if not await classes_repo.remove_member(ctx.db, class_id, user_id):
         raise HTTPException(status_code=404, detail="membership not found")
     return Response(status_code=204)
@@ -200,4 +209,6 @@ async def new_summary(
 async def check_summary(
     assignment_id: int, admin: User = Depends(require_admin), ctx: AppContext = Depends(get_ctx)
 ) -> JobCheckOut:
-    return check_job_response(await latest_job(ctx.db, admin.id, "assignment_summary", f"a{assignment_id}"))
+    return check_job_response(
+        await latest_job(ctx.db, admin.id, "assignment_summary", f"a{assignment_id}")
+    )

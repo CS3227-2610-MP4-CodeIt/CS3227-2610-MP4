@@ -20,7 +20,11 @@ async def run_judge(ctx: AppContext, job_input: dict[str, Any]) -> dict[str, Any
         tests = [t for t in tests if not t.is_hidden]
 
     response = await ctx.executor.execute(
-        job_input["code"], question.time_limit_ms, question.memory_limit_mb, question.float_tolerance, tests
+        job_input["code"],
+        question.time_limit_ms,
+        question.memory_limit_mb,
+        question.float_tolerance,
+        tests,
     )
     try:
         result = _redact(response, [t.is_hidden for t in tests])
@@ -29,8 +33,15 @@ async def run_judge(ctx: AppContext, job_input: dict[str, Any]) -> dict[str, Any
 
     if submit:
         await submissions_repo.create(
-            ctx.db, job_input["student_id"], job_input["assignment_id"], job_input["question_id"],
-            job_input["job_id"], job_input["code"], result["verdict"], result["passed"], result["total"],
+            ctx.db,
+            job_input["student_id"],
+            job_input["assignment_id"],
+            job_input["question_id"],
+            job_input["job_id"],
+            job_input["code"],
+            result["verdict"],
+            result["passed"],
+            result["total"],
         )
     return result
 
@@ -50,9 +61,13 @@ def _redact(response: dict[str, Any], hidden_flags: list[bool]) -> dict[str, Any
     if failed is not None and hidden_flags[failed]:
         error_message = None
     data = {
-        "verdict": response["verdict"], "passed": response["passed"], "total": response["total"],
-        "failed_test_index": failed, "error_message": error_message,
-        "max_time_ms": response["max_time_ms"], "max_memory_kb": response.get("max_memory_kb"),
+        "verdict": response["verdict"],
+        "passed": response["passed"],
+        "total": response["total"],
+        "failed_test_index": failed,
+        "error_message": error_message,
+        "max_time_ms": response["max_time_ms"],
+        "max_memory_kb": response.get("max_memory_kb"),
         "results": results,
     }
     return JudgeResult.model_validate(data).model_dump()

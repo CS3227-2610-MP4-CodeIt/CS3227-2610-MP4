@@ -5,7 +5,13 @@ import aiosqlite
 
 from app.db import Database
 
-VERDICTS = ("ACCEPTED", "WRONG_ANSWER", "TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "RUNTIME_ERROR")
+VERDICTS = (
+    "ACCEPTED",
+    "WRONG_ANSWER",
+    "TIME_LIMIT_EXCEEDED",
+    "MEMORY_LIMIT_EXCEEDED",
+    "RUNTIME_ERROR",
+)
 
 
 @dataclass
@@ -24,8 +30,16 @@ class Submission:
 
 def _submission(row: aiosqlite.Row, with_code: bool) -> Submission:
     return Submission(
-        row["id"], row["user_id"], row["assignment_id"], row["question_id"], row["job_id"], row["verdict"],
-        row["passed"], row["total"], row["created_at"], row["code"] if with_code else None,
+        row["id"],
+        row["user_id"],
+        row["assignment_id"],
+        row["question_id"],
+        row["job_id"],
+        row["verdict"],
+        row["passed"],
+        row["total"],
+        row["created_at"],
+        row["code"] if with_code else None,
     )
 
 
@@ -50,7 +64,9 @@ async def create(
         return cursor.lastrowid  # type: ignore[return-value]
 
 
-async def list_for(db: Database, user_id: int, assignment_id: int, question_id: int) -> list[Submission]:
+async def list_for(
+    db: Database, user_id: int, assignment_id: int, question_id: int
+) -> list[Submission]:
     """The student's submissions for one assignment question, newest first, without code."""
     async with db.connect() as conn:
         cursor = await conn.execute(
@@ -144,7 +160,11 @@ async def assignment_stats(db: Database, assignment_id: int) -> dict[str, Any] |
             verdicts.setdefault(question_id, {})[verdict] = n
 
     return {
-        "assignment": {"title": head["title"], "due_at": head["due_at"], "class_name": head["name"]},
+        "assignment": {
+            "title": head["title"],
+            "due_at": head["due_at"],
+            "class_name": head["name"],
+        },
         "students_in_class": students_in_class,
         "students_attempted_any": attempted_any,
         "students_solved_all": solved_all,

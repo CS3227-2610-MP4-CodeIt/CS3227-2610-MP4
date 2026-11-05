@@ -53,7 +53,11 @@ async def run_hint(ctx: AppContext, job_input: dict[str, Any]) -> dict[str, Any]
     nonce = guards.new_nonce()
     canary = guards.new_canary()
     asked = job_input.get("question")
-    asked_line = f"Their question: {guards.wrap_untrusted('student_question', asked, nonce)} " if asked else ""
+    asked_line = (
+        f"Their question: {guards.wrap_untrusted('student_question', asked, nonce)} "
+        if asked
+        else ""
+    )
     messages: list[dict[str, Any]] = [
         {"role": "system", "content": guards.build_system_prompt(_BASE_PROMPT, nonce, canary)},
         {
@@ -78,7 +82,9 @@ async def run_hint(ctx: AppContext, job_input: dict[str, Any]) -> dict[str, Any]
                 if name not in tools_used:
                     tools_used.append(name)
                 content = guards.wrap_untrusted(name, handler(), nonce)
-            messages.append({"role": "tool", "tool_call_id": call.get("id", ""), "content": content})
+            messages.append(
+                {"role": "tool", "tool_call_id": call.get("id", ""), "content": content}
+            )
         choice = "none" if round_no == MAX_TOOL_ROUNDS else "auto"
         reply = await ctx.llm.chat(messages, tools=TOOLS, tool_choice=choice, max_tokens=MAX_TOKENS)
 

@@ -62,7 +62,9 @@ def question_body(**overrides: Any) -> dict[str, Any]:
     return body
 
 
-def chat_completion(content: str | None = "", tool_calls: list[dict] | None = None, finish_reason: str | None = None) -> dict:
+def chat_completion(
+    content: str | None = "", tool_calls: list[dict] | None = None, finish_reason: str | None = None
+) -> dict:
     """A SoCLaaS /v1/chat/completions response body."""
     message: dict[str, Any] = {"role": "assistant", "content": content}
     if tool_calls:
@@ -71,7 +73,13 @@ def chat_completion(content: str | None = "", tool_calls: list[dict] | None = No
         "id": "chatcmpl-test",
         "object": "chat.completion",
         "model": "upstream-model",
-        "choices": [{"index": 0, "message": message, "finish_reason": finish_reason or ("tool_calls" if tool_calls else "stop")}],
+        "choices": [
+            {
+                "index": 0,
+                "message": message,
+                "finish_reason": finish_reason or ("tool_calls" if tool_calls else "stop"),
+            }
+        ],
         "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15},
     }
 
@@ -81,13 +89,20 @@ def tool_call(name: str, call_id: str = "call_1", arguments: str = "{}") -> dict
     return {"id": call_id, "type": "function", "function": {"name": name, "arguments": arguments}}
 
 
-def execute_response(statuses: list[str], *, error_message: str | None = None, preview: bool = True) -> dict:
+def execute_response(
+    statuses: list[str], *, error_message: str | None = None, preview: bool = True
+) -> dict:
     """An executor /v1/execute response. statuses: one verdict per test, e.g. ["ACCEPTED", "WRONG_ANSWER"].
     Like the executor, it stops at the first failure; previews are added to every result if preview."""
     results: list[dict[str, Any]] = []
     failed: int | None = None
     for i, status in enumerate(statuses):
-        result: dict[str, Any] = {"index": i, "status": status, "time_ms": 10 + i, "memory_kb": 9000 + i}
+        result: dict[str, Any] = {
+            "index": i,
+            "status": status,
+            "time_ms": 10 + i,
+            "memory_kb": 9000 + i,
+        }
         if preview:
             result["stdout_preview"] = f"out{i}"
             result["stderr_preview"] = f"err{i}"
@@ -148,7 +163,9 @@ def mock_http() -> Iterator[respx.MockRouter]:
         router.get(f"{SOCLAAS_URL}/v1/models", name="models").respond(
             json={"object": "list", "data": [{"id": LLM_MODEL, "object": "model"}]}
         )
-        router.post(f"{SOCLAAS_URL}/v1/chat/completions", name="llm").respond(json=chat_completion("OK"))
+        router.post(f"{SOCLAAS_URL}/v1/chat/completions", name="llm").respond(
+            json=chat_completion("OK")
+        )
         router.post(f"{EXECUTOR_URL}/v1/execute", name="executor").respond(
             json=execute_response(["ACCEPTED", "ACCEPTED"])
         )
@@ -220,10 +237,17 @@ def make_user(db: Database) -> MakeUser:
     """`await make_user("teacher", username=None, display_name=None, password=TEST_PASSWORD)`:
     creates the user through the repo and a logged-in session (no HTTP)."""
 
-    async def make(role: str, username: str | None = None, display_name: str | None = None, password: str = TEST_PASSWORD) -> TestUser:
+    async def make(
+        role: str,
+        username: str | None = None,
+        display_name: str | None = None,
+        password: str = TEST_PASSWORD,
+    ) -> TestUser:
         n = next(_counter)
         username = username or f"{role}{n}"
-        user = await users_repo.create(db, username, display_name or f"{role.title()} {n}", await hash_password(password), role)
+        user = await users_repo.create(
+            db, username, display_name or f"{role.title()} {n}", await hash_password(password), role
+        )
         token = await create_session(db, user.id, 1)
         return TestUser(user, password, token)
 
@@ -251,7 +275,9 @@ def login(client: httpx.AsyncClient) -> Callable[[str, str], Awaitable[dict[str,
     """`headers = await login(username, password)` through POST /api/auth/login."""
 
     async def do_login(username: str, password: str) -> dict[str, str]:
-        response = await client.post("/api/auth/login", json={"username": username, "password": password})
+        response = await client.post(
+            "/api/auth/login", json={"username": username, "password": password}
+        )
         assert response.status_code == 200, response.text
         return {"Authorization": f"Bearer {response.json()['token']}"}
 
@@ -269,7 +295,9 @@ def _id(x: TestUser | int) -> int:
 def make_class(db: Database) -> Callable[..., Awaitable[ClassRow]]:
     """`await make_class(members=[teacher, student], name=None)` (members: TestUser or user id)."""
 
-    async def make(members: list[TestUser | int] | None = None, name: str | None = None) -> ClassRow:
+    async def make(
+        members: list[TestUser | int] | None = None, name: str | None = None
+    ) -> ClassRow:
         row = await classes_repo.create(db, name or f"Class {next(_counter)}")
         if members:
             await classes_repo.add_members(db, row.id, [_id(m) for m in members])
@@ -285,7 +313,9 @@ def make_question(db: Database) -> Callable[..., Awaitable[Question]]:
     """`await make_question(owner, **question_body_overrides)` → Question with test_cases."""
 
     async def make(owner: TestUser | int, **overrides: Any) -> Question:
-        return await questions_repo.create(db, _id(owner), QuestionIn.model_validate(question_body(**overrides)))
+        return await questions_repo.create(
+            db, _id(owner), QuestionIn.model_validate(question_body(**overrides))
+        )
 
     return make
 
@@ -302,7 +332,9 @@ def make_assignment(db: Database) -> Callable[..., Awaitable[Assignment]]:
         due_at: datetime | None = None,
         description_md: str = "",
     ) -> Assignment:
-        return await assignments_repo.create(db, class_id, _id(owner), title, description_md, due_at, question_ids)
+        return await assignments_repo.create(
+            db, class_id, _id(owner), title, description_md, due_at, question_ids
+        )
 
     return make
 
@@ -352,7 +384,8 @@ class SSEStream:
             "raw_path": b"/api/events",
             "query_string": b"",
             "root_path": "",
-            "headers": [(b"host", b"test")] + [(k.lower().encode(), v.encode()) for k, v in self.headers.items()],
+            "headers": [(b"host", b"test")]
+            + [(k.lower().encode(), v.encode()) for k, v in self.headers.items()],
             "client": ("127.0.0.1", 12345),
             "server": ("test", 80),
         }
@@ -369,7 +402,9 @@ class SSEStream:
         async def send(message: dict) -> None:
             if message["type"] == "http.response.start":
                 self.status = message["status"]
-                self.response_headers = {k.decode(): v.decode() for k, v in message.get("headers", [])}
+                self.response_headers = {
+                    k.decode(): v.decode() for k, v in message.get("headers", [])
+                }
                 self._started.set()
             elif message["type"] == "http.response.body":
                 if message.get("body"):

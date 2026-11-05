@@ -51,7 +51,10 @@ async def run_question_gen(ctx: AppContext, job_input: dict[str, Any]) -> dict[s
                 raise UserFacingError(INVALID_QUESTION) from e
             messages += [
                 {"role": "assistant", "content": reply.content},
-                {"role": "user", "content": f"That was invalid: {str(e)[:1500]}\nReturn the corrected JSON object only."},
+                {
+                    "role": "user",
+                    "content": f"That was invalid: {str(e)[:1500]}\nReturn the corrected JSON object only.",
+                },
             ]
             continue
         return QuestionGenResult(draft=draft).model_dump(mode="json")

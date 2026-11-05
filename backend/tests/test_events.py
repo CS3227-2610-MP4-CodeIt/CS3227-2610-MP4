@@ -38,10 +38,14 @@ async def test_stream_headers(open_events, student: TestUser) -> None:
 
 async def test_no_or_bad_token_is_401(client: httpx.AsyncClient) -> None:
     assert (await client.get("/api/events")).status_code == 401
-    assert (await client.get("/api/events", headers={"Authorization": "Bearer nope"})).status_code == 401
+    assert (
+        await client.get("/api/events", headers={"Authorization": "Bearer nope"})
+    ).status_code == 401
 
 
-async def test_job_created_and_finished_events(open_events, db: Database, student: TestUser) -> None:
+async def test_job_created_and_finished_events(
+    open_events, db: Database, student: TestUser
+) -> None:
     gate = asyncio.Event()
     async with open_events(student.headers) as stream:
         assert (await stream.next_event())[0] == "ready"
@@ -54,7 +58,9 @@ async def test_job_created_and_finished_events(open_events, db: Database, studen
     assert finished == expected  # only ids: no status, result or error
 
 
-async def test_only_owner_gets_events(open_events, db: Database, student: TestUser, make_user) -> None:
+async def test_only_owner_gets_events(
+    open_events, db: Database, student: TestUser, make_user
+) -> None:
     other = await make_user("student")
     gate = asyncio.Event()
     gate.set()
@@ -68,7 +74,9 @@ async def test_only_owner_gets_events(open_events, db: Database, student: TestUs
             await theirs.next_event(timeout=0.2)
 
 
-async def test_two_streams_of_one_user_both_get_events(open_events, db: Database, student: TestUser) -> None:
+async def test_two_streams_of_one_user_both_get_events(
+    open_events, db: Database, student: TestUser
+) -> None:
     gate = asyncio.Event()
     async with open_events(student.headers) as tab1, open_events(student.headers) as tab2:
         await tab1.next_event()

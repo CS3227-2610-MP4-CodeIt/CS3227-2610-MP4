@@ -6,7 +6,9 @@ import aiosqlite
 
 from app.db import Database
 
-_COLUMNS = "id, user_id, kind, target_key, status, input_json, result_json, error, created_at, finished_at"
+_COLUMNS = (
+    "id, user_id, kind, target_key, status, input_json, result_json, error, created_at, finished_at"
+)
 
 
 @dataclass
@@ -38,7 +40,9 @@ def _job(row: aiosqlite.Row) -> Job:
     )
 
 
-async def insert_in_process(db: Database, user_id: int, kind: str, target_key: str, job_input: dict[str, Any]) -> Job:
+async def insert_in_process(
+    db: Database, user_id: int, kind: str, target_key: str, job_input: dict[str, Any]
+) -> Job:
     """Raises sqlite3.IntegrityError if a job for this key is already in process."""
     async with db.transaction() as conn:
         cursor = await conn.execute(
@@ -79,7 +83,12 @@ async def latest(db: Database, user_id: int, kind: str, target_key: str) -> Job 
 
 
 async def finish(
-    db: Database, job_id: int, status: str, *, result: dict[str, Any] | None = None, error: str | None = None
+    db: Database,
+    job_id: int,
+    status: str,
+    *,
+    result: dict[str, Any] | None = None,
+    error: str | None = None,
 ) -> None:
     """Moves an in_process job to success (with result) or failed (with error). No-op otherwise."""
     async with db.transaction() as conn:

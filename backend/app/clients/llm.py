@@ -33,7 +33,7 @@ def error_message(response: httpx.Response) -> str:
     """Reads both SoCLaaS error shapes: {"error": "..."} and {"error": {"message": ...}}."""
     try:
         error = response.json().get("error")
-    except (ValueError, AttributeError):
+    except ValueError, AttributeError:
         return response.text[:200]
     if isinstance(error, dict):
         return str(error.get("message", ""))
@@ -101,7 +101,9 @@ class LLMClient:
         delays = list(self.retry_delays_s)
         while True:
             try:
-                response = await self._http.post("/v1/chat/completions", json=body, timeout=self.chat_timeout_s)
+                response = await self._http.post(
+                    "/v1/chat/completions", json=body, timeout=self.chat_timeout_s
+                )
             except httpx.HTTPError as e:
                 raise UserFacingError(UNAVAILABLE) from e
             if response.status_code in RETRY_STATUSES and delays:
@@ -117,7 +119,7 @@ def _parse(response: httpx.Response) -> ChatReply:
         data = response.json()
         choice = data["choices"][0]
         message = choice.get("message") or {}
-    except (ValueError, KeyError, IndexError, TypeError):
+    except ValueError, KeyError, IndexError, TypeError:
         raise UserFacingError(UNAVAILABLE)
     return ChatReply(
         content=(message.get("content") or "").strip(),

@@ -43,7 +43,9 @@ class Question:
 
 
 def _question(row: aiosqlite.Row) -> Question:
-    tolerance = None if row["float_abs"] is None else {"abs": row["float_abs"], "rel": row["float_rel"]}
+    tolerance = (
+        None if row["float_abs"] is None else {"abs": row["float_abs"], "rel": row["float_rel"]}
+    )
     return Question(
         id=row["id"],
         created_by=row["created_by"],
@@ -77,11 +79,16 @@ def _fields(data: QuestionIn) -> tuple:
 async def _insert_tests(conn: aiosqlite.Connection, question_id: int, data: QuestionIn) -> None:
     await conn.executemany(
         "INSERT INTO test_cases (question_id, position, is_hidden, stdin, expected_stdout) VALUES (?, ?, ?, ?, ?)",
-        [(question_id, i, int(t.is_hidden), t.stdin, t.expected_stdout) for i, t in enumerate(data.test_cases, 1)],
+        [
+            (question_id, i, int(t.is_hidden), t.stdin, t.expected_stdout)
+            for i, t in enumerate(data.test_cases, 1)
+        ],
     )
 
 
-async def create(db: Database, created_by: int, data: QuestionIn, source_job_id: int | None = None) -> Question:
+async def create(
+    db: Database, created_by: int, data: QuestionIn, source_job_id: int | None = None
+) -> Question:
     """Inserts the question and its test cases (position = list order, from 1).
     Raises Conflict if source_job_id was already approved."""
     try:
@@ -104,7 +111,9 @@ async def create(db: Database, created_by: int, data: QuestionIn, source_job_id:
 async def get(db: Database, question_id: int, with_tests: bool = True) -> Question | None:
     """The question, with all its test cases ordered by position if with_tests."""
     async with db.connect() as conn:
-        cursor = await conn.execute(f"SELECT {_COLUMNS} FROM questions WHERE id = ?", (question_id,))
+        cursor = await conn.execute(
+            f"SELECT {_COLUMNS} FROM questions WHERE id = ?", (question_id,)
+        )
         row = await cursor.fetchone()
     if row is None:
         return None
@@ -120,13 +129,17 @@ async def get_many(db: Database, question_ids: list[int]) -> list[Question]:
         return []
     marks = ",".join("?" * len(question_ids))
     async with db.connect() as conn:
-        cursor = await conn.execute(f"SELECT {_COLUMNS} FROM questions WHERE id IN ({marks}) ORDER BY id", question_ids)
+        cursor = await conn.execute(
+            f"SELECT {_COLUMNS} FROM questions WHERE id IN ({marks}) ORDER BY id", question_ids
+        )
         return [_question(row) for row in await cursor.fetchall()]
 
 
 async def get_by_source_job(db: Database, job_id: int) -> Question | None:
     async with db.connect() as conn:
-        cursor = await conn.execute(f"SELECT {_COLUMNS} FROM questions WHERE source_job_id = ?", (job_id,))
+        cursor = await conn.execute(
+            f"SELECT {_COLUMNS} FROM questions WHERE source_job_id = ?", (job_id,)
+        )
         row = await cursor.fetchone()
     return _question(row) if row else None
 
@@ -140,7 +153,9 @@ async def list_by_owner(db: Database, teacher_id: int) -> list[Question]:
         return [_question(row) for row in await cursor.fetchall()]
 
 
-async def get_test_cases(db: Database, question_id: int, hidden: bool | None = None) -> list[TestCaseRow]:
+async def get_test_cases(
+    db: Database, question_id: int, hidden: bool | None = None
+) -> list[TestCaseRow]:
     """Test cases ordered by position. hidden=False → visible only, True → hidden only, None → all."""
     sql = "SELECT id, position, is_hidden, stdin, expected_stdout FROM test_cases WHERE question_id = ?"
     params: list = [question_id]
@@ -150,7 +165,10 @@ async def get_test_cases(db: Database, question_id: int, hidden: bool | None = N
     async with db.connect() as conn:
         cursor = await conn.execute(sql + " ORDER BY position", params)
         rows = await cursor.fetchall()
-    return [TestCaseRow(r["id"], r["position"], bool(r["is_hidden"]), r["stdin"], r["expected_stdout"]) for r in rows]
+    return [
+        TestCaseRow(r["id"], r["position"], bool(r["is_hidden"]), r["stdin"], r["expected_stdout"])
+        for r in rows
+    ]
 
 
 async def count_test_cases(db: Database, question_id: int, hidden: bool | None = None) -> int:
@@ -183,7 +201,9 @@ async def replace(db: Database, question_id: int, data: QuestionIn) -> Question 
 async def is_used(db: Database, question_id: int) -> bool:
     """True if any assignment uses the question."""
     async with db.connect() as conn:
-        cursor = await conn.execute("SELECT 1 FROM assignment_questions WHERE question_id = ? LIMIT 1", (question_id,))
+        cursor = await conn.execute(
+            "SELECT 1 FROM assignment_questions WHERE question_id = ? LIMIT 1", (question_id,)
+        )
         return await cursor.fetchone() is not None
 
 

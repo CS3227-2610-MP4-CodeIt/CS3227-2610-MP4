@@ -69,7 +69,9 @@ async def _own_gen_job(ctx: AppContext, user: User, job_id: int):
 
 
 @router.get("/classes")
-async def list_classes(user: User = Depends(require_teacher), ctx: AppContext = Depends(get_ctx)) -> list[ClassOut]:
+async def list_classes(
+    user: User = Depends(require_teacher), ctx: AppContext = Depends(get_ctx)
+) -> list[ClassOut]:
     return [ClassOut.model_validate(c) for c in await classes_repo.list_for_user(ctx.db, user.id)]
 
 
@@ -80,7 +82,10 @@ async def list_classes(user: User = Depends(require_teacher), ctx: AppContext = 
 async def list_questions(
     user: User = Depends(require_teacher), ctx: AppContext = Depends(get_ctx)
 ) -> list[QuestionSummaryOut]:
-    return [QuestionSummaryOut.model_validate(q) for q in await questions_repo.list_by_owner(ctx.db, user.id)]
+    return [
+        QuestionSummaryOut.model_validate(q)
+        for q in await questions_repo.list_by_owner(ctx.db, user.id)
+    ]
 
 
 @router.post("/questions", status_code=201)
@@ -99,7 +104,10 @@ async def get_question(
 
 @router.put("/questions/{question_id}")
 async def replace_question(
-    question_id: int, body: QuestionIn, user: User = Depends(require_teacher), ctx: AppContext = Depends(get_ctx)
+    question_id: int,
+    body: QuestionIn,
+    user: User = Depends(require_teacher),
+    ctx: AppContext = Depends(get_ctx),
 ) -> QuestionOut:
     await _own_question(ctx, user, question_id)
     question = await questions_repo.replace(ctx.db, question_id, body)
@@ -136,12 +144,16 @@ async def new_generation(
             raise HTTPException(status_code=404, detail="job not found")
         job_input["parent_draft"] = parent.result["draft"]
     handler = partial(question_gen.run_question_gen, ctx)
-    job, created = await start_job(ctx.db, user.id, KIND, "-", job_input, handler, ctx.settings.llm_job_timeout_s)
+    job, created = await start_job(
+        ctx.db, user.id, KIND, "-", job_input, handler, ctx.settings.llm_job_timeout_s
+    )
     return new_job_response(job, created)
 
 
 @router.get("/question-generations")
-async def check_generation(user: User = Depends(require_teacher), ctx: AppContext = Depends(get_ctx)) -> JobCheckOut:
+async def check_generation(
+    user: User = Depends(require_teacher), ctx: AppContext = Depends(get_ctx)
+) -> JobCheckOut:
     return check_job_response(await latest_job(ctx.db, user.id, KIND, "-"))
 
 
@@ -176,13 +188,21 @@ async def list_assignments(
 
 @router.post("/assignments", status_code=201)
 async def create_assignment(
-    body: AssignmentCreate, user: User = Depends(require_teacher), ctx: AppContext = Depends(get_ctx)
+    body: AssignmentCreate,
+    user: User = Depends(require_teacher),
+    ctx: AppContext = Depends(get_ctx),
 ) -> AssignmentOut:
     if not await classes_repo.is_member(ctx.db, body.class_id, user.id):
         raise HTTPException(status_code=404, detail="class not found")
     await _check_question_ids(ctx, user, body.question_ids)
     assignment = await assignments_repo.create(
-        ctx.db, body.class_id, user.id, body.title, body.description_md, body.due_at, body.question_ids
+        ctx.db,
+        body.class_id,
+        user.id,
+        body.title,
+        body.description_md,
+        body.due_at,
+        body.question_ids,
     )
     return AssignmentOut.model_validate(assignment)
 
@@ -196,11 +216,18 @@ async def get_assignment(
 
 @router.get("/assignments/{assignment_id}/questions/{question_id}")
 async def get_assignment_question(
-    assignment_id: int, question_id: int, user: User = Depends(require_teacher), ctx: AppContext = Depends(get_ctx)
+    assignment_id: int,
+    question_id: int,
+    user: User = Depends(require_teacher),
+    ctx: AppContext = Depends(get_ctx),
 ) -> QuestionOut:
     """Read-only view for any teacher of the class, including co-teachers who did not write it."""
     assignment = await _own_assignment(ctx, user, assignment_id)
-    question = await questions_repo.get(ctx.db, question_id) if assignment.has_question(question_id) else None
+    question = (
+        await questions_repo.get(ctx.db, question_id)
+        if assignment.has_question(question_id)
+        else None
+    )
     if question is None:
         raise HTTPException(status_code=404, detail="question not found")
     return QuestionOut.model_validate(question)

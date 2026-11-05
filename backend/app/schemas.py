@@ -21,7 +21,9 @@ MemberRole = Literal["teacher", "student"]
 Difficulty = Literal["easy", "medium", "hard"]
 JobKind = Literal["run", "submit", "hint", "question_gen", "assignment_summary"]
 JobStatus = Literal["in_process", "success", "failed"]
-Verdict = Literal["ACCEPTED", "WRONG_ANSWER", "TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "RUNTIME_ERROR"]
+Verdict = Literal[
+    "ACCEPTED", "WRONG_ANSWER", "TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "RUNTIME_ERROR"
+]
 
 USERNAME = {"min_length": 3, "max_length": 32, "pattern": r"^[A-Za-z0-9_.-]+$"}
 DISPLAY_NAME = {"min_length": 1, "max_length": 100}

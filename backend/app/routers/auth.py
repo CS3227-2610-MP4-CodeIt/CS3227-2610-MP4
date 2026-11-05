@@ -23,7 +23,9 @@ async def login(body: LoginIn, ctx: AppContext = Depends(get_ctx)) -> LoginOut:
 
 
 @router.post("/logout", status_code=204, dependencies=[Depends(current_user)])
-async def logout(token_hash: str = Depends(current_token_hash), ctx: AppContext = Depends(get_ctx)) -> Response:
+async def logout(
+    token_hash: str = Depends(current_token_hash), ctx: AppContext = Depends(get_ctx)
+) -> Response:
     await users_repo.delete_session(ctx.db, token_hash)
     return Response(status_code=204)
 

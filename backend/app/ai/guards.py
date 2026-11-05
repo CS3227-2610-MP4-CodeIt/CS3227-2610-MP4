@@ -31,7 +31,9 @@ _INJECTION_PATTERNS = [
     r"\[/?inst\]",
     r"</?\s*(system|assistant)\s*>",
 ]
-_INJECTION_RE = re.compile("|".join(f"(?:{p})" for p in _INJECTION_PATTERNS), re.IGNORECASE | re.MULTILINE)
+_INJECTION_RE = re.compile(
+    "|".join(f"(?:{p})" for p in _INJECTION_PATTERNS), re.IGNORECASE | re.MULTILINE
+)
 _UNTRUSTED_TAG_RE = re.compile(r"<\s*/?\s*untrusted-[^>]*>?", re.IGNORECASE)
 _FENCE_RE = re.compile(r"(?P<fence>```|~~~)[^\n]*\n(?P<body>.*?)(?:(?P=fence)|\Z)", re.DOTALL)
 

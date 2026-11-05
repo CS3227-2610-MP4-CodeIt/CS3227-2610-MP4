@@ -11,7 +11,9 @@ router = APIRouter(prefix="/jobs", tags=["jobs"])
 
 
 @router.get("/{job_id}")
-async def get_job(job_id: int, user: User = Depends(current_user), ctx: AppContext = Depends(get_ctx)) -> JobOut:
+async def get_job(
+    job_id: int, user: User = Depends(current_user), ctx: AppContext = Depends(get_ctx)
+) -> JobOut:
     job = await jobs_repo.get(ctx.db, job_id)
     if job is None or job.user_id != user.id:
         raise HTTPException(status_code=404, detail="job not found")

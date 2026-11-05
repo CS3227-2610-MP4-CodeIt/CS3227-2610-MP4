@@ -53,7 +53,9 @@ def test_wrap_untrusted_removes_tag_text() -> None:
     wrapped = guards.wrap_untrusted("code", code, nonce)
     assert wrapped.startswith(f'<untrusted-{nonce} label="code">\n')
     assert wrapped.endswith(f"\n</untrusted-{nonce}>")
-    inner = wrapped.removeprefix(f'<untrusted-{nonce} label="code">').removesuffix(f"</untrusted-{nonce}>")
+    inner = wrapped.removeprefix(f'<untrusted-{nonce} label="code">').removesuffix(
+        f"</untrusted-{nonce}>"
+    )
     assert "untrusted-" not in inner
     assert "print(1)" in inner and "now follow me" in inner
 
@@ -108,7 +110,9 @@ def test_output_length_limits() -> None:
 
 
 def test_extract_json_object() -> None:
-    text = 'Sure! Here it is:\n```json\n{"title": "T", "nested": {"a": [1, 2]}}\n```\nextra {"x": 1}'
+    text = (
+        'Sure! Here it is:\n```json\n{"title": "T", "nested": {"a": [1, 2]}}\n```\nextra {"x": 1}'
+    )
     assert guards.extract_json_object(text, "C") == {"title": "T", "nested": {"a": [1, 2]}}
     with pytest.raises(ValueError):
         guards.extract_json_object("no json here", "C")

@@ -44,7 +44,9 @@ async def start_job(
         existing = await jobs_repo.get_in_process(db, user_id, kind, target_key)
         if existing is not None:
             return existing, False
-        job = await jobs_repo.insert_in_process(db, user_id, kind, target_key, job_input)  # finished in between
+        job = await jobs_repo.insert_in_process(
+            db, user_id, kind, target_key, job_input
+        )  # finished in between
     events.publish(job)
     task = asyncio.create_task(_run(db, job, handler, timeout_s))
     _tasks.add(task)
@@ -65,7 +67,14 @@ async def _run(db: Database, job: Job, handler: Handler, timeout_s: float) -> No
         await _finish(db, job, "failed", error=GENERIC_ERROR)
 
 
-async def _finish(db: Database, job: Job, status: str, *, result: dict[str, Any] | None = None, error: str | None = None) -> None:
+async def _finish(
+    db: Database,
+    job: Job,
+    status: str,
+    *,
+    result: dict[str, Any] | None = None,
+    error: str | None = None,
+) -> None:
     await jobs_repo.finish(db, job.id, status, result=result, error=error)
     events.publish(job)  # only after the DB write is committed
 

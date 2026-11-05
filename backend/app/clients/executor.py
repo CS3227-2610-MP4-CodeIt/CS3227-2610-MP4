@@ -40,13 +40,17 @@ def build_payload(
         "time_limit_ms": time_limit_ms,
         "memory_limit_mb": memory_limit_mb,
         "float_tolerance": float_tolerance,
-        "test_cases": [{"stdin": t.stdin, "expected_stdout": t.expected_stdout} for t in test_cases],
+        "test_cases": [
+            {"stdin": t.stdin, "expected_stdout": t.expected_stdout} for t in test_cases
+        ],
     }
 
 
 class ExecutorClient:
     def __init__(self, base_url: str, token: str) -> None:
-        self._http = httpx.AsyncClient(base_url=base_url.rstrip("/"), headers={"X-Internal-Token": token})
+        self._http = httpx.AsyncClient(
+            base_url=base_url.rstrip("/"), headers={"X-Internal-Token": token}
+        )
 
     async def aclose(self) -> None:
         await self._http.aclose()

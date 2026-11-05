@@ -17,7 +17,13 @@ async def _start_and_stop(settings: Settings) -> None:
 
 
 async def test_dev_startup_twice_seeds_once(settings: Settings, mock_http) -> None:
-    dev = settings.model_copy(update={"app_env": "dev", "bootstrap_admin_username": None, "bootstrap_admin_password": None})
+    dev = settings.model_copy(
+        update={
+            "app_env": "dev",
+            "bootstrap_admin_username": None,
+            "bootstrap_admin_password": None,
+        }
+    )
     await _start_and_stop(dev)
     await _start_and_stop(dev)
 
@@ -37,7 +43,9 @@ async def test_dev_startup_twice_seeds_once(settings: Settings, mock_http) -> No
     assert "teacher1" in class_a and "student01" in class_a and "student11" not in class_a
 
 
-async def test_dev_seed_skips_admin_when_bootstrap_admin_exists(settings: Settings, mock_http) -> None:
+async def test_dev_seed_skips_admin_when_bootstrap_admin_exists(
+    settings: Settings, mock_http
+) -> None:
     dev = settings.model_copy(update={"app_env": "dev"})
     app = create_app(dev)
     async with app.router.lifespan_context(app):
@@ -47,7 +55,9 @@ async def test_dev_seed_skips_admin_when_bootstrap_admin_exists(settings: Settin
         assert len(await users_repo.list_users(db)) == 23
         transport = httpx.ASGITransport(app=app)
         async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.post("/api/auth/login", json={"username": "student07", "password": "demo1234"})
+            response = await client.post(
+                "/api/auth/login", json={"username": "student07", "password": "demo1234"}
+            )
             assert response.status_code == 200
             assert (await client.get("/docs")).status_code == 200  # docs on in dev
 

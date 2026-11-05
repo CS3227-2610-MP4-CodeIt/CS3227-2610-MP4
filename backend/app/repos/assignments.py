@@ -45,12 +45,21 @@ class Assignment:
 
 def _assignment(row: aiosqlite.Row) -> Assignment:
     return Assignment(
-        row["id"], row["class_id"], row["class_name"], row["created_by"], row["title"], row["description_md"],
-        row["due_at"], row["created_at"], row["updated_at"],
+        row["id"],
+        row["class_id"],
+        row["class_name"],
+        row["created_by"],
+        row["title"],
+        row["description_md"],
+        row["due_at"],
+        row["created_at"],
+        row["updated_at"],
     )
 
 
-async def _with_questions(conn: aiosqlite.Connection, assignments: list[Assignment]) -> list[Assignment]:
+async def _with_questions(
+    conn: aiosqlite.Connection, assignments: list[Assignment]
+) -> list[Assignment]:
     if not assignments:
         return assignments
     by_id = {a.id: a for a in assignments}
@@ -62,7 +71,9 @@ async def _with_questions(conn: aiosqlite.Connection, assignments: list[Assignme
         list(by_id),
     )
     for r in await cursor.fetchall():
-        by_id[r["assignment_id"]].questions.append(AssignmentQuestion(r["id"], r["position"], r["title"], r["difficulty"]))
+        by_id[r["assignment_id"]].questions.append(
+            AssignmentQuestion(r["id"], r["position"], r["title"], r["difficulty"])
+        )
     return assignments
 
 
@@ -89,7 +100,9 @@ async def get_for_member(db: Database, assignment_id: int, user_id: int) -> Assi
     return found[0] if found else None
 
 
-async def list_for_member(db: Database, user_id: int, class_id: int | None = None) -> list[Assignment]:
+async def list_for_member(
+    db: Database, user_id: int, class_id: int | None = None
+) -> list[Assignment]:
     """Assignments of every class the user belongs to (optionally one class), newest first."""
     where = "WHERE a.class_id IN (SELECT class_id FROM class_members WHERE user_id = ?)"
     params: tuple = (user_id,)
@@ -131,7 +144,8 @@ async def create(
 async def has_submissions(db: Database, assignment_id: int, question_id: int) -> bool:
     async with db.connect() as conn:
         cursor = await conn.execute(
-            "SELECT 1 FROM submissions WHERE assignment_id = ? AND question_id = ? LIMIT 1", (assignment_id, question_id)
+            "SELECT 1 FROM submissions WHERE assignment_id = ? AND question_id = ? LIMIT 1",
+            (assignment_id, question_id),
         )
         return await cursor.fetchone() is not None
 
@@ -155,17 +169,22 @@ async def update(
         for q in current.questions:
             if q.id not in question_ids and await has_submissions(db, assignment_id, q.id):
                 raise Conflict("a question with submissions cannot be removed from the assignment")
-    changes: dict[str, object] = {k: v for k, v in {"title": title, "description_md": description_md}.items() if v is not None}
+    changes: dict[str, object] = {
+        k: v for k, v in {"title": title, "description_md": description_md}.items() if v is not None
+    }
     if due_at is not _UNSET:
         changes["due_at"] = to_iso(due_at) if isinstance(due_at, datetime) else None
     # foreign_keys OFF: re-inserting the question rows must not cascade-delete kept submissions.
     async with db.transaction(foreign_keys=False) as conn:
         sets = "".join(f"{k} = ?, " for k in changes)
         await conn.execute(
-            f"UPDATE assignments SET {sets}updated_at = ? WHERE id = ?", (*changes.values(), now_iso(), assignment_id)
+            f"UPDATE assignments SET {sets}updated_at = ? WHERE id = ?",
+            (*changes.values(), now_iso(), assignment_id),
         )
         if question_ids is not None:
-            await conn.execute("DELETE FROM assignment_questions WHERE assignment_id = ?", (assignment_id,))
+            await conn.execute(
+                "DELETE FROM assignment_questions WHERE assignment_id = ?", (assignment_id,)
+            )
             await conn.executemany(
                 "INSERT INTO assignment_questions (assignment_id, question_id, position) VALUES (?, ?, ?)",
                 [(assignment_id, q, i) for i, q in enumerate(question_ids, 1)],

@@ -35,14 +35,18 @@ async def get_many(db: Database, user_ids: list[int]) -> list[User]:
         return []
     marks = ",".join("?" * len(user_ids))
     async with db.connect() as conn:
-        cursor = await conn.execute(f"SELECT {_COLUMNS} FROM users WHERE id IN ({marks}) ORDER BY id", user_ids)
+        cursor = await conn.execute(
+            f"SELECT {_COLUMNS} FROM users WHERE id IN ({marks}) ORDER BY id", user_ids
+        )
         return [_user(row) for row in await cursor.fetchall()]
 
 
 async def get_with_password_hash(db: Database, username: str) -> tuple[User, str] | None:
     """Case-insensitive username lookup, for login."""
     async with db.connect() as conn:
-        cursor = await conn.execute(f"SELECT {_COLUMNS}, password_hash FROM users WHERE username = ?", (username,))
+        cursor = await conn.execute(
+            f"SELECT {_COLUMNS}, password_hash FROM users WHERE username = ?", (username,)
+        )
         row = await cursor.fetchone()
     return (_user(row), row["password_hash"]) if row else None
 
@@ -52,7 +56,9 @@ async def list_users(db: Database, role: str | None = None) -> list[User]:
         if role is None:
             cursor = await conn.execute(f"SELECT {_COLUMNS} FROM users ORDER BY id")
         else:
-            cursor = await conn.execute(f"SELECT {_COLUMNS} FROM users WHERE role = ? ORDER BY id", (role,))
+            cursor = await conn.execute(
+                f"SELECT {_COLUMNS} FROM users WHERE role = ? ORDER BY id", (role,)
+            )
         return [_user(row) for row in await cursor.fetchall()]
 
 
@@ -63,7 +69,9 @@ async def count_admins(db: Database) -> int:
     return row[0] if row else 0
 
 
-async def create(db: Database, username: str, display_name: str, password_hash: str, role: str) -> User:
+async def create(
+    db: Database, username: str, display_name: str, password_hash: str, role: str
+) -> User:
     """Raises Conflict if the username is taken (case-insensitive)."""
     try:
         async with db.transaction() as conn:
@@ -96,7 +104,8 @@ async def update(
             if changes:
                 sets = ", ".join(f"{k} = ?" for k in changes)
                 await conn.execute(
-                    f"UPDATE users SET {sets}, updated_at = ? WHERE id = ?", (*changes.values(), now_iso(), user_id)
+                    f"UPDATE users SET {sets}, updated_at = ? WHERE id = ?",
+                    (*changes.values(), now_iso(), user_id),
                 )
             if password_hash is not None:
                 await conn.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
@@ -118,7 +127,8 @@ async def delete(db: Database, user_id: int) -> bool:
 async def create_session(db: Database, token_hash: str, user_id: int, expires_at: str) -> None:
     async with db.transaction() as conn:
         await conn.execute(
-            "INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)", (token_hash, user_id, expires_at)
+            "INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)",
+            (token_hash, user_id, expires_at),
         )
 
 

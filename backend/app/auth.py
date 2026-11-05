@@ -29,7 +29,7 @@ async def verify_password(password_hash: str, password: str) -> bool:
     def verify() -> bool:
         try:
             return _hasher.verify(password_hash, password)
-        except (VerificationError, InvalidHashError):
+        except VerificationError, InvalidHashError:
             return False
 
     return await asyncio.to_thread(verify)
@@ -47,22 +47,30 @@ def token_hash(token: str) -> str:
 async def create_session(db: Database, user_id: int, ttl_hours: float) -> str:
     """Creates a session and returns the raw token (only its hash is stored)."""
     token = secrets.token_urlsafe(32)
-    await users_repo.create_session(db, token_hash(token), user_id, now_iso(timedelta(hours=ttl_hours)))
+    await users_repo.create_session(
+        db, token_hash(token), user_id, now_iso(timedelta(hours=ttl_hours))
+    )
     return token
 
 
 def _unauthorized() -> HTTPException:
-    return HTTPException(status_code=401, detail="not authenticated", headers={"WWW-Authenticate": "Bearer"})
+    return HTTPException(
+        status_code=401, detail="not authenticated", headers={"WWW-Authenticate": "Bearer"}
+    )
 
 
-async def current_token_hash(credentials: HTTPAuthorizationCredentials | None = Depends(_bearer)) -> str:
+async def current_token_hash(
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+) -> str:
     """sha256 of the bearer token; 401 if there is no bearer token."""
     if credentials is None or not credentials.credentials:
         raise _unauthorized()
     return token_hash(credentials.credentials)
 
 
-async def current_user(token_hash_: str = Depends(current_token_hash), ctx: AppContext = Depends(get_ctx)) -> User:
+async def current_user(
+    token_hash_: str = Depends(current_token_hash), ctx: AppContext = Depends(get_ctx)
+) -> User:
     """The logged-in user; 401 for a missing / unknown / expired token or a deleted user."""
     user = await users_repo.get_session_user(ctx.db, token_hash_)
     if user is None:
