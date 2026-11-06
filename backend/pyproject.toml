@@ -17,7 +17,7 @@ dev = [
     "ruff>=0.13,<1",
     "mypy>=1.18,<2",
     "pytest>=8.3",
-    "pytest-asyncio>=0.25",
+    "pytest-asyncio>=1.4.1.post1",
     "respx>=0.22",
 ]
 
