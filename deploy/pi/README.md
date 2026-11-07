@@ -2,8 +2,12 @@
 
 Every push to `master` runs the backend and executor checks. A successful run
 joins the tailnet temporarily, then asks the Pi to deploy that exact commit to
-the isolated `codeit-staging` Compose project. The existing Funnel-facing
-service and database remain on the existing Compose project and port 8000.
+the isolated `codeit-staging` Compose project. The Pi then rebuilds and
+recreates the existing production backend and executor from the same commit,
+without waiting for staging health to pass. It runs health checks on both
+stacks after production has been updated.
+The Funnel-facing service remains on port 8000 and keeps its existing database
+volume and production environment files.
 
 The staging backend binds to `127.0.0.1:8001`, uses its own database volume,
 runs with `APP_ENV=prod`, and talks to the executor through an internal HTTPS
@@ -22,10 +26,15 @@ staging token and certificates.
 The deploy command lives outside the repository at
 `~/.local/bin/deploy-codeit-staging`. Its SSH key is restricted in
 `authorized_keys` to `staging <full-commit-sha>`; it rejects any other command
-or SHA that is no longer the current `master` commit. After a deploy it checks
-the backend, executor container health, and the HTTPS executor connection. A
-failed staging deploy exits with an error and leaves staging containers for
-diagnosis; the separate production stack is not changed.
+or SHA that is no longer the current `master` commit. The command starts the
+staging containers, then promotes the same commit to the existing `codeit`
+production Compose project regardless of staging health. It checks both stacks
+after production is updated. A Markdown report is saved in
+`~/.config/codeit-staging/reports/` and printed into the GitHub Actions run
+log. Failed post-deploy checks are reported after promotion, do not block the
+production update, and do not automatically roll it back. The deployed
+production SHA is recorded in
+`~/.config/codeit-staging/state/production-sha`.
 
 ## Tailscale one-time setup
 
@@ -49,6 +58,7 @@ key. The workflow does not expose these credentials to pull-request jobs.
 
 ## Production promotion
 
-This workflow deploys staging only. Production promotion remains a separate
-manual approval step, as previously selected. The production stack stays on
-port 8000 and continues to be served by the existing Funnel configuration.
+Promotion is automatic after staging containers start. It updates only
+the existing Pi `codeit` Compose backend and executor; it does not change the
+Render frontend or the Tailscale Funnel configuration. The production
+database volume and environment files remain in place.
