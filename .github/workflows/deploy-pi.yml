@@ -1,0 +1,101 @@
+name: Deploy backend and executor to Pi staging
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  backend-checks:
+    name: Pi staging backend checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.12.23"
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - run: uv python install 3.14
+      - run: uv sync --locked
+      - run: uv run --locked ruff format --check .
+      - run: uv run --locked ruff check .
+      - run: uv run --locked mypy app
+      - run: uv run --locked pytest -q
+      - run: uv build
+
+  executor-checks:
+    name: Pi staging executor checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: code-execution
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.12.23"
+          enable-cache: true
+          cache-dependency-glob: code-execution/uv.lock
+      - run: uv python install 3.14
+      - run: uv sync --locked
+      - run: uv run --locked ruff format --check .
+      - run: uv run --locked ruff check .
+      - run: uv run --locked mypy app
+      - run: uv run --locked pytest -q
+      - run: uv build
+
+  deploy-staging:
+    name: Auto-deploy Pi staging
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: [backend-checks, executor-checks]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: pi-staging
+    concurrency:
+      group: pi-staging
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Join the private tailnet temporarily
+        uses: tailscale/github-action@064b10558093f38325e838ddea35486bdc6b1d5c # v4.4.0
+        with:
+          oauth-client-id: ${{ vars.TAILSCALE_OAUTH_CLIENT_ID }}
+          audience: ${{ vars.TAILSCALE_AUDIENCE }}
+          tags: tag:github-actions
+
+      - name: Deploy this commit to Pi staging
+        env:
+          PI_DEPLOY_SSH_KEY: ${{ secrets.PI_DEPLOY_SSH_KEY }}
+          PI_SSH_KNOWN_HOSTS: ${{ vars.PI_SSH_KNOWN_HOSTS }}
+          PI_SSH_HOST: ${{ vars.PI_SSH_HOST }}
+        run: |
+          set -eu
+          test -n "$PI_DEPLOY_SSH_KEY"
+          test -n "$PI_SSH_KNOWN_HOSTS"
+          test -n "$PI_SSH_HOST"
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$PI_DEPLOY_SSH_KEY" > "$HOME/.ssh/pi_deploy"
+          printf '%s\n' "$PI_SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/pi_deploy" "$HOME/.ssh/known_hosts"
+          ssh -i "$HOME/.ssh/pi_deploy" \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            "junhao@$PI_SSH_HOST" "staging $GITHUB_SHA"
