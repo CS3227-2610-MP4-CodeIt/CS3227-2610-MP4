@@ -43,13 +43,6 @@ LATEST_SHA="$(git -C "$REPO_DIR" rev-parse --verify origin/master^{commit})"
 [[ "$TARGET_SHA" == "$LATEST_SHA" ]] || die "Refusing stale deployment; master is now $LATEST_SHA."
 git -C "$REPO_DIR" cat-file -e "$TARGET_SHA^{commit}" 2>/dev/null || die "Commit is not available locally."
 
-PREVIOUS_SHA=""
-[[ -f "$STATE_DIR/current-sha" ]] && PREVIOUS_SHA="$(cat "$STATE_DIR/current-sha")"
-if [[ -z "$PREVIOUS_SHA" ]]; then
-    PREVIOUS_SHA="$(git -C "$REPO_DIR" rev-parse --verify HEAD^{commit})"
-fi
-[[ "$PREVIOUS_SHA" =~ ^[0-9a-f]{40}$ ]] || die "Recorded previous deployment SHA is invalid."
-
 make_release() {
     local sha="$1" path="$RELEASE_DIR/$1"
     if [[ ! -d "$path" ]]; then
@@ -103,14 +96,19 @@ deploy_source() {
 
     # SQLite's online backup API provides a consistent snapshot while the old
     # backend is still serving requests. Keep it in the persistent data volume.
-    if docker inspect codeit-staging-backend-1 >/dev/null 2>&1; then
+    local backend_state
+    backend_state="$(docker inspect codeit-staging-backend-1 --format '{{.State.Status}}' 2>/dev/null || true)"
+    if [[ "$backend_state" == running ]]; then
         docker exec codeit-staging-backend-1 python -c \
           'import sqlite3,sys; src=sqlite3.connect("/data/app.db"); dst=sqlite3.connect("/data/predeploy-"+sys.argv[1]+".db"); src.backup(dst); dst.close(); src.close()' \
           "$sha" || return 1
+    elif [[ -n "$backend_state" ]]; then
+        say "Skipping predeploy database snapshot because the staging backend is $backend_state."
     fi
 
     say "Starting Pi backend, HTTPS executor proxy, and executor."
-    compose "$source" "$overlay" up --detach --no-deps backend code-executor executor-https || return 1
+    compose "$source" "$overlay" up --detach --no-deps --force-recreate \
+        backend code-executor executor-https || return 1
     if wait_healthy; then
         printf '%s\n' "$sha" >"$STATE_DIR/current-sha.tmp"
         chmod 600 "$STATE_DIR/current-sha.tmp"
@@ -121,17 +119,9 @@ deploy_source() {
     return 1
 }
 
-deploy_source "$TARGET_SHA" "$TARGET_SHA" && exit 0
-say "Deployment of $TARGET_SHA failed its build or health check."
-
-if [[ "$PREVIOUS_SHA" != "$TARGET_SHA" ]]; then
-    say "Rolling back to $PREVIOUS_SHA."
-    if deploy_source "$PREVIOUS_SHA" "$TARGET_SHA"; then
-        say "Rollback succeeded; the previous app is serving again."
-        exit 1
-    fi
-    say "Rollback did not pass its health check. Inspect Docker logs on the Pi." >&2
-else
-    say "No previous deployment is recorded. The original container state was left for inspection." >&2
+if deploy_source "$TARGET_SHA" "$TARGET_SHA"; then
+    exit 0
 fi
+
+say "Deployment of $TARGET_SHA failed its build or health check. Inspect the staging containers on the Pi; production was not changed." >&2
 exit 1

@@ -24,7 +24,8 @@ The deploy command lives outside the repository at
 `authorized_keys` to `staging <full-commit-sha>`; it rejects any other command
 or SHA that is no longer the current `master` commit. After a deploy it checks
 the backend, executor container health, and the HTTPS executor connection. A
-failure triggers rollback to the previous source revision.
+failed staging deploy exits with an error and leaves staging containers for
+diagnosis; the separate production stack is not changed.
 
 ## Tailscale one-time setup
 
