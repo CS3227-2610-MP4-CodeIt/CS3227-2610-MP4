@@ -171,6 +171,7 @@ source = { editable = "." }
 dependencies = [
     { name = "aiosqlite" },
     { name = "argon2-cffi" },
+    { name = "certifi" },
     { name = "fastapi" },
     { name = "httpx" },
     { name = "pydantic-settings" },
@@ -190,6 +191,7 @@ dev = [
 requires-dist = [
     { name = "aiosqlite", specifier = ">=0.20" },
     { name = "argon2-cffi", specifier = ">=23.1" },
+    { name = "certifi", specifier = ">=2026.10.19" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "httpx", specifier = ">=0.28" },
     { name = "pydantic-settings", specifier = ">=2.16.2" },

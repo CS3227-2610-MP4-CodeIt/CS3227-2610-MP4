@@ -7,7 +7,7 @@ services:
       BOOTSTRAP_ADMIN_USERNAME: ""
       BOOTSTRAP_ADMIN_PASSWORD: ""
       CODE_EXECUTION_SERVER: https://executor-https:8443
-      SSL_CERT_FILE: /run/executor-ca/ca.crt
+      EXECUTOR_CA_FILE: /run/executor-ca/ca.crt
       EXECUTOR_TOKEN: ${PI_EXECUTOR_TOKEN:?Set PI_EXECUTOR_TOKEN in the Pi deploy env file}
     volumes:
       - staging-data:/data

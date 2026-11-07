@@ -1,8 +1,10 @@
 """Code-execution service client (spec §9.2)."""
 
+import ssl
 from collections.abc import Sequence
 from typing import Any
 
+import certifi
 import httpx
 
 from app.jobs.runner import UserFacingError
@@ -47,9 +49,15 @@ def build_payload(
 
 
 class ExecutorClient:
-    def __init__(self, base_url: str, token: str) -> None:
+    def __init__(self, base_url: str, token: str, ca_file: str | None = None) -> None:
+        verify: bool | ssl.SSLContext = True
+        if ca_file:
+            verify = ssl.create_default_context(cafile=certifi.where())
+            verify.load_verify_locations(cafile=ca_file)
         self._http = httpx.AsyncClient(
-            base_url=base_url.rstrip("/"), headers={"X-Internal-Token": token}
+            base_url=base_url.rstrip("/"),
+            headers={"X-Internal-Token": token},
+            verify=verify,
         )
 
     async def aclose(self) -> None:

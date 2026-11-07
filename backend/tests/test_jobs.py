@@ -4,6 +4,7 @@ import asyncio
 import time
 from collections.abc import Awaitable, Callable
 from typing import Any
+from unittest.mock import Mock
 
 import httpx
 import pytest
@@ -383,6 +384,21 @@ async def test_prod_refuses_http_executor(settings: Settings) -> None:
 def test_executor_timeouts() -> None:
     assert executor_client.http_timeout_s(4, 2000) == 4 * 2.5 + 30 + 5
     assert executor_client.job_timeout_s(4, 2000) == 4 * 2.5 + 30 + 10
+
+
+def test_executor_client_adds_private_ca_to_standard_roots(monkeypatch: pytest.MonkeyPatch) -> None:
+    context = Mock()
+    async_client = Mock()
+    create_default_context = Mock(return_value=context)
+    http_client = Mock(return_value=async_client)
+    monkeypatch.setattr(executor_client.ssl, "create_default_context", create_default_context)
+    monkeypatch.setattr(executor_client.httpx, "AsyncClient", http_client)
+
+    executor_client.ExecutorClient("https://executor.test", "token", "/run/ca.crt")
+
+    create_default_context.assert_called_once_with(cafile=executor_client.certifi.where())
+    context.load_verify_locations.assert_called_once_with(cafile="/run/ca.crt")
+    assert http_client.call_args.kwargs["verify"] is context
 
 
 async def test_executor_client(ctx: AppContext, executor_route: respx.Route) -> None:

@@ -691,6 +691,7 @@ No request limits are applied by the backend: SoCLaaS enforces its own rate and 
 | `LLM_JOB_TIMEOUT_S` | `300` | Timeout for AI jobs |
 | `CODE_EXECUTION_SERVER` | — (required) | Executor base URL, e.g. `https://executor.example.com` (`http://localhost:8001` in dev) |
 | `EXECUTOR_TOKEN` | — (required) | Shared secret with the executor |
+| `EXECUTOR_CA_FILE` | — | Optional extra CA certificate used only to verify the executor HTTPS connection; public upstream clients retain the standard Certifi roots |
 
 Dev and prod use separate `.env` files, separate SQLite volumes and separate SoCLaaS keys. `.env`
 files are git-ignored.
