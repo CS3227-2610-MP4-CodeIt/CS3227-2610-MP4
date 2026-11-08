@@ -153,8 +153,8 @@ new QueryClient({
 
 - Uses `VITE_API_BASE_URL` as the primary origin and optional `VITE_API_FALLBACK_URL` as the
   fallback origin, prefixing the selected origin with `/api`. With a fallback configured, startup
-  probes `GET /api/health/ready` on primary (2.5 s timeout); an unavailable primary selects the
-  fallback for the tab. Adds `Authorization: Bearer <token>` when logged in; sends and parses JSON;
+  probes `GET /api/health/ready` on primary (8 s per attempt, retrying once); an unavailable primary
+  selects the fallback for the tab. Adds `Authorization: Bearer <token>` when logged in; sends and parses JSON;
   `204` → `undefined`. Passes the query's `signal` so cancelled queries abort their request.
 - Primary network errors or 5xx switch future requests to fallback. `GET` and `HEAD` can retry once
   on fallback; writes are not replayed because the primary may have processed a request before its

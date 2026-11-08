@@ -6,6 +6,7 @@ export type ApiOrigin = "primary" | "fallback";
 let activeOrigin: ApiOrigin = "primary";
 let initialCheck: Promise<void> | undefined;
 const listeners = new Set<() => void>();
+const READINESS_TIMEOUT_MS = 8_000;
 
 function apiOrigin(value: string): string {
   const trimmed = value.trim().replace(/\/$/, "");
@@ -45,7 +46,10 @@ function chooseFallback(): boolean {
 
 async function probe(origin: string): Promise<boolean> {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 2500);
+  const timeout = window.setTimeout(
+    () => controller.abort(),
+    READINESS_TIMEOUT_MS,
+  );
   try {
     const response = await fetch(`${origin}/api/health/ready`, {
       signal: controller.signal,
@@ -62,7 +66,7 @@ async function probe(origin: string): Promise<boolean> {
 export async function resolveApiBase(): Promise<string> {
   if (activeOrigin === "primary" && fallback) {
     initialCheck ??= (async () => {
-      if (!(await probe(primary))) chooseFallback();
+      if (!(await probe(primary)) && !(await probe(primary))) chooseFallback();
     })();
     await initialCheck;
   }

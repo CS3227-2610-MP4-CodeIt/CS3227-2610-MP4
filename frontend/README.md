@@ -44,6 +44,7 @@ On the Render frontend service, set `VITE_API_BASE_URL` to the Pi Funnel HTTPS o
 `VITE_API_FALLBACK_URL` to the Render backend HTTPS origin (Render passes both as build args); set
 the Root Directory to `frontend`. The browser checks `GET /api/health/ready` on the Pi at startup.
 That endpoint checks the Pi backend and executor. If unavailable, the frontend sticks to Render for
-the current tab and shows a notice. Safe reads may retry once on Render after a Pi network or 5xx
+the current tab and shows a notice. The check allows up to 8 seconds per attempt and retries once,
+so a fully unreachable Pi can take up to 16 seconds to select the backup. Safe reads may retry once on Render after a Pi network or 5xx
 failure. Writes are never replayed automatically because the Pi may have processed them; later
 requests use Render. Since the databases are separate, accounts, data, and sessions can differ.
