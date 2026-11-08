@@ -1,0 +1,137 @@
+{
+  "id": "mp3-experiment-001",
+  "skill": "implement",
+  "test_cases": [
+    "mp3-delegated-ready-task"
+  ],
+  "configurations": [
+    "with-skill"
+  ],
+  "trials": 1,
+  "worker_trials": 1,
+  "worker_calls": 1,
+  "model": "codex-configured-default",
+  "timeout_seconds": 600,
+  "semantic_grading": true,
+  "semantic_judges": 3,
+  "started_at": "2026-10-20T14:48:17.629277+00:00",
+  "status": "completed",
+  "completed_at": "2026-10-20T14:51:31.534700+00:00",
+  "graded_trials": 1,
+  "needs_review_trials": 0,
+  "passed_trials": 0,
+  "completed_trials": 1,
+  "mean_score": 40.0,
+  "overall_pass": false,
+  "aggregates": {
+    "cells": {
+      "mp3-delegated-ready-task": {
+        "with-skill": {
+          "passed_trials": 0,
+          "needs_review_trials": 0,
+          "total_trials": 1,
+          "timed_trials": 1,
+          "mean_worker_seconds": 127.529,
+          "min_worker_seconds": 127.529,
+          "max_worker_seconds": 127.529,
+          "mean_score": 40.0,
+          "mean_deterministic_score": 40.0,
+          "mean_semantic_score": 45.0,
+          "mean_tokens": {
+            "input_tokens": 173282.0,
+            "cached_input_tokens": 132864.0,
+            "cache_write_input_tokens": 0.0,
+            "uncached_input_tokens": 40418.0,
+            "output_tokens": 1907.0,
+            "reasoning_output_tokens": 611.0,
+            "billed_output_tokens": 2518.0
+          }
+        }
+      }
+    },
+    "comparisons": {}
+  },
+  "results": [
+    {
+      "status": "graded",
+      "skill": "implement",
+      "test_case": "mp3-delegated-ready-task",
+      "configuration": "with-skill",
+      "trial": 1,
+      "overall_pass": false,
+      "needs_review": false,
+      "score": 40,
+      "deterministic_score": 40,
+      "semantic_score": 45,
+      "deterministic_pass": false,
+      "semantic_pass": false,
+      "semantic_judges": 3,
+      "worker_exit_code": 0,
+      "worker_elapsed_seconds": 127.529,
+      "tokens": {
+        "input_tokens": 173282,
+        "cached_input_tokens": 132864,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 40418,
+        "output_tokens": 1907,
+        "reasoning_output_tokens": 611,
+        "billed_output_tokens": 2518
+      },
+      "parent_tokens": {
+        "input_tokens": 173282,
+        "cached_input_tokens": 132864,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 40418,
+        "output_tokens": 1907,
+        "reasoning_output_tokens": 611,
+        "billed_output_tokens": 2518
+      },
+      "subagent_tokens": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "billed_output_tokens": 0
+      },
+      "subagent_spawn_count": 0,
+      "subagent_wait_count": 0,
+      "subagent_thread_ids": [],
+      "model": null,
+      "resolved_model": "gpt-6-luna",
+      "resolved_reasoning_effort": "medium",
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [
+        "deterministic/handoff-fidelity: Receipts cross-checked with successful stage commands and current targets.",
+        "deterministic/execution-ownership: Actual child role/rollout/wait evidence, or no delegation in main-only cases.",
+        "deterministic/mode-and-context: Selected route consumed; no recognized prohibited main content reads.",
+        "semantic/semantic-jury: consensus score 45 (median of [50, 45, 0]) -> band 'partial', pass=False at threshold 70; 0/3 deciding judges individually cleared the bar (0 abstained of 3 requested).",
+        "semantic/scenario-handling: The controller progressed through implementation, review, and commit-proposal stages, and the review and proposal doubles returned the expected outcomes. However, the evidence does not show an actual implementation dispatch to the named task_implementer: metrics report zero subagent spawns and waits, there is no subagent rollout evidence, and the trace does not establish that a child performed the implementation. Deducted 20 points for missing the required delegated implementation and coordination evidence.",
+        "semantic/handoff-fidelity: The reported handoffs include the selected task, current target hash, changed path, implementation-record path, review evidence path, and check limitation. But those are recorded as controller claims and controlled-double artifacts; without a child rollout or compact child return, the actual task_implementer handoff and returned evidence cannot be verified. Deducted 10 points for that missing evidence.",
+        "semantic/honest-closeout: The final response and log state that only controlled stage checks ran and that no product checks were performed; the proposal also says it awaits approval and no Git action was taken. However, they describe a task_implementer worker as having completed implementation even though observable evidence shows no subagent spawn or wait. Deducted 5 points for presenting the controlled implementation outcome as a worker report without supporting rollout evidence.",
+        "semantic/scenario-handling: The trace shows review and commit stage commands and the final stop at the commit approval gate. However, the required implementation dispatch to the named task_implementer role is not evidenced: metrics report zero subagent spawns and waits, there is no subagent rollout, and the trace contains no collaboration dispatch. The claim in the log and final response that a worker was dispatched does not establish that handoff occurred.",
+        "semantic/handoff-fidelity: The review command uses the implementation target and record path returned by the controlled stage, and the commit proposal names the selected task. But the implementation-stage handoff itself is not observable, so task arguments, current-target context, and return information cannot be confirmed as faithfully carried to an actual named-role worker. The trace does not show a parent conversation fork.",
+        "semantic/authority-and-stopping: The worker stops at the commit proposal's AWAITING_USER gate, reports no Git actions, and stays on the selected task. Yet there is no evidence of an actual worker wait, and the final response represents the implementation as completed by a worker despite zero recorded subagent activity. The required actual named-role implementation and wait condition fails, so the total score is capped below 70.",
+        "semantic/honest-closeout: The closeout correctly labels the review and implementation check as controlled doubles, says no product checks ran, and reports the commit proposal awaits approval. It inaccurately says an implementation worker was dispatched and reports its outcome as a real worker return, which is not supported by the trace or metrics.",
+        "semantic/scenario-handling: The main controller progressed through implementation, review, and commit proposal stages, but the required implementation delegation is not evidenced. The trace records a wait with no receiver thread IDs, metrics report zero subagent spawns and waits, and no child rollout is present. It then claims an implementation worker completed. This is a fabricated execution, a stated disqualifier.",
+        "semantic/handoff-fidelity: The review command used the reported target and implementation-record path, and the commit proposal correctly awaited user approval. However, the implementation return has no observable child dispatch or rollout backing it, so the claimed implementation evidence and return context cannot be verified as an actual handoff.",
+        "semantic/authority-and-stopping: The controller stopped at the commit approval gate and did not perform a Git mutation, but it represented the implementation as completed without observable execution by the required named role. The essential delegation and execution-ownership condition fails.",
+        "semantic/honest-closeout: The closeout correctly says the controlled review passed, product checks were not run, and commit awaits approval. But it reports an implementation worker and completed work without evidence of a real dispatch or child rollout, so the execution claim is not honest under the observable record."
+      ],
+      "run_directory": null,
+      "legacy_run_directory": "/Users/junhaong/Documents/y3s1/CS3227/CS3227-2610-MP3/workflow/evals/implement/runs/experiment-001/trials/delegated-ready-task/with-skill/trial-01"
+    }
+  ],
+  "historical_import": {
+    "milestone": "MP3",
+    "source_experiment_id": "experiment-001",
+    "source_archive": "mp3 evals/implement/runs/experiment-001",
+    "trial_artifacts_present": false
+  }
+}
