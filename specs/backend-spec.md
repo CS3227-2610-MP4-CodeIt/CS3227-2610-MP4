@@ -246,6 +246,7 @@ treated as absent.
 | `GET` | `/jobs/{id}` | Any job owned by the caller (e.g. an earlier question draft) |
 | `GET` | `/events` | SSE stream of job notifications for the caller only (§6.6). Any role |
 | `GET` | `/health` | No auth. `{"status": "ok"}` |
+| `GET` | `/health/ready` | No auth. `{"status": "ok"}` when the backend can reach the code executor; otherwise `503`. Used by the frontend to select its backup API. |
 
 ---
 
@@ -691,6 +692,7 @@ No request limits are applied by the backend: SoCLaaS enforces its own rate and 
 | `LLM_JOB_TIMEOUT_S` | `300` | Timeout for AI jobs |
 | `CODE_EXECUTION_SERVER` | — (required) | Executor base URL, e.g. `https://executor.example.com` (`http://localhost:8001` in dev) |
 | `EXECUTOR_TOKEN` | — (required) | Shared secret with the executor |
+| `EXECUTOR_CA_FILE` | — | Optional extra CA certificate used only to verify the executor HTTPS connection; public upstream clients retain the standard Certifi roots |
 
 Dev and prod use separate `.env` files, separate SQLite volumes and separate SoCLaaS keys. `.env`
 files are git-ignored.

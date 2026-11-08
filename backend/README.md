@@ -15,6 +15,8 @@ DATABASE_PATH=./dev.db uv run uvicorn app.main:app --port 8000 --workers 1
 
 With `APP_ENV=dev` the demo accounts are created on startup (spec §4): `admin`, `teacher1`,
 `teacher2`, `student01`–`student20`, password `demo1234`.
+Demo accounts are not seeded when `APP_ENV=prod`; production Pi and Render databases are
+independent unless accounts are created separately.
 
 Environment variables override `.env`, so an exported `SOCLAAS_BASE_URL` etc. in your shell wins.
 

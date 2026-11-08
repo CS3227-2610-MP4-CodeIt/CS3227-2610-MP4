@@ -1,4 +1,10 @@
 import { currentToken } from "../auth/session";
+import {
+  currentApiBase,
+  failOverToFallback,
+  getApiOrigin,
+  resolveApiBase,
+} from "./origin";
 
 export interface ValidationItem {
   loc: (string | number)[];
@@ -18,8 +24,6 @@ export class ApiError extends Error {
     this.detail = detail;
   }
 }
-
-export const API_BASE = `${import.meta.env.VITE_API_BASE_URL ?? ""}/api`;
 
 let onUnauthorized: () => void = () => {};
 
@@ -43,12 +47,31 @@ export async function apiFetch<T>(
   if (token) headers.Authorization = `Bearer ${token}`;
   if (body !== undefined) headers["Content-Type"] = "application/json";
 
-  const res = await fetch(API_BASE + path, {
-    method,
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-    signal,
-  });
+  const base = await resolveApiBase();
+  const origin = getApiOrigin();
+  const canRetry = ["GET", "HEAD"].includes(method.toUpperCase());
+  const request = (apiBase: string) =>
+    fetch(apiBase + path, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal,
+    });
+  let res: Response;
+  try {
+    res = await request(base);
+  } catch (error) {
+    if (
+      signal?.aborted ||
+      (error instanceof Error && error.name === "AbortError")
+    )
+      throw error;
+    if (origin !== "primary" || !failOverToFallback() || !canRetry) throw error;
+    res = await request(currentApiBase());
+  }
+  if (res.status >= 500 && origin === "primary" && failOverToFallback()) {
+    if (canRetry) res = await request(currentApiBase());
+  }
 
   if (!res.ok) {
     const data = await res.json().catch(() => null);

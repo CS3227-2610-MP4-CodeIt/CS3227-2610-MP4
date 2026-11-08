@@ -1,0 +1,8 @@
+{
+	admin off
+}
+
+:8443 {
+	tls /run/pki/executor.crt /run/pki/executor.key
+	reverse_proxy code-executor:8001
+}

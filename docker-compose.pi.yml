@@ -1,0 +1,5 @@
+# Pi-specific settings shared by production and staging.
+services:
+  code-executor:
+    environment:
+      MAX_CONCURRENT_JOBS: "8"

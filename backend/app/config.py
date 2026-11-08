@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     llm_job_timeout_s: float = 300
     code_execution_server: str
     executor_token: str
+    executor_ca_file: str | None = None
 
 
 class AppEnv(BaseSettings):

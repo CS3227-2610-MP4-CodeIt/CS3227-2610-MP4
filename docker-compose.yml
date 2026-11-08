@@ -8,6 +8,7 @@ services:
       args:
         # Baked in at build time; the browser calls the backend through the host port.
         VITE_API_BASE_URL: http://localhost:8000
+        VITE_API_FALLBACK_URL: ${VITE_API_FALLBACK_URL:-}
     ports:
       - "5173:80"
     depends_on:
@@ -16,11 +17,11 @@ services:
 
   backend:
     build: ./backend
-    env_file: ./backend/.env
+    env_file: ${MP4_BACKEND_ENV_FILE:-./backend/.env}
     environment:
       CODE_EXECUTION_SERVER: http://code-executor:8001
     ports:
-      - "8000:8000"
+      - "${MP4_BACKEND_BIND_ADDRESS:-0.0.0.0}:${MP4_BACKEND_PUBLISHED_PORT:-8000}:8000"
     volumes:
       - backend-data:/data
     networks:
@@ -32,7 +33,7 @@ services:
 
   code-executor:
     build: ./code-execution
-    env_file: ./code-execution/.env
+    env_file: ${MP4_EXECUTOR_ENV_FILE:-./code-execution/.env}
     environment:
       WORK_ROOT: /work
     # No published port: only the backend reaches it, over the internal network.
