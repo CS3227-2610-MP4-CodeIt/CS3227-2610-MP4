@@ -6,11 +6,7 @@ import { createQueryClient } from "./api/queryClient";
 import App from "./App.tsx";
 import { AuthProvider } from "./auth/AuthProvider";
 import { EventsProvider } from "./events/EventsProvider";
-import {
-  getApiOrigin,
-  hasApiFallback,
-  subscribeApiOrigin,
-} from "./api/origin";
+import { getApiOrigin, hasApiFallback, subscribeApiOrigin } from "./api/origin";
 import "./index.css";
 
 const queryClient = createQueryClient();
@@ -23,8 +19,12 @@ function ApiOriginNotice() {
   );
   if (origin !== "fallback" || !hasApiFallback()) return null;
   return (
-    <div className="bg-amber-100 px-4 py-2 text-center text-sm text-amber-950" role="status">
-      Pi API unavailable. Using the Render backup; accounts and data may differ from the Pi.
+    <div
+      className="bg-amber-100 px-4 py-2 text-center text-sm text-amber-950"
+      role="status"
+    >
+      Pi API unavailable. Using the Render backup; accounts and data may differ
+      from the Pi.
     </div>
   );
 }
