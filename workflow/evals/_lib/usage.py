@@ -16,6 +16,7 @@ from typing import Any
 from _lib.usage_accounting import finalize_usage_accounting
 from _lib.accounting import observation_tokens, agent_path, parse_accounting, record_accounting
 from _lib.common import markdown_metadata, markdown_cell, now, read_json, write_json
+from _lib.detail_navigation import header_stats
 from _lib.pricing import (
     LONG_CONTEXT_THRESHOLD,
     PRICING_AS_OF,
@@ -3009,6 +3010,13 @@ def _generate_usage_report_locked(
     report_md.write_text(render_usage_markdown(summary), encoding="utf-8")
     report_html.write_text(render_usage_html(summary), encoding="utf-8")
     write_json(summary_json, summary)
+    online_stats, offline_stats = header_stats(summary)
+    (out_dir / "header-data.js").write_text(
+        "window.__EVAL_HEADER_STATS__ = "
+        + json.dumps({"online": online_stats, "offline": offline_stats}, ensure_ascii=True)
+        + ";\n",
+        encoding="utf-8",
+    )
 
     totals = summary["totals"]
     eval_totals = summary["harness_evals"]["totals"]

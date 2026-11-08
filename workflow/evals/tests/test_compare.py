@@ -336,3 +336,83 @@ def test_compare_experiments_supports_baseline_config(tmp_path):
     assert "| Configuration | baseline | baseline |" in content
 
 
+def test_comparison_html_keeps_cases_missing_values_and_evidence():
+    from _lib.compare import render_comparison_html
+
+    first = evalmod.compare_cell(_cell(80, 1, 2, output=1000), _cell(90, 2, 2, output=1500))
+    second = evalmod.compare_cell(_cell(None, 0, 1), _cell(90, 1, 1))
+    rows = [
+        {
+            "test_case": "case-<one>",
+            "diff": first,
+            "confounds": ["fixture changed"],
+            "old_trials": [{"trial": 1, "score": 80, "overall_pass": True, "tokens": {"output_tokens": 1000}}],
+            "new_trials": [],
+        },
+        {"test_case": "case-two", "diff": second, "confounds": [], "old_trials": [], "new_trials": []},
+    ]
+    page = render_comparison_html(
+        "demo", "old-vs-new.md", old_id="old", new_id="new",
+        partition={"both": ["case-<one>", "case-two", "case-missing"], "only_old": ["dropped"], "only_new": ["added"]},
+        rows=rows, skill_diff=["--- v1/SKILL.md", "+++ v2/SKILL.md", "-<old>", "+<new>"],
+        summary={"improved": 1, "regressed": 0, "unchanged": 0, "unknown": 1},
+        provenance={"old_model": "m1", "new_model": "m2", "old_effort": "low", "new_effort": "medium", "trials": {"old": 2, "new": 2}},
+    )
+    assert page.count("class='run-panel v1'") == 2
+    assert page.count("class='run-panel v2'") == 2
+    assert "case-&lt;one&gt;" in page and "case-two" in page
+    assert "fixture changed" in page and "Missing configuration data" in page
+    assert "case-missing" in page and "dropped" in page and "added" in page
+    assert "- &lt;old&gt;" not in page and "-&lt;old&gt;" in page and "+&lt;new&gt;" in page
+    assert "Individual trial records (1)" in page
+    assert "mean score not available" in page and "n/a (pricing unavailable)" in page
+    assert "1</strong> unknown" in page
+    assert "href=\"../../_usage/report.html#offline-comparisons\"" in page
+    assert "demo comparison</span>" in page and ">Comparisons</a>" not in page
+    assert "class=\"topbar has-breadcrumb\"" in page and "Markdown source" in page
+    assert 'class="page-back" href="../../_usage/report.html#offline-comparisons"' in page
+
+
+def test_compare_experiments_reports_missing_score_as_unknown(tmp_path):
+    import argparse
+    import json
+
+    skill_dir = tmp_path / "demo"
+    for exp_id, score in (("experiment-001", None), ("experiment-002", 95)):
+        exp_dir = skill_dir / "runs" / exp_id
+        exp_dir.mkdir(parents=True)
+        manifest = {
+            "skill": "demo", "trials": 1, "test_cases": ["case-a"],
+            "aggregates": {"cells": {"case-a": {"baseline": _cell(score, 0, 1)}}},
+            "results": [{"test_case": "case-a", "configuration": "baseline"}],
+        }
+        (exp_dir / "experiment.json").write_text(json.dumps(manifest), encoding="utf-8")
+
+    args = argparse.Namespace(skill="demo", old="experiment-001", new="experiment-002", config="baseline")
+    assert evalmod.compare_experiments(args, {"demo": skill_dir}) == 0
+    reports = skill_dir / "comparisons"
+    markdown = (reports / "experiment-001-vs-experiment-002-baseline.md").read_text(encoding="utf-8")
+    page = (reports / "experiment-001-vs-experiment-002-baseline.html").read_text(encoding="utf-8")
+    assert "| Unchanged (score) | 0 |" in markdown
+    assert "| Unknown (score) | 1 |" in markdown
+    assert "Score: unknown" in page and "1</strong> unknown" in page
+
+
+def test_comparison_header_uses_current_usage_totals():
+    from _lib.detail_navigation import header_stats
+
+    summary = {
+        "totals": {"session_count": 2, "est_cost": None, "known_cost": 0.01234, "coverage": {"status": "partial"}},
+        "harness_evals": {
+            "totals": {"worker_session_count": 3, "est_cost": 0.05, "coverage": {"status": "complete"}},
+            "sessions": [
+                {"eval_skill": "a", "experiment": "experiment-001"},
+                {"eval_skill": "a", "experiment": "experiment-001"},
+                {"eval_skill": "a", "experiment": "experiment-002"},
+            ],
+        },
+    }
+    assert header_stats(summary) == ("$0.0123 · 2 sessions", "$0.0500 · 2 exps · 3 trials")
+    assert header_stats(None) == ("—", "—")
+
+

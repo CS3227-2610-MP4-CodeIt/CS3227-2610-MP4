@@ -142,15 +142,17 @@ To compare two saved experiments (for example before and after editing
 `SKILL.md`) without making any new model calls:
 
 ```bash
-# Compare with-skill cells (default) -> writes comparisons/<old>-vs-<new>.md
+# Compare with-skill cells (default) -> writes comparisons/<old>-vs-<new>.md and .html
 python3 workflow/evals/eval.py compare <skill-name> experiment-001 experiment-002
 
-# Compare baseline cells -> writes comparisons/<old>-vs-<new>-baseline.md
+# Compare baseline cells -> writes comparisons/<old>-vs-<new>-baseline.md and .html
 python3 workflow/evals/eval.py compare <skill-name> experiment-001 experiment-002 --config baseline
 ```
 
-The generated Markdown report under `workflow/evals/<skill-name>/comparisons/`
-includes a `Setup` and `Summary` header, a one-row-per-case `## Case overview`
+The generated Markdown and standalone HTML reports under
+`workflow/evals/<skill-name>/comparisons/` (the HTML page links back to the
+usage dashboard and to its Markdown source). Both include a `Setup` and
+`Summary` header, a one-row-per-case `## Case overview`
 table, per-case score/token/cost breakdowns (including `det score` and
 `sem score` when available), confound detection when the model or fixture
 changed, and a unified diff of the captured `SKILL.md` snapshots.
@@ -215,8 +217,10 @@ workspaces, links spawned subagents to their parent sessions, and updates:
   subagent breakdown including `0`-spawn `.codex/agents/*.toml` profiles, model
   mix, daily usage bars, descriptive session observations with links to their
   trace evidence, and a searchable/filterable session table);
-- `workflow/evals/_usage/report.md` — clean GitHub-flavored Markdown summary; and
-- `workflow/evals/_usage/summary.json` — machine-readable aggregate data.
+- `workflow/evals/_usage/report.md` — clean GitHub-flavored Markdown summary;
+- `workflow/evals/_usage/summary.json` — machine-readable aggregate data; and
+- `workflow/evals/_usage/header-data.js` — the current summary counts used by
+  standalone comparison-page headers.
 
 The hook refresh is best effort: Codex may cancel unfinished asynchronous hooks
 when a session ends. Run `python3 workflow/evals/eval.py usage` for an explicit

@@ -124,7 +124,7 @@ workflow/
 | `.agents/skills/<skill-name>/SKILL.md` | Yes | The skill being evaluated—the system under test |
 | `workflow/evals/<skill-name>/test-cases/` | Yes | Holds the scenarios used to evaluate that skill |
 | `workflow/evals/<skill-name>/runs/` | Generated | Numbered experiments, human-readable reports, workspaces, traces, and grades |
-| `workflow/evals/<skill-name>/comparisons/` | Generated | Cross-experiment comparison reports (`<old>-vs-<new>.md`) |
+| `workflow/evals/<skill-name>/comparisons/` | Generated | Cross-experiment comparison reports (`<old>-vs-<new>.md` and matching standalone `.html` pages) |
 
 The two `<skill-name>` directory names must match exactly. A skill also needs at
 least one valid test case before it can be run. You do not manually populate
