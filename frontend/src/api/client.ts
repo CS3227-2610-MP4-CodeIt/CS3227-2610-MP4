@@ -61,8 +61,12 @@ export async function apiFetch<T>(
   try {
     res = await request(base);
   } catch (error) {
-    if (origin !== "primary" || !failOverToFallback() || !canRetry)
+    if (
+      signal?.aborted ||
+      (error instanceof Error && error.name === "AbortError")
+    )
       throw error;
+    if (origin !== "primary" || !failOverToFallback() || !canRetry) throw error;
     res = await request(currentApiBase());
   }
   if (res.status >= 500 && origin === "primary" && failOverToFallback()) {
