@@ -151,9 +151,18 @@ new QueryClient({
 
 `apiFetch<T>(path, {method, body, signal})`:
 
-- Prefixes `import.meta.env.VITE_API_BASE_URL` + `/api`; adds `Authorization: Bearer <token>` when
-  logged in; sends and parses JSON; `204` → `undefined`. Passes the query's `signal` so cancelled
-  queries abort their request.
+- Uses `VITE_API_BASE_URL` as the primary origin and optional `VITE_API_FALLBACK_URL` as the
+  fallback origin, prefixing the selected origin with `/api`. With a fallback configured, startup
+  probes `GET /api/health/ready` on primary (2.5 s timeout); an unavailable primary selects the
+  fallback for the tab. Adds `Authorization: Bearer <token>` when logged in; sends and parses JSON;
+  `204` → `undefined`. Passes the query's `signal` so cancelled queries abort their request.
+- Primary network errors or 5xx switch future requests to fallback. `GET` and `HEAD` can retry once
+  on fallback; writes are not replayed because the primary may have processed a request before its
+  response failed. The SSE connection follows the selected origin and switches to fallback on
+  primary network or 5xx errors. A global notice appears while fallback is selected.
+- Only configured HTTP(S) origins are accepted; production origins must use HTTPS. The session
+  bearer token is sent only to those configured origins. The primary/fallback selection is sticky
+  for the tab; reload to probe the primary again.
 - Non-2xx → throws `ApiError {status, detail}`. `detail` is either a string (e.g. `409`,
   injection guard `422`) or FastAPI's validation list; `ErrorText` shows a string as-is and a list
   as one line per item (`loc` last element: `msg`). Forms map list items to fields by `loc`.
@@ -422,13 +431,15 @@ The backend still checks every call; the guard is only for UX.
 | Variable | Purpose |
 |---|---|
 | `VITE_API_BASE_URL` | Backend origin without `/api`. Default `http://localhost:8000` (the backend Docker container run locally) |
+| `VITE_API_FALLBACK_URL` | Optional backup backend origin without `/api`; empty by default. Configure the Render backend origin when the Pi is primary. |
 
-The value is read from `frontend/.env` (git-ignored). `frontend/.env.example` is committed with the
-default; copy it to `.env` and change the URL to point at another backend.
+The values are read from `frontend/.env` (git-ignored). `frontend/.env.example` is committed with
+the local primary and empty fallback; copy it to `.env` and set the origins for the deployment.
 
 `npm run build` outputs a static `dist/` that is deployed to any static host (with fallback to
-`index.html` for client-side routes). The URL is baked in at build time, so set `.env` before
-building for production.
+`index.html` for client-side routes). Both origins are baked in at build time. `/api/health/ready`
+checks the backend and its executor; `/api/health` remains a backend liveness endpoint. Backend
+databases remain independent, so users, sessions, and data may differ after failover.
 
 ---
 
