@@ -1,0 +1,69 @@
+# Pi staging-only settings. Shared Pi settings are in docker-compose.pi.yml.
+# Staging uses its own API port and DB volume.
+services:
+  backend:
+    environment:
+      APP_ENV: prod
+      BOOTSTRAP_ADMIN_USERNAME: ""
+      BOOTSTRAP_ADMIN_PASSWORD: ""
+      CODE_EXECUTION_SERVER: https://executor-https:8443
+      EXECUTOR_CA_FILE: /run/executor-ca/ca.crt
+      EXECUTOR_TOKEN: ${PI_EXECUTOR_TOKEN:?Set PI_EXECUTOR_TOKEN in the Pi deploy env file}
+    volumes:
+      - staging-data:/data
+      - ${PI_EXECUTOR_TLS_DIR:?Set PI_EXECUTOR_TLS_DIR in the Pi deploy env file}/ca.crt:/run/executor-ca/ca.crt:ro
+    depends_on:
+      code-executor:
+        condition: service_healthy
+      executor-https:
+        condition: service_started
+
+  code-executor:
+    environment:
+      EXECUTOR_TOKEN: ${PI_EXECUTOR_TOKEN:?Set PI_EXECUTOR_TOKEN in the Pi deploy env file}
+      WORK_ROOT: /work
+    pids_limit: 128
+    mem_limit: 3g
+    cpus: 2
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health', timeout=2).read()
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 15s
+
+  executor-https:
+    image: caddy:2.11.8-alpine
+    user: ${PI_CADDY_UID:-1000}:${PI_CADDY_GID:-1000}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.5
+    networks:
+      - executor
+    volumes:
+      - ${PI_CADDYFILE:?Set PI_CADDYFILE in the Pi deploy env file}:/etc/caddy/Caddyfile:ro
+      - ${PI_EXECUTOR_TLS_DIR:?Set PI_EXECUTOR_TLS_DIR in the Pi deploy env file}/executor.crt:/run/pki/executor.crt:ro
+      - ${PI_EXECUTOR_TLS_DIR:?Set PI_EXECUTOR_TLS_DIR in the Pi deploy env file}/executor.key:/run/pki/executor.key:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      code-executor:
+        condition: service_healthy
+
+volumes:
+  staging-data:
+    name: codeit-staging-backend-data
+  caddy-data:
+  caddy-config:

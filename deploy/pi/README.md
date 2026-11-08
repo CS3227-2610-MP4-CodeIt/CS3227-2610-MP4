@@ -9,11 +9,13 @@ stacks after production has been updated.
 The Funnel-facing service remains on port 8000 and keeps its existing database
 volume and production environment files.
 
-The staging backend binds to `127.0.0.1:8001`, uses its own database volume,
-runs with `APP_ENV=prod`, and talks to the executor through an internal HTTPS
-proxy. The Pi override limits the executor to 3 GiB RAM, 2 CPUs, 128 processes,
-and 2 concurrent jobs. The local Compose configuration is unchanged apart from
-environment-variable defaults that preserve its existing values.
+Production and staging both load `docker-compose.pi.yml`, which sets the Pi
+executor concurrency to 8. Staging also loads
+`docker-compose.pi.staging.yml`: its backend binds to `127.0.0.1:8001`, uses a
+separate database volume, runs with `APP_ENV=prod`, and reaches its executor
+through an internal HTTPS proxy. Staging limits the executor to 3 GiB RAM,
+2 CPUs, and 128 processes. The local Compose configuration does not load either
+Pi override and keeps its existing settings.
 
 ## Pi bootstrap
 

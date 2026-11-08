@@ -58,14 +58,15 @@ make_release() {
 staging_compose() {
     local source="$1" overlay="$2"
     docker compose --project-name "$STAGING_PROJECT" --env-file "$COMPOSE_ENV" \
-        --file "$source/docker-compose.yml" --file "$overlay/docker-compose.pi.yml" "${@:3}"
+        --file "$source/docker-compose.yml" --file "$overlay/docker-compose.pi.yml" \
+        --file "$overlay/docker-compose.pi.staging.yml" "${@:3}"
 }
 
 production_compose() {
     local source="$1"
     MP4_BACKEND_BIND_ADDRESS=0.0.0.0 MP4_BACKEND_PUBLISHED_PORT=8000 \
         docker compose --project-name "$PRODUCTION_PROJECT" --env-file "$COMPOSE_ENV" \
-            --file "$source/docker-compose.yml" "${@:2}"
+            --file "$source/docker-compose.yml" --file "$source/docker-compose.pi.yml" "${@:2}"
 }
 
 wait_healthy() {
@@ -114,7 +115,8 @@ EOF
 deploy_staging() {
     local source="$RELEASE_DIR/$TARGET_SHA" overlay="$RELEASE_DIR/$TARGET_SHA"
     make_release "$TARGET_SHA"
-    [[ -f "$overlay/docker-compose.pi.yml" && -f "$overlay/deploy/pi/Caddyfile" ]] \
+    [[ -f "$overlay/docker-compose.pi.yml" && -f "$overlay/docker-compose.pi.staging.yml" \
+        && -f "$overlay/deploy/pi/Caddyfile" ]] \
         || die "Commit $TARGET_SHA is missing the Pi staging configuration."
     install -m 644 "$overlay/deploy/pi/Caddyfile" "$CONFIG_DIR/Caddyfile"
     say "Building staging backend and executor for $TARGET_SHA."
