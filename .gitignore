@@ -1,3 +1,8 @@
 website/_site/
 _markbind/logs/
 website/_markbind/logs/
+
+# Local environment secrets
+.env
+.env.*
+!.env.example
