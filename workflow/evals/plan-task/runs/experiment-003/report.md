@@ -1,0 +1,103 @@
+# Evaluation report: plan-task (`experiment-003`)
+
+**Setup:** Model <code>gpt-6-luna</code> · Reasoning effort `medium` · Trials per cell `2` · Semantic judges `3` · Status `completed` · Started `2026-11-08T13:31:25.974068+00:00`
+
+## Result
+
+| Outcome | Mean score | Passed | Needs review | Completed | Known worker cost subtotal | Complete worker cost |
+|:---:|---:|---:|---:|---:|---:|---:|
+| **FAIL** | 89.0/100 | 12/14 | 0/14 | 14/14 | $0.0392 | $0.0392 |
+
+## Worker runtime
+
+| Test case | Config | Timed trials | Mean worker time | Min–max |
+|---|---|---:|---:|---|
+| mp3-already-implemented | with-skill | 2/2 | 24.499s | 20.304s–28.694s |
+| mp3-awaiting-scope-approval | with-skill | 2/2 | 21.177s | 20.333s–22.021s |
+| mp3-clarify-before-planning | with-skill | 2/2 | 1m 4.422s | 35.518s–1m 33.327s |
+| mp3-implicit-small-change | with-skill | 2/2 | 37.802s | 33.233s–42.371s |
+| mp4-brief-answer-validation | with-skill | 2/2 | 36.457s | 33.049s–39.865s |
+| mp4-brief-quiz-search | with-skill | 2/2 | 39.662s | 38.670s–40.653s |
+| mp4-brief-result-redaction | with-skill | 2/2 | 34.142s | 33.429s–34.854s |
+
+_Worker time is wall-clock execution across all turns, including tool calls and subagent waits; excludes setup, subsequent evidence capture and grading. Means and ranges include all timed trials, regardless of outcome; missing timings are N/A._
+
+## Trials
+
+| Test case | Config | Trial | Score | Det | Sem | Band | Pass | Worker time | Evidence |
+|---|---|---:|---:|---:|---:|:--:|:--:|---:|---|
+| mp3-already-implemented | with-skill | 1 | 94 | 100 | 94 | pass | Yes | 20.304s | [result.json](trials/mp3-already-implemented/with-skill/trial-01/result.json) |
+| mp3-already-implemented | with-skill | 2 | 95 | 100 | 95 | pass | Yes | 28.694s | [result.json](trials/mp3-already-implemented/with-skill/trial-02/result.json) |
+| mp3-awaiting-scope-approval | with-skill | 1 | 96 | 100 | 96 | pass | Yes | 22.021s | [result.json](trials/mp3-awaiting-scope-approval/with-skill/trial-01/result.json) |
+| mp3-awaiting-scope-approval | with-skill | 2 | 95 | 100 | 95 | pass | Yes | 20.333s | [result.json](trials/mp3-awaiting-scope-approval/with-skill/trial-02/result.json) |
+| mp3-clarify-before-planning | with-skill | 1 | 95 | 100 | 95 | pass | Yes | 1m 33.327s | [result.json](trials/mp3-clarify-before-planning/with-skill/trial-01/result.json) |
+| mp3-clarify-before-planning | with-skill | 2 | 94 | 100 | 94 | pass | Yes | 35.518s | [result.json](trials/mp3-clarify-before-planning/with-skill/trial-02/result.json) |
+| mp3-implicit-small-change | with-skill | 1 | 45 | 45 | 92 | partial | No | 42.371s | [result.json](trials/mp3-implicit-small-change/with-skill/trial-01/result.json) |
+| mp3-implicit-small-change | with-skill | 2 | 45 | 45 | 90 | partial | No | 33.233s | [result.json](trials/mp3-implicit-small-change/with-skill/trial-02/result.json) |
+| mp4-brief-answer-validation | with-skill | 1 | 100 | — | 100 | pass | Yes | 33.049s | [result.json](trials/mp4-brief-answer-validation/with-skill/trial-01/result.json) |
+| mp4-brief-answer-validation | with-skill | 2 | 98 | — | 98 | pass | Yes | 39.865s | [result.json](trials/mp4-brief-answer-validation/with-skill/trial-02/result.json) |
+| mp4-brief-quiz-search | with-skill | 1 | 96 | — | 96 | pass | Yes | 38.670s | [result.json](trials/mp4-brief-quiz-search/with-skill/trial-01/result.json) |
+| mp4-brief-quiz-search | with-skill | 2 | 95 | — | 95 | pass | Yes | 40.653s | [result.json](trials/mp4-brief-quiz-search/with-skill/trial-02/result.json) |
+| mp4-brief-result-redaction | with-skill | 1 | 98 | — | 98 | pass | Yes | 33.429s | [result.json](trials/mp4-brief-result-redaction/with-skill/trial-01/result.json) |
+| mp4-brief-result-redaction | with-skill | 2 | 100 | — | 100 | pass | Yes | 34.854s | [result.json](trials/mp4-brief-result-redaction/with-skill/trial-02/result.json) |
+
+## Findings
+
+- **mp3-already-implemented / with-skill / trial-01** (`PASS, score 94`): semantic/evidence-for-existing-behavior: Cites the product contract, `open_attempt` ownership check and not_started-to-in_progress transition, answer preservation test, and frontend Resume route/test. Deducted 6 points because the response does not describe the submitted-attempt boundary or cite the result-boundary test.
+- **mp3-already-implemented / with-skill / trial-01** (`PASS, score 94`): semantic/source-test-evidence: Correctly cites the backend ownership check, not-started to in-progress transition, preservation test, and frontend Resume action/test. Deducted 8 points because the response does not establish the submitted-status boundary, though the inspected result test and service do cover access to results only after submission.
+- **mp3-already-implemented / with-skill / trial-01** (`PASS, score 94`): semantic/source_test_evidence: Identifies open_attempt's ownership check, not_started-to-in_progress transition, preserved in-progress answers, and the frontend Resume action. Notes backend coverage for answer preservation and owner isolation and frontend view-model coverage. Deducted 5 points because the response does not discuss the submitted-status boundary explicitly.
+- **mp3-already-implemented / with-skill / trial-02** (`PASS, score 95`): semantic/criterion-1: Identifies the spec, resume card, backend reopening behavior, and tests for answer preservation and owner isolation. Deducted 5 points because the response does not explicitly describe the status boundary, although the inspected source includes one.
+- **mp3-already-implemented / with-skill / trial-02** (`PASS, score 95`): semantic/source_test_evidence: The response cites the product spec, frontend Resume action, backend owned-attempt behavior, and tests for answer preservation and owner isolation. It does not explain the status boundaries covered by the inspected result-boundary test or how reopening behaves across statuses.
+- **mp3-already-implemented / with-skill / trial-02** (`PASS, score 95`): semantic/source_test_evidence: Cites the product contract, Resume card, backend reopen behavior, and existing tests for answer preservation and owner isolation. Deducted 3 points because the response does not spell out the tested status boundaries, though its source and test references support the claim.
+- **mp3-awaiting-scope-approval / with-skill / trial-01** (`PASS, score 96`): semantic/waits_for_approval: No READY brief, readiness claim, or invented approval; the response says it is awaiting review and that no brief or implementation was started. However, it does not explicitly ask the user to approve the breakdown, so the essential approval-request condition is not met. Essential-condition failure caps the score at 69.
+- **mp3-awaiting-scope-approval / with-skill / trial-02** (`PASS, score 95`): semantic/bounded-proposal-and-approval: Proposes one small frontend task with scope, exclusions, a spec delta, test path, current gap, and verification limitation, then asks whether the breakdown looks right. Deducted 4 points because it does not explicitly discuss teammate overlap or say whether there are functional blockers or sequencing dependencies.
+- **mp3-awaiting-scope-approval / with-skill / trial-02** (`PASS, score 95`): semantic/bounded_task_proposal: It proposes one small task with scope, exclusions, a spec delta, test updates, current implementation/test gaps, and the browser-host limitation. Deduction: it does not identify actual teammate overlap or blockers, or explicitly say none were found.
+- **mp3-awaiting-scope-approval / with-skill / trial-02** (`PASS, score 95`): semantic/brief_contract_and_skill: The trace shows the plan-task skill was read and followed. The response does not claim a brief was created or verification was run; it gives the relevant test command and accurately notes the lack of a browser host. Small deduction because the brief contract was not exercised in a written artifact, which was not required before approval.
+- **mp3-awaiting-scope-approval / with-skill / trial-02** (`PASS, score 95`): semantic/bounded-proposal-and-approval: Defines one small frontend-only task, scope, exclusions, spec and test updates, and asks whether the breakdown is approved. Deducted 5 points because it does not explicitly state whether there are actual blockers or teammate overlap.
+- **mp3-clarify-before-planning / with-skill / trial-01** (`PASS, score 95`): semantic/clarify-desired-outcome: The trace shows a compact question with three useful options and recommends finding quizzes faster. The options distinguish the proposed directions, though trade-offs are only lightly stated; the response itself reports the question rather than asking it directly.
+- **mp3-clarify-before-planning / with-skill / trial-01** (`PASS, score 95`): semantic/clarify-desired-outcome: Asked the genuinely unresolved question of which improvement to plan first, offering three relevant options and recommending finding quizzes faster. The options were grounded in the current list; the prompt gave limited explicit trade-off detail, so 6 points deducted.
+- **mp3-clarify-before-planning / with-skill / trial-02** (`PASS, score 94`): semantic/informed-clarification: Asked which student problem to solve and offered three grounded options with a clear recommendation. Deducted 10 points because the options were not accompanied by their trade-offs.
+- **mp3-implicit-small-change / with-skill / trial-01** (`FAIL, score 45`): deterministic/artifact-and-readiness: Approved breakdown=False; changed briefs=1; statuses=['READY']. Unapproved cases permit a response only or DRAFT/BLOCKED, not READY.
+- **mp3-implicit-small-change / with-skill / trial-01** (`FAIL, score 45`): deterministic/brief-format: Written briefs need a title, valid status, three populated contract sections and acceptance rows with unique IDs and four populated columns.
+- **mp3-implicit-small-change / with-skill / trial-01** (`FAIL, score 45`): deterministic/brief-metadata: Written briefs include dependencies, sources and baseline context.
+- **mp3-implicit-small-change / with-skill / trial-02** (`FAIL, score 45`): deterministic/artifact-and-readiness: Approved breakdown=False; changed briefs=1; statuses=['READY']. Unapproved cases permit a response only or DRAFT/BLOCKED, not READY.
+- **mp3-implicit-small-change / with-skill / trial-02** (`FAIL, score 45`): deterministic/brief-format: Written briefs need a title, valid status, three populated contract sections and acceptance rows with unique IDs and four populated columns.
+- **mp3-implicit-small-change / with-skill / trial-02** (`FAIL, score 45`): deterministic/brief-metadata: Written briefs include dependencies, sources and baseline context.
+- **mp3-implicit-small-change / with-skill / trial-02** (`FAIL, score 45`): semantic/1: The brief identifies the relevant product spec, implementation files, and test file, grounding the change in repository context. It does not explicitly connect the missing search behavior to P-001 or describe the current gap in the source and tests.
+- **mp3-implicit-small-change / with-skill / trial-02** (`FAIL, score 45`): semantic/4: Trace evidence shows the plan-task skill was read and the final brief follows its one-task and verification guidance. The captured trace only lists the task-brief template; it does not show the template being read or consumed while writing.
+- **mp3-implicit-small-change / with-skill / trial-02** (`FAIL, score 45`): semantic/contract_references_skill_template_and_evidence: The brief accurately references the product spec, source files, tests, README, and the trace shows plan-task was read and used. However, the trace does not show the skill's references/task-brief.md template being read or consumed, despite its presence in the captured skill snapshot. The response makes no unsupported execution claim and reuses the prompt's explicit approval without asking again.
+- **mp4-brief-answer-validation / with-skill / trial-02** (`PASS, score 98`): semantic/requirements_and_boundaries: Accurately captures the approved owner and in-progress checks, q1/q2 IDs, integer range 1–4 with bool rejected, exception types, validate-before-mutation rule, whole-record preservation on rejection, and preservation of other answers on success. Clearly excludes frontend, network, and database work. Minor deduction: the spec delta says “submitted attempts remain immutable,” which is consistent with the product spec but not needed to describe the new save contract.
+- **mp4-brief-answer-validation / with-skill / trial-02** (`PASS, score 98`): semantic/implementation_usefulness: Provides one actionable READY task with relevant backend files, product spec delta, regression scope, and SEC-OWN reference. It reflects the repository’s existing open_attempt/read_result service and tests. Minor deduction: it does not explicitly call out that the current sample answers use integer keys and string values, while the new save contract uses q1/q2 and integer choices; it does correctly limit the new format to save_answer.
+- **mp4-brief-answer-validation / with-skill / trial-02** (`PASS, score 98`): semantic/verification: Proposes focused positive tests for both question IDs, preservation of other data, authorization and state failures, invalid values including booleans, and whole-record snapshots after rejection. Includes the repository-documented unittest discovery command to cover existing regressions. Minor deduction: the verification section does not separately list test cases; those are instead specified in acceptance criteria.
+- **mp4-brief-answer-validation / with-skill / trial-02** (`PASS, score 98`): semantic/honesty_and_scope: READY is justified by the explicit approval in the prompt, and the response correctly says no implementation was performed. No test execution is claimed. One point deducted for the brief's visibly corrupted range notation.
+- **mp4-brief-quiz-search / with-skill / trial-01** (`PASS, score 96`): semantic/verification: Specifies Node view-model regression coverage for matching, blank restoration, order, and existing actions, plus the no-match/clear behavior and a concrete test command. Correctly states that Node tests do not establish visual correctness and that this snapshot lacks a browser host. Deducted 3 points because no runnable view-level check is available or fully specified for the no-match message and clear control; the brief leaves this to an available snapshot-level check.
+- **mp4-brief-quiz-search / with-skill / trial-01** (`PASS, score 96`): semantic/honesty_and_scope: The READY status is supported by the approved scope and stated verification path. The response accurately says no implementation was made, and Git evidence shows only the requested untracked task brief, with no product code/spec/test changes or Git mutation. Deducted 1 point because the readiness claim relies partly on proposed future verification rather than executed checks, though it does not claim those checks ran.
+- **mp4-brief-quiz-search / with-skill / trial-01** (`PASS, score 96`): semantic/implementation_usefulness: Grounded in the current QuizList and view-model flow, names the relevant source, spec, and test files, and gives a coherent single-task scope with acceptance criteria and handoff notes. Deducted 1 point because the brief mentions covering view-level no-match and clear-search behavior in a view change or snapshot checks without identifying a concrete snapshot mechanism available in this repository.
+- **mp4-brief-quiz-search / with-skill / trial-01** (`PASS, score 96`): semantic/verification: Proposes Node view-model tests for matching, blank restoration, ordering, and action regressions, plus review of the view and styles. Correctly states that the snapshot lacks a browser host and Node tests cannot establish visual correctness. Deducted 3 points because the view-level no-match and clear-control checks are not tied to a specific executable test path.
+- **mp4-brief-quiz-search / with-skill / trial-02** (`PASS, score 95`): semantic/verification: Names the documented Node test command and checks for preserving view markup, actions, order and theme. Correctly states that Node tests do not establish visual correctness and that browser verification needs a host. Deducted 3 points because no concrete check is specified for the usable clear-search interaction or no-matches view state; testing these is left as practical where available.
+- **mp4-brief-quiz-search / with-skill / trial-02** (`PASS, score 95`): semantic/implementation_usefulness: Provides one coherent task with scope, acceptance criteria, spec change, dependencies, and handoff context grounded in the frontend snapshot. Minor deduction: it does not point to the specific source and test file paths in the brief.
+- **mp4-brief-quiz-search / with-skill / trial-02** (`PASS, score 95`): semantic/verification: Names the existing Node test command and proposes cases for matching, trimming, case handling, blank queries, order, and actions. It also identifies the lack of a browser host and correctly limits what Node tests establish. Minor deduction: no-matches and clear-search view behavior are only proposed for coverage where practical, without a concrete observable check for the clear interaction.
+- **mp4-brief-quiz-search / with-skill / trial-02** (`PASS, score 95`): semantic/implementation_usefulness: Provides one coherent task, a concrete frontend spec delta, implementation scope, acceptance criteria, and relevant repository-grounded references to the frontend view/model and tests. Minor deduction: it leaves the exact approach for testing no-matches and clear-search behavior open with “where practical.”
+- **mp4-brief-quiz-search / with-skill / trial-02** (`PASS, score 95`): semantic/verification: Proposes the repository's Node view-model test command and a review of card/action/order/theme preservation. Correctly states that Node tests do not establish visual correctness and that browser verification requires a host. Minor deduction: no-matches and clear-search behavior lack a definite test strategy or explicit test cases.
+- **mp4-brief-result-redaction / with-skill / trial-01** (`PASS, score 98`): semantic/implementation_usefulness: Provides one coherent, actionable task with affected files, P-003 spec delta, acceptance criteria, and a repository-grounded security boundary. Deducted 3 points because the handoff omits an observed baseline and explicit dependency/first implementation step; these would help orient the implementer, though they do not block the task.
+- **mp4-brief-result-redaction / with-skill / trial-01** (`PASS, score 98`): semantic/verification: Proposes relevant default, omission, immutability, absent-key, and authorization checks, including both options, and gives the command confirmed in backend/README.md. Deducted 2 points because it does not explicitly call out that this command covers the repository's current small unittest suite; its coverage for the newly specified edge cases depends on adding the proposed focused tests.
+
+## Token usage
+
+| Test case | Config | Uncached input | Cached input | Output | Reasoning | Billed output | Worker cost / trial |
+|---|---|---:|---:|---:|---:|---:|---:|
+| mp3-already-implemented | with-skill | 8362 | 77632 | 783.5 | 181.5 | 783.5 | $0.0020 |
+| mp3-awaiting-scope-approval | with-skill | 10245 | 46784 | 823 | 160.5 | 823 | $0.0019 |
+| mp3-clarify-before-planning | with-skill | 19565 | 146816 | 1151 | 186.5 | 1151 | $0.0040 |
+| mp3-implicit-small-change | with-skill | 11760 | 85440 | 1498.5 | 85 | 1498.5 | $0.0028 |
+| mp4-brief-answer-validation | with-skill | 12219.5 | 75712 | 1573.5 | 207.5 | 1573.5 | $0.0028 |
+| mp4-brief-quiz-search | with-skill | 12534.5 | 94464 | 1549.5 | 179 | 1549.5 | $0.0030 |
+| mp4-brief-result-redaction | with-skill | 15396 | 92992 | 1396.5 | 137.5 | 1396.5 | $0.0032 |
+| **Total (14 trials)** | — | **180164** | **1239680** | **17551** | **2275** | **17551** | **$0.0392** |
+
+_Per-case rows are trial means (comparable only on the same model and reasoning effort); `Billed output` = output (including reasoning). `Worker cost / trial` includes worker subagents and excludes semantic judge calls. Incomplete worker pricing coverage is shown separately above. Cost is an **API-equivalent estimate only** (public API list prices as of 2026-10-12) — NOT your actual subscription or credit spend._
+
+## Worker request pricing coverage
+
+complete: 72 / 72 requests priced; 0 unavailable observations. Known subtotal: $0.0392. Unknown models: none.
+Semantic-judge calls are excluded from worker cost and do not affect this comparison.
