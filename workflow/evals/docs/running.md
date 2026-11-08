@@ -43,6 +43,7 @@ parallel when `expected.md` is present.
 | Flag | Default | Meaning |
 |---|---:|---|
 | `--compare` | Off | Run a no-skill baseline and a with-skill trial for every selected test case |
+| `--case-prefix PREFIX` | Off | Run only cases whose names begin with `PREFIX`; cannot be combined with a positional test-case name |
 | `--trials N` | `1` | Repeat each test-case/configuration cell `N` times |
 | `--judges N` | `3` | Use `N` parallel semantic judges for each worker trial |
 | `--no-semantic-judges` | Off | Run the worker and `check.py`, but make no semantic-judge model calls |

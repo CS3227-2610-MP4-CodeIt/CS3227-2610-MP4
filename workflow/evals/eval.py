@@ -115,6 +115,9 @@ def parse_args() -> argparse.Namespace:
         "test_case", nargs="?", help="one test case; omit to run all"
     )
     run_parser.add_argument(
+        "--case-prefix", help="run only test cases whose names start with this prefix"
+    )
+    run_parser.add_argument(
         "--compare",
         action="store_true",
         help="also run a no-skill baseline",
@@ -296,10 +299,18 @@ def run_evaluation(args: argparse.Namespace, skills: dict[str, Path]) -> int:
         fail("--judges must be at least 1")
 
     cases = load_cases(args.skill, skills)
+    if args.test_case and args.case_prefix:
+        fail("choose a test case or --case-prefix, not both")
     if args.test_case:
         if args.test_case not in cases:
             fail(f"unknown test case: {args.test_case}")
         selected = [cases[args.test_case]]
+    elif args.case_prefix is not None:
+        if not args.case_prefix:
+            fail("--case-prefix must not be empty")
+        selected = [case for name, case in cases.items() if name.startswith(args.case_prefix)]
+        if not selected:
+            fail(f"no test cases match prefix: {args.case_prefix}")
     else:
         selected = list(cases.values())
 
