@@ -21,7 +21,7 @@ services:
   code-executor:
     environment:
       EXECUTOR_TOKEN: ${PI_EXECUTOR_TOKEN:?Set PI_EXECUTOR_TOKEN in the Pi deploy env file}
-      MAX_CONCURRENT_JOBS: "2"
+      MAX_CONCURRENT_JOBS: "8"
       WORK_ROOT: /work
     pids_limit: 128
     mem_limit: 3g
