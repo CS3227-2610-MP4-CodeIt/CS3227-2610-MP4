@@ -246,6 +246,7 @@ treated as absent.
 | `GET` | `/jobs/{id}` | Any job owned by the caller (e.g. an earlier question draft) |
 | `GET` | `/events` | SSE stream of job notifications for the caller only (§6.6). Any role |
 | `GET` | `/health` | No auth. `{"status": "ok"}` |
+| `GET` | `/health/ready` | No auth. `{"status": "ok"}` when the backend can reach the code executor; otherwise `503`. Used by the frontend to select its backup API. |
 
 ---
 

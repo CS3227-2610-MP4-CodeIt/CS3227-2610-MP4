@@ -63,6 +63,14 @@ class ExecutorClient:
     async def aclose(self) -> None:
         await self._http.aclose()
 
+    async def check_health(self) -> bool:
+        """Return whether the executor answers its lightweight health endpoint."""
+        try:
+            response = await self._http.get("/health", timeout=2.0)
+            return response.status_code == 200
+        except httpx.HTTPError:
+            return False
+
     async def execute(
         self,
         code: str,

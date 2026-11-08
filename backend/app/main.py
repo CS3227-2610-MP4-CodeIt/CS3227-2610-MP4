@@ -1,7 +1,7 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth import hash_password
@@ -68,6 +68,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/api/health", tags=["health"])
     async def health() -> HealthOut:
+        return HealthOut()
+
+    @app.get("/api/health/ready", tags=["health"])
+    async def ready(request: Request) -> HealthOut:
+        if not await request.app.state.ctx.executor.check_health():
+            raise HTTPException(status_code=503, detail="Code executor unavailable")
         return HealthOut()
 
     for module in (auth, admin, teacher, student, jobs_router, events_router):
