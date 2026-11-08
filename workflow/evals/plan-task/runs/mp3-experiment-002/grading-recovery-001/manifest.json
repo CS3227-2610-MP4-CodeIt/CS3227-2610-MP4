@@ -1,0 +1,305 @@
+{
+  "started_at": "2026-10-20T07:56:51.499370+00:00",
+  "method": "Existing harness judge function, saved inputs; missing judges only",
+  "max_concurrent_judges": 3,
+  "reused": [
+    "trials/already-implemented/with-skill/trial-01/grades/semantic/judge-01/output.json",
+    "trials/already-implemented/with-skill/trial-02/grades/semantic/judge-03/output.json",
+    "trials/awaiting-scope-approval/with-skill/trial-01/grades/semantic/judge-03/output.json",
+    "trials/clarify-before-planning/with-skill/trial-02/grades/semantic/judge-02/output.json"
+  ],
+  "executed": [
+    {
+      "trial": "trials/already-implemented/with-skill/trial-01",
+      "judge": 2,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/already-implemented/with-skill/trial-01",
+      "judge": 3,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/already-implemented/with-skill/trial-02",
+      "judge": 1,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/already-implemented/with-skill/trial-02",
+      "judge": 2,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/already-implemented/with-skill/trial-03",
+      "judge": 1,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/already-implemented/with-skill/trial-03",
+      "judge": 2,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/already-implemented/with-skill/trial-03",
+      "judge": 3,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/awaiting-scope-approval/with-skill/trial-01",
+      "judge": 1,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/awaiting-scope-approval/with-skill/trial-01",
+      "judge": 2,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/awaiting-scope-approval/with-skill/trial-02",
+      "judge": 1,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/awaiting-scope-approval/with-skill/trial-02",
+      "judge": 2,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/awaiting-scope-approval/with-skill/trial-02",
+      "judge": 3,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/awaiting-scope-approval/with-skill/trial-03",
+      "judge": 1,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/awaiting-scope-approval/with-skill/trial-03",
+      "judge": 2,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/awaiting-scope-approval/with-skill/trial-03",
+      "judge": 3,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/clarify-before-planning/with-skill/trial-01",
+      "judge": 1,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/clarify-before-planning/with-skill/trial-01",
+      "judge": 2,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/clarify-before-planning/with-skill/trial-01",
+      "judge": 3,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/clarify-before-planning/with-skill/trial-02",
+      "judge": 1,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/clarify-before-planning/with-skill/trial-02",
+      "judge": 3,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/clarify-before-planning/with-skill/trial-03",
+      "judge": 1,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/clarify-before-planning/with-skill/trial-03",
+      "judge": 2,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/clarify-before-planning/with-skill/trial-03",
+      "judge": 3,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/implicit-small-change/with-skill/trial-01",
+      "judge": 1,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/implicit-small-change/with-skill/trial-01",
+      "judge": 2,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/implicit-small-change/with-skill/trial-01",
+      "judge": 3,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/implicit-small-change/with-skill/trial-02",
+      "judge": 1,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/implicit-small-change/with-skill/trial-02",
+      "judge": 2,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/implicit-small-change/with-skill/trial-02",
+      "judge": 3,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/implicit-small-change/with-skill/trial-03",
+      "judge": 1,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/implicit-small-change/with-skill/trial-03",
+      "judge": 2,
+      "status": "completed",
+      "errors": []
+    },
+    {
+      "trial": "trials/implicit-small-change/with-skill/trial-03",
+      "judge": 3,
+      "status": "completed",
+      "errors": []
+    }
+  ],
+  "worker_hashes": {
+    "trials/already-implemented/with-skill/trial-01/worker/metrics.json": "47ee4d65a3c8f1f548f5c80754714f381634d5abe7765862d0baceed0bf6498c",
+    "trials/already-implemented/with-skill/trial-01/worker/result.json": "57e6c09b362851978858fe4329a1146f342d66897578ab95bb17769d10c6d407",
+    "trials/already-implemented/with-skill/trial-01/worker/trace.jsonl": "693deff3a631e61233d15e61fe2ed9bdf631148ef1bc71ad304d6a5dddb36063",
+    "trials/already-implemented/with-skill/trial-01/worker/turns/turn-01/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "trials/already-implemented/with-skill/trial-01/worker/turns/turn-01/state.json": "d1c8cf6e69826e02b6490fb32b73400e6ece249ca2324c5bda2573d0d4b4f277",
+    "trials/already-implemented/with-skill/trial-01/worker/turns/turn-01/prompt.md": "fb51dbd08584bb1db446d331ea6219afe28c0fdf33bf27e27229a5706b344df5",
+    "trials/already-implemented/with-skill/trial-01/worker/turns/turn-01/trace.jsonl": "8406ab8a99b3b7a89659bb1e8e23f39bb62ef8207e5b3278812bde0e23d3d914",
+    "trials/already-implemented/with-skill/trial-01/worker/turns/turn-01/response.md": "696a8f65e1cee7bad509c165add9c4b762f304e0f96d8c7de68517e7a7f57b92",
+    "trials/already-implemented/with-skill/trial-02/worker/metrics.json": "4a72bb9704acdb881200f3618e2baf674625aa1fd43baf43a570748007abc9fb",
+    "trials/already-implemented/with-skill/trial-02/worker/result.json": "d39310a96dcfcee308bee47a26525f831ef2415a9189936a79407b6373371190",
+    "trials/already-implemented/with-skill/trial-02/worker/trace.jsonl": "f01296bbb246219787e3703d347b4c34a86730ac43b2838dc7456060708e5406",
+    "trials/already-implemented/with-skill/trial-02/worker/turns/turn-01/stderr.log": "325a4c66c19436cbaf8b672987e4927bf904dd6cb15fdd8605dfe5f2069eb7f2",
+    "trials/already-implemented/with-skill/trial-02/worker/turns/turn-01/state.json": "27bb0b4261fa8414b9394150a002ec62d65e1d6c9c06359c77cf4f157053b3cf",
+    "trials/already-implemented/with-skill/trial-02/worker/turns/turn-01/prompt.md": "fb51dbd08584bb1db446d331ea6219afe28c0fdf33bf27e27229a5706b344df5",
+    "trials/already-implemented/with-skill/trial-02/worker/turns/turn-01/trace.jsonl": "2fed8f9cb0a3efec4db4bc4891beeb2a092dcccea38b48e1b5d3ecc3f175edb4",
+    "trials/already-implemented/with-skill/trial-02/worker/turns/turn-01/response.md": "58b5f3b56963dc3c9a30c3230480530bef93a735e4b3731d3d4bb0c11c993400",
+    "trials/already-implemented/with-skill/trial-03/worker/metrics.json": "0516b9d95045dd7cd129d2676d7867f2272e40659ebbfa9c9162b1b9a38ea5f2",
+    "trials/already-implemented/with-skill/trial-03/worker/result.json": "de426818871935fe8b295b044836e1b399e0ecf8a1c45609d3278f00c13e8005",
+    "trials/already-implemented/with-skill/trial-03/worker/trace.jsonl": "44d64b31705058b5df8a0063d358fc2d1841ac08e07feaa63a4ef0d8fbfc587e",
+    "trials/already-implemented/with-skill/trial-03/worker/turns/turn-01/stderr.log": "2f33766c04f3082e13b3c11a30b9fd1609a30bf3cca561afd8d78c902ae49d9b",
+    "trials/already-implemented/with-skill/trial-03/worker/turns/turn-01/state.json": "0502c4e7fce9581c64b9175e987d8138d015024107db612af4e4447bb3b24830",
+    "trials/already-implemented/with-skill/trial-03/worker/turns/turn-01/prompt.md": "fb51dbd08584bb1db446d331ea6219afe28c0fdf33bf27e27229a5706b344df5",
+    "trials/already-implemented/with-skill/trial-03/worker/turns/turn-01/trace.jsonl": "d16f26d1fd9a8037fd668d788c36eb8c6dbeeda7cbb41ff7f0be5312ae97ed0b",
+    "trials/already-implemented/with-skill/trial-03/worker/turns/turn-01/response.md": "8aa2167d127f53639ed393a3efd04c50c98e09e3ed924e6af03296aa869043bb",
+    "trials/awaiting-scope-approval/with-skill/trial-01/worker/metrics.json": "f86aa2990a70be69d8a2392e6a948e0da0f3745fa8de0f3ae6124b41c0553717",
+    "trials/awaiting-scope-approval/with-skill/trial-01/worker/result.json": "b4a14f451a3b3774380a18e8c45abbbd222b599b6da7f28fd37ecfa75ec2d6a4",
+    "trials/awaiting-scope-approval/with-skill/trial-01/worker/trace.jsonl": "19866fec5ae8e976ccec002b1e779e21deb0023fd59e5b31e5c51dd875c45cc8",
+    "trials/awaiting-scope-approval/with-skill/trial-01/worker/turns/turn-01/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "trials/awaiting-scope-approval/with-skill/trial-01/worker/turns/turn-01/state.json": "3c0a2fb3d981f46096e067bab895c699b603f41b94716d625e0ece618ab2cd7b",
+    "trials/awaiting-scope-approval/with-skill/trial-01/worker/turns/turn-01/prompt.md": "b7291f9a2d1fd3a895ef33f02a6b0c56e4459a86f25589cc9f059fd19bd97636",
+    "trials/awaiting-scope-approval/with-skill/trial-01/worker/turns/turn-01/trace.jsonl": "c54d0f03b46c747c14f383d51d2d619f4944e2adde8cd7ea082a9a5ef9605af3",
+    "trials/awaiting-scope-approval/with-skill/trial-01/worker/turns/turn-01/response.md": "b3e54bd7117cda35bffaf2b44c90b20c91cb49ef2f4b6ae73e317fa889f3f4ca",
+    "trials/awaiting-scope-approval/with-skill/trial-02/worker/metrics.json": "786c6084aba93deb47d8c31320ff7d13030a716cd7ba2884da40259d28e69336",
+    "trials/awaiting-scope-approval/with-skill/trial-02/worker/result.json": "dd73901cafa573631f23109412958e08f163887454dd4fb4f3f1fe69e7b9774e",
+    "trials/awaiting-scope-approval/with-skill/trial-02/worker/trace.jsonl": "9b4a6680b12fa62ce5530371a5c5bc752687223328f457c835d95af10c13ae97",
+    "trials/awaiting-scope-approval/with-skill/trial-02/worker/turns/turn-01/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "trials/awaiting-scope-approval/with-skill/trial-02/worker/turns/turn-01/state.json": "c8157b7057fcb6a91c6656466fa5c2a4e214bcedd9e37a3452e5bcbb522c6e50",
+    "trials/awaiting-scope-approval/with-skill/trial-02/worker/turns/turn-01/prompt.md": "b7291f9a2d1fd3a895ef33f02a6b0c56e4459a86f25589cc9f059fd19bd97636",
+    "trials/awaiting-scope-approval/with-skill/trial-02/worker/turns/turn-01/trace.jsonl": "de5139307f0e1a7d10b85a4b2eac1751f65c91dd3fabffef0f7327eeb8d06ede",
+    "trials/awaiting-scope-approval/with-skill/trial-02/worker/turns/turn-01/response.md": "7836bab511761f2f2149bdafcdc354a743e1459b38d5c5251d57a329303bd1f2",
+    "trials/awaiting-scope-approval/with-skill/trial-03/worker/metrics.json": "ff5326cb6d8e06f103a0827889ac690b444e8d00f8eba594c87cac170f489215",
+    "trials/awaiting-scope-approval/with-skill/trial-03/worker/result.json": "617914cb9126aa3e36bced7edcce6d2614fac89a4b0380f529839c455bfdd4d9",
+    "trials/awaiting-scope-approval/with-skill/trial-03/worker/trace.jsonl": "5d7df56442890f2bbf0f0751a52ea4487e120d5d4cb997101733c2f8a90a5d6f",
+    "trials/awaiting-scope-approval/with-skill/trial-03/worker/turns/turn-01/stderr.log": "6826f40148b427f3331a971a415e6f0ec4084589d997e3e7ec693040ad519bb1",
+    "trials/awaiting-scope-approval/with-skill/trial-03/worker/turns/turn-01/state.json": "e6c56857eeff1f5822ddb538bbecaa955a39b1fe7c577c92b6e50e31467fa60b",
+    "trials/awaiting-scope-approval/with-skill/trial-03/worker/turns/turn-01/prompt.md": "b7291f9a2d1fd3a895ef33f02a6b0c56e4459a86f25589cc9f059fd19bd97636",
+    "trials/awaiting-scope-approval/with-skill/trial-03/worker/turns/turn-01/trace.jsonl": "5b5e80f6bacdf7fb2ae4cbf8a309a6c5d6b2249a28624180d7f14c47bfc996a6",
+    "trials/awaiting-scope-approval/with-skill/trial-03/worker/turns/turn-01/response.md": "6f7c997af8e63c2e882b9e8d38b6753d883fda9410fb1e158f9c50da108159b8",
+    "trials/clarify-before-planning/with-skill/trial-01/worker/metrics.json": "2d885d9922c3c1fedf3d4f4534af28738a186e129e2d82638e3f5d4fb6302f8f",
+    "trials/clarify-before-planning/with-skill/trial-01/worker/result.json": "eb7a152a191639bae4dff8b3f44d5cd1440fdea72410ee5623df0791b1553ebe",
+    "trials/clarify-before-planning/with-skill/trial-01/worker/trace.jsonl": "176a85824b3d8a7572aa5ff4a71cd963ad7a6de928cbc635d4fd9597c077eb49",
+    "trials/clarify-before-planning/with-skill/trial-01/worker/turns/turn-01/stderr.log": "cec983b40f649b1bbd66ca0db3d8e7a2662f0285ea7d8ac1155d895344020c89",
+    "trials/clarify-before-planning/with-skill/trial-01/worker/turns/turn-01/state.json": "36d56ebfd23d1710d7e09a8e80021c83afc3b9198ac8aec09648da94994d557a",
+    "trials/clarify-before-planning/with-skill/trial-01/worker/turns/turn-01/prompt.md": "1b673a8508cc1c2d1f2311fad616d5661d8d4625bde6e8b68e229f8b94cbf322",
+    "trials/clarify-before-planning/with-skill/trial-01/worker/turns/turn-01/trace.jsonl": "664cd1c579edc6ac7a3750c44bda8ef2ee60f60c7e6777c0e28c5c99e51019d8",
+    "trials/clarify-before-planning/with-skill/trial-01/worker/turns/turn-01/response.md": "cfd0e40e454f6f97817a64c6533c039d484fbac3839bd0bbb7548a1c2e58b846",
+    "trials/clarify-before-planning/with-skill/trial-02/worker/metrics.json": "b3524bda4b961a1c4a92b8401eb65d3f9fb5b8989b978fb063278743e4f674e9",
+    "trials/clarify-before-planning/with-skill/trial-02/worker/result.json": "47ff3dcb4be6be1ccbe06978f0ea8ec1b5ef3bf72fdae8d6cf36fa55d35c923e",
+    "trials/clarify-before-planning/with-skill/trial-02/worker/trace.jsonl": "a42ba842dd762c5a1b5016c1853757b3444b17a1fd7770d00f5818eae5e5d877",
+    "trials/clarify-before-planning/with-skill/trial-02/worker/turns/turn-01/stderr.log": "873204d0cf88b6ccf54076a41c2de08ecc8d7fd6337630f8c24c1396fc4f60d5",
+    "trials/clarify-before-planning/with-skill/trial-02/worker/turns/turn-01/state.json": "66b66281d5abc8aeff9686b2717fab11e9149ae6084075bd90e5f240bf670ade",
+    "trials/clarify-before-planning/with-skill/trial-02/worker/turns/turn-01/prompt.md": "1b673a8508cc1c2d1f2311fad616d5661d8d4625bde6e8b68e229f8b94cbf322",
+    "trials/clarify-before-planning/with-skill/trial-02/worker/turns/turn-01/trace.jsonl": "aa5be2cec71cf90b1bab09aae22af238626b428c75c904058167289f7541d659",
+    "trials/clarify-before-planning/with-skill/trial-02/worker/turns/turn-01/response.md": "a7303b27f2b3d5ad9747b82d0d0b0a569deba7412e7e76bf3b3ea6859a0cdde4",
+    "trials/clarify-before-planning/with-skill/trial-03/worker/metrics.json": "027351084590abec7fd4de06510a0574f6b3a3ba07dc87a2754c13c5fa0bc51e",
+    "trials/clarify-before-planning/with-skill/trial-03/worker/result.json": "61bd453da2b1d1aae616d2fd331c549eb74255094302870f7bfa4c453800658f",
+    "trials/clarify-before-planning/with-skill/trial-03/worker/trace.jsonl": "0f2cbbe551f4dd1661852f003c702f38d149276c75a1306574feaf12ee820213",
+    "trials/clarify-before-planning/with-skill/trial-03/worker/turns/turn-01/stderr.log": "8cd15572dd6472e786e7773f796361c20a4bb2621090792dc00035eee9e27a04",
+    "trials/clarify-before-planning/with-skill/trial-03/worker/turns/turn-01/state.json": "1fc795be79ad54ddb6d6f77f198be384b6733fa637f63300b04b137abfecb8e0",
+    "trials/clarify-before-planning/with-skill/trial-03/worker/turns/turn-01/prompt.md": "1b673a8508cc1c2d1f2311fad616d5661d8d4625bde6e8b68e229f8b94cbf322",
+    "trials/clarify-before-planning/with-skill/trial-03/worker/turns/turn-01/trace.jsonl": "06c361f316ea33bbf27516e9934cc99457b0e8701eaf49ffd6ce84a226a5cdec",
+    "trials/clarify-before-planning/with-skill/trial-03/worker/turns/turn-01/response.md": "f64f838c6e40078e383f67106d1b92233de1f59cff92612c8ab5e8dd3650159b",
+    "trials/implicit-small-change/with-skill/trial-01/worker/metrics.json": "e4913a72b34a42495524e33d978b9ec7f09ebf7f50f3b3a6f972c6395d67791d",
+    "trials/implicit-small-change/with-skill/trial-01/worker/result.json": "b024a34aae11361c8f7a6769f21c2821c74799dca8d055de2740aa2a8bf5474e",
+    "trials/implicit-small-change/with-skill/trial-01/worker/trace.jsonl": "241928ceb6edddec80ec5d1abc4da489dbf746372bcafc6c7bc26936b100af79",
+    "trials/implicit-small-change/with-skill/trial-01/worker/turns/turn-01/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "trials/implicit-small-change/with-skill/trial-01/worker/turns/turn-01/state.json": "5c3e7608d14c6a75327d377655185d8b6c2867e570d901704b819bb768c68799",
+    "trials/implicit-small-change/with-skill/trial-01/worker/turns/turn-01/prompt.md": "8108e2fb56ecaaacc99263fc6e02ed7eebbf819939f23b154b4f9ebc1beafe2b",
+    "trials/implicit-small-change/with-skill/trial-01/worker/turns/turn-01/trace.jsonl": "125df58e97d64562485340f22202b39c550269e05cb021ed75a2f125bae20cbf",
+    "trials/implicit-small-change/with-skill/trial-01/worker/turns/turn-01/response.md": "8e46c86acd1afec148f136e2fa1fdf529c8b082203fc4e603ead8167645531b9",
+    "trials/implicit-small-change/with-skill/trial-02/worker/metrics.json": "3004c78d887a9a7cb9e03c0fcf5686e883d9bb80d37d196e82f4e3a459a791a1",
+    "trials/implicit-small-change/with-skill/trial-02/worker/result.json": "0af5908919f37f23b22263ef52c3a08619bff7380838c9547be68c8ea8ed0170",
+    "trials/implicit-small-change/with-skill/trial-02/worker/trace.jsonl": "986b1f89abc48907ff76a37f6f6b228c87315695b01702b3fcea9ee76af14717",
+    "trials/implicit-small-change/with-skill/trial-02/worker/turns/turn-01/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "trials/implicit-small-change/with-skill/trial-02/worker/turns/turn-01/state.json": "e7d50f43ffe72bf37dcf61a4dc8f40f415e8b7326d95a0186927bcb516e80878",
+    "trials/implicit-small-change/with-skill/trial-02/worker/turns/turn-01/prompt.md": "8108e2fb56ecaaacc99263fc6e02ed7eebbf819939f23b154b4f9ebc1beafe2b",
+    "trials/implicit-small-change/with-skill/trial-02/worker/turns/turn-01/trace.jsonl": "5edcfc2f59aa9f03ff7268e7a3a58cd8e504e2cc8e60f24b6371dcb643a6da2c",
+    "trials/implicit-small-change/with-skill/trial-02/worker/turns/turn-01/response.md": "3f7ca8744c912c206f72bc6d915395ce9f746fb8407aae6c2c9a49ba75af7512",
+    "trials/implicit-small-change/with-skill/trial-03/worker/metrics.json": "5455e1c94df597b921a4f45fc281cb8ea515405ecbd3263c82a05edd3ecfd7fe",
+    "trials/implicit-small-change/with-skill/trial-03/worker/result.json": "4308e235a45e2955a48c99b696056fb2e90e949a8afb113253bcc0d512eb41ec",
+    "trials/implicit-small-change/with-skill/trial-03/worker/trace.jsonl": "fa7f6aa6d264288d7893d8cd815cebfecd19b3c2658d9e2354580fd89fb31d08",
+    "trials/implicit-small-change/with-skill/trial-03/worker/turns/turn-01/stderr.log": "20fee183918e3893952696d4d90eee52a915a62032f0747d908ddf07ecb0887a",
+    "trials/implicit-small-change/with-skill/trial-03/worker/turns/turn-01/state.json": "62b919ee2db23ab4e8a14fc441744ab1757070191b75a0498dc5c268ba64d8af",
+    "trials/implicit-small-change/with-skill/trial-03/worker/turns/turn-01/prompt.md": "8108e2fb56ecaaacc99263fc6e02ed7eebbf819939f23b154b4f9ebc1beafe2b",
+    "trials/implicit-small-change/with-skill/trial-03/worker/turns/turn-01/trace.jsonl": "d42ff626bfbecc4ac2be451e8058cc99815146add54a31994b55b54f083c1d4f",
+    "trials/implicit-small-change/with-skill/trial-03/worker/turns/turn-01/response.md": "6accd72ef1c0c5599f1c04c206a88c97a5cd65ebd58be6a0ae20657dd95e75ab"
+  },
+  "completed_at": "2026-10-20T08:09:33.838167+00:00",
+  "worker_evidence_unchanged": true
+}
