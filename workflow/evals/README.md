@@ -25,6 +25,10 @@ exec` works in your environment.
 
 ## Install
 
+The harness supports macOS, Linux, and Windows. Use `python3` on macOS/Linux
+or `python` (or `py -3`) on Windows. The Codex CLI and Git must be available on
+`PATH` in the same shell that runs the harness.
+
 From the root of the project you want to evaluate:
 
 ```bash

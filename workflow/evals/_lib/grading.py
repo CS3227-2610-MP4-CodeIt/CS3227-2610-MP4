@@ -14,6 +14,7 @@ from typing import Any
 from _lib.common import (
     Case,
     HarnessError,
+    codex_cli_command,
     read_json,
     run_command,
     write_json,
@@ -366,7 +367,7 @@ essential pass condition or hard gate in `expected.md` fails, cap `score` below
         judge_dir = semantic_dir / f"judge-{index:02d}"
         output = judge_dir / "output.json"
         command = [
-            "codex",
+            *codex_cli_command(),
             "exec",
             "--ephemeral",
             "--json",

@@ -26,6 +26,7 @@ from _lib.common import (  # noqa: E402, F401
     TerminalProgress,
     _fmt,
     concatenate_files,
+    codex_cli_command,
     elapsed,
     markdown_cell,
     now,
@@ -393,7 +394,7 @@ def _execute_trial(
         (turn_dir / "prompt.md").write_text(turn_prompt, encoding="utf-8")
 
         if index == 1:
-            worker_command = ["codex", "exec"]
+            worker_command = [*codex_cli_command(), "exec"]
             # NOTE: previously single-turn cases used --ephemeral. We now always
             # persist the rollout so provenance (model + reasoning effort) can be
             # read back from turn_context. The harness only READS the rollout; it
@@ -417,7 +418,7 @@ def _execute_trial(
                     f"worker turn 1 did not record a resumable thread ID for {case.name}"
                 )
             worker_command = [
-                "codex",
+                *codex_cli_command(),
                 "exec",
                 "resume",
                 "--json",

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import subprocess
 import sys
 import threading
@@ -22,6 +23,29 @@ SPINNER_FRAMES = ("◐", "◓", "◑", "◒")
 
 class HarnessError(ValueError):
     """Raised when an evaluation definition or run is invalid."""
+
+
+def codex_cli_command() -> list[str]:
+    """Return a launch-safe Codex CLI prefix, bypassing Windows .cmd shims."""
+    executable = shutil.which("codex")
+    if executable is None:
+        return ["codex"]
+
+    path = Path(executable)
+    if path.suffix.lower() in {".cmd", ".bat"}:
+        bundled_node = path.parent / "node.exe"
+        node = str(bundled_node) if bundled_node.is_file() else shutil.which("node")
+        entrypoint = (
+            path.parent / "node_modules" / "@openai" / "codex" / "bin" / "codex.js"
+        )
+        if node and entrypoint.is_file():
+            return [node, str(entrypoint)]
+        raise HarnessError(
+            "Codex resolves to a Windows batch wrapper, but its Node entrypoint "
+            "could not be resolved. Install the npm Codex CLI and ensure Node is on PATH."
+        )
+
+    return [executable]
 
 
 @dataclass(frozen=True)
@@ -176,9 +200,10 @@ def run_command(
                     check=False,
                     env=environment,
                 )
-            except FileNotFoundError:
+            except FileNotFoundError as error:
+                stderr_file.write(f"Failed to start process: {error}\n")
                 completed = subprocess.CompletedProcess(
-                    command, 127, "", "command not found"
+                    command, 127, "", f"command not found: {error}"
                 )
             except subprocess.TimeoutExpired:
                 completed = subprocess.CompletedProcess(command, 124, "", "timeout")
