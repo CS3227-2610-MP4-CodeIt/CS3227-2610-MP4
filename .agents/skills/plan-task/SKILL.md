@@ -40,8 +40,8 @@ to the implementer unless an approved contract constrains them.
 6. Present each task's outcome and blockers; confirm scope, exclusions and
    granularity with the user. Wait for explicit approval of the task breakdown
    before `READY`; reuse approval only for an unchanged breakdown.
-   Before writing or revising briefs, read
-   [task-brief.md](references/task-brief.md).
+   Choose the brief's structure and details for the task; include the
+   information the implementer needs to work and verify the outcome.
    Write one self-contained brief per coding task to `workflow/tasks/<task-id>.md`;
    revise matching tasks in place and preserve unrelated drafts.
 
