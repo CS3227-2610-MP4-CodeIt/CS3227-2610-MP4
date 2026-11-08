@@ -1,0 +1,106 @@
+{
+  "id": "mp2-experiment-001",
+  "skill": "javadoc-writing",
+  "test_cases": [
+    "document-public-api",
+    "negative-control-inline-comments",
+    "no-change-when-already-documented",
+    "respect-scope-boundaries"
+  ],
+  "configurations": [
+    "baseline",
+    "with-skill"
+  ],
+  "trials": 1,
+  "worker_trials": 8,
+  "worker_calls": 8,
+  "model": "codex-configured-default",
+  "timeout_seconds": 600,
+  "semantic_grading": false,
+  "semantic_judges": 0,
+  "started_at": "2026-09-25T02:59:54.901937+00:00",
+  "status": "interrupted",
+  "completed_at": "2026-09-25T03:02:40.843745+00:00",
+  "graded_trials": 2,
+  "passed_trials": 2,
+  "completed_trials": 2,
+  "mean_score": 100.0,
+  "overall_pass": false,
+  "aggregates": {
+    "cells": {
+      "document-public-api": {
+        "baseline": {
+          "passed_trials": 1,
+          "total_trials": 1,
+          "mean_score": 100.0
+        },
+        "with-skill": {
+          "passed_trials": 1,
+          "total_trials": 1,
+          "mean_score": 100.0
+        }
+      }
+    },
+    "comparisons": {
+      "document-public-api": {
+        "baseline_mean": 100.0,
+        "with_skill_mean": 100.0,
+        "delta": 0.0
+      }
+    }
+  },
+  "results": [
+    {
+      "status": "graded",
+      "skill": "javadoc-writing",
+      "test_case": "document-public-api",
+      "configuration": "baseline",
+      "trial": 1,
+      "overall_pass": true,
+      "score": 100,
+      "deterministic_score": 100,
+      "semantic_score": null,
+      "deterministic_pass": true,
+      "semantic_pass": null,
+      "semantic_judges": 0,
+      "worker_exit_code": 0,
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "not_requested",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [],
+      "run_directory": "workflow/evals/javadoc-writing/runs/mp2-experiment-001/trials/document-public-api/baseline/trial-01"
+    },
+    {
+      "status": "graded",
+      "skill": "javadoc-writing",
+      "test_case": "document-public-api",
+      "configuration": "with-skill",
+      "trial": 1,
+      "overall_pass": true,
+      "score": 100,
+      "deterministic_score": 100,
+      "semantic_score": null,
+      "deterministic_pass": true,
+      "semantic_pass": null,
+      "semantic_judges": 0,
+      "worker_exit_code": 0,
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "not_requested",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [],
+      "run_directory": "workflow/evals/javadoc-writing/runs/mp2-experiment-001/trials/document-public-api/with-skill/trial-01"
+    }
+  ],
+  "historical_import": {
+    "milestone": "MP2",
+    "source_experiment_id": "experiment-001",
+    "source_archive": "mp2 evals\\javadoc-writing\\runs\\experiment-001",
+    "trial_artifacts_present": true
+  }
+}

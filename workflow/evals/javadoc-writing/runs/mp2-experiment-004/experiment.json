@@ -1,0 +1,101 @@
+{
+  "id": "mp2-experiment-004",
+  "skill": "javadoc-writing",
+  "test_cases": [
+    "document-public-api",
+    "negative-control-inline-comments",
+    "no-change-when-already-documented",
+    "respect-scope-boundaries"
+  ],
+  "configurations": [
+    "baseline",
+    "with-skill"
+  ],
+  "trials": 3,
+  "worker_trials": 24,
+  "worker_calls": 24,
+  "model": "codex-configured-default",
+  "timeout_seconds": 600,
+  "semantic_grading": true,
+  "semantic_judges": 1,
+  "started_at": "2026-09-25T07:21:44.814980+00:00",
+  "status": "interrupted",
+  "completed_at": "2026-09-25T07:25:27.612396+00:00",
+  "graded_trials": 2,
+  "passed_trials": 0,
+  "completed_trials": 2,
+  "mean_score": 65.0,
+  "overall_pass": false,
+  "aggregates": {
+    "cells": {
+      "document-public-api": {
+        "baseline": {
+          "passed_trials": 0,
+          "total_trials": 2,
+          "mean_score": 65.0
+        }
+      }
+    },
+    "comparisons": {}
+  },
+  "results": [
+    {
+      "status": "graded",
+      "skill": "javadoc-writing",
+      "test_case": "document-public-api",
+      "configuration": "baseline",
+      "trial": 1,
+      "overall_pass": false,
+      "score": 65,
+      "deterministic_score": 100,
+      "semantic_score": 65,
+      "deterministic_pass": true,
+      "semantic_pass": false,
+      "semantic_judges": 1,
+      "worker_exit_code": 0,
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [
+        "semantic/semantic-jury: 0/1 judges voted pass; valid judge scores: [65]; consensus uses the median.",
+        "semantic/getter-restraint: The trivial getDailyLimit getter is over-documented: it has a multi-line Javadoc header and a separate verbose @return block. Under the specified standard, this getter should be omitted or documented only in a one-line form. This is the sole deduction."
+      ],
+      "run_directory": "workflow/evals/javadoc-writing/runs/mp2-experiment-004/trials/document-public-api/baseline/trial-01"
+    },
+    {
+      "status": "graded",
+      "skill": "javadoc-writing",
+      "test_case": "document-public-api",
+      "configuration": "baseline",
+      "trial": 2,
+      "overall_pass": false,
+      "score": 65,
+      "deterministic_score": 100,
+      "semantic_score": 65,
+      "deterministic_pass": true,
+      "semantic_pass": false,
+      "semantic_judges": 1,
+      "worker_exit_code": 0,
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [
+        "semantic/semantic-jury: 0/1 judges voted pass; valid judge scores: [65]; consensus uses the median.",
+        "semantic/getter-restraint: The trivial getDailyLimit getter is over-documented: it has a multi-line header plus an @return block. The expected standard permits omitting this getter documentation or using only a one-line form, so this criterion fails and the essential getter-restraint condition is not met."
+      ],
+      "run_directory": "workflow/evals/javadoc-writing/runs/mp2-experiment-004/trials/document-public-api/baseline/trial-02"
+    }
+  ],
+  "historical_import": {
+    "milestone": "MP2",
+    "source_experiment_id": "experiment-004",
+    "source_archive": "mp2 evals\\javadoc-writing\\runs\\experiment-004",
+    "trial_artifacts_present": true
+  }
+}

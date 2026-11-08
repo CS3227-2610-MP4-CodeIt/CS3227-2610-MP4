@@ -1,0 +1,106 @@
+{
+  "id": "mp2-experiment-007",
+  "skill": "javadoc-writing",
+  "test_cases": [
+    "document-public-api"
+  ],
+  "configurations": [
+    "baseline",
+    "with-skill"
+  ],
+  "trials": 1,
+  "worker_trials": 2,
+  "worker_calls": 2,
+  "model": "codex-configured-default",
+  "timeout_seconds": 600,
+  "semantic_grading": true,
+  "semantic_judges": 1,
+  "started_at": "2026-09-25T07:56:35.698955+00:00",
+  "status": "completed",
+  "completed_at": "2026-09-25T08:00:07.179839+00:00",
+  "graded_trials": 2,
+  "passed_trials": 1,
+  "completed_trials": 2,
+  "mean_score": 82.5,
+  "overall_pass": false,
+  "aggregates": {
+    "cells": {
+      "document-public-api": {
+        "baseline": {
+          "passed_trials": 0,
+          "total_trials": 1,
+          "mean_score": 65.0
+        },
+        "with-skill": {
+          "passed_trials": 1,
+          "total_trials": 1,
+          "mean_score": 100.0
+        }
+      }
+    },
+    "comparisons": {
+      "document-public-api": {
+        "baseline_mean": 65.0,
+        "with_skill_mean": 100.0,
+        "delta": 35.0
+      }
+    }
+  },
+  "results": [
+    {
+      "status": "graded",
+      "skill": "javadoc-writing",
+      "test_case": "document-public-api",
+      "configuration": "baseline",
+      "trial": 1,
+      "overall_pass": false,
+      "score": 65,
+      "deterministic_score": 100,
+      "semantic_score": 65,
+      "deterministic_pass": true,
+      "semantic_pass": false,
+      "semantic_judges": 1,
+      "worker_exit_code": 0,
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [
+        "semantic/semantic-jury: 0/1 judges voted pass; valid judge scores: [65]; consensus uses the median.",
+        "semantic/getter-restraint: The getDailyLimit getter is over-documented relative to the stated standard: it has a multi-line Javadoc header and an explicit @return block even though it is a trivial getter. The expected standard permits omitting this documentation or using only a one-line form, and explicitly treats this verbose form as over-documentation."
+      ],
+      "run_directory": "workflow/evals/javadoc-writing/runs/mp2-experiment-007/trials/document-public-api/baseline/trial-01"
+    },
+    {
+      "status": "graded",
+      "skill": "javadoc-writing",
+      "test_case": "document-public-api",
+      "configuration": "with-skill",
+      "trial": 1,
+      "overall_pass": true,
+      "score": 100,
+      "deterministic_score": 100,
+      "semantic_score": 100,
+      "deterministic_pass": true,
+      "semantic_pass": true,
+      "semantic_judges": 1,
+      "worker_exit_code": 0,
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [],
+      "run_directory": "workflow/evals/javadoc-writing/runs/mp2-experiment-007/trials/document-public-api/with-skill/trial-01"
+    }
+  ],
+  "historical_import": {
+    "milestone": "MP2",
+    "source_experiment_id": "experiment-007",
+    "source_archive": "mp2 evals\\javadoc-writing\\runs\\experiment-007",
+    "trial_artifacts_present": true
+  }
+}
