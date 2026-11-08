@@ -1,0 +1,863 @@
+{
+  "id": "experiment-003",
+  "skill": "implement-task",
+  "test_cases": [
+    "mp4-prototype-aware-quiz-list"
+  ],
+  "configurations": [
+    "baseline",
+    "with-skill"
+  ],
+  "trials": 2,
+  "worker_trials": 4,
+  "worker_calls": 4,
+  "model": "codex-configured-default",
+  "timeout_seconds": 600,
+  "semantic_grading": true,
+  "semantic_judges": 3,
+  "started_at": "2026-11-08T04:22:32.426016+00:00",
+  "status": "completed",
+  "completed_at": "2026-11-08T04:30:22.723273+00:00",
+  "graded_trials": 4,
+  "needs_review_trials": 0,
+  "passed_trials": 4,
+  "completed_trials": 4,
+  "mean_score": 95.5,
+  "overall_pass": true,
+  "aggregates": {
+    "cells": {
+      "mp4-prototype-aware-quiz-list": {
+        "baseline": {
+          "passed_trials": 2,
+          "needs_review_trials": 0,
+          "total_trials": 2,
+          "timed_trials": 2,
+          "mean_worker_seconds": 103.054,
+          "min_worker_seconds": 81.456,
+          "max_worker_seconds": 124.652,
+          "mean_score": 93.5,
+          "mean_deterministic_score": 100.0,
+          "mean_semantic_score": 93.5,
+          "accounting": {
+            "requests": [
+              {"response_id":"resp_0a48b73672f78f5f016aeff90bae5487d0b0d39eb383f4f29d","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:22:41.616Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15507,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":148,"reasoning_output_tokens":0,"uncached_input_tokens":3731,"billed_output_tokens":148,"total_tokens":15655},"est_cost":0.000565},
+              {"response_id":"resp_0a48b73672f78f5f016aeff912042c87d0acd4eb42027f0bf0","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:22:48.135Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24644,"cached_input_tokens":15360,"cache_write_input_tokens":0,"output_tokens":192,"reasoning_output_tokens":82,"uncached_input_tokens":9284,"billed_output_tokens":192,"total_tokens":24836},"est_cost":0.001178},
+              {"response_id":"resp_0a48b73672f78f5f016aeff9186b3087d088a25293bf1c7ca9","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:22:52.883Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25453,"cached_input_tokens":24448,"cache_write_input_tokens":0,"output_tokens":102,"reasoning_output_tokens":0,"uncached_input_tokens":1005,"billed_output_tokens":102,"total_tokens":25555},"est_cost":0.000396},
+              {"response_id":"resp_0a48b73672f78f5f016aeff91d471c87d09ac50aead9774e41","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:22:58.635Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":26676,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":52,"reasoning_output_tokens":19,"uncached_input_tokens":14900,"billed_output_tokens":52,"total_tokens":26728},"est_cost":0.001634},
+              {"response_id":"resp_0a48b73672f78f5f016aeff922dad887d0921802b1011b5373","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:23:06.593Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":26967,"cached_input_tokens":26496,"cache_write_input_tokens":0,"output_tokens":239,"reasoning_output_tokens":83,"uncached_input_tokens":471,"billed_output_tokens":239,"total_tokens":27206},"est_cost":0.000432},
+              {"response_id":"resp_0a48b73672f78f5f016aeff92d28c887d0969a0356e74ea608","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:23:16.333Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27230,"cached_input_tokens":25216,"cache_write_input_tokens":0,"output_tokens":45,"reasoning_output_tokens":0,"uncached_input_tokens":2014,"billed_output_tokens":45,"total_tokens":27275},"est_cost":0.000476},
+              {"response_id":"resp_0a48b73672f78f5f016aeff934731887d0b327d20a9b576816","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:23:28.827Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27299,"cached_input_tokens":27008,"cache_write_input_tokens":0,"output_tokens":594,"reasoning_output_tokens":0,"uncached_input_tokens":291,"billed_output_tokens":594,"total_tokens":27893},"est_cost":0.000596},
+              {"response_id":"resp_0a48b73672f78f5f016aeff940fc4c87d0b82c52bbc6dad9c8","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:23:48.660Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27917,"cached_input_tokens":26752,"cache_write_input_tokens":0,"output_tokens":1013,"reasoning_output_tokens":0,"uncached_input_tokens":1165,"billed_output_tokens":1013,"total_tokens":28930},"est_cost":0.000891},
+              {"response_id":"resp_0a48b73672f78f5f016aeff955343887d084574ad3029b77f8","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:02.401Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":28954,"cached_input_tokens":27776,"cache_write_input_tokens":0,"output_tokens":512,"reasoning_output_tokens":0,"uncached_input_tokens":1178,"billed_output_tokens":512,"total_tokens":29466},"est_cost":0.000652},
+              {"response_id":"resp_0a48b73672f78f5f016aeff9629a1487d081171a429a50d299","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:09.682Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29490,"cached_input_tokens":28800,"cache_write_input_tokens":0,"output_tokens":188,"reasoning_output_tokens":50,"uncached_input_tokens":690,"billed_output_tokens":188,"total_tokens":29678},"est_cost":0.000451},
+              {"response_id":"resp_0a48b73672f78f5f016aeff96a1b5487d08abad13eacb4e875","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:14.226Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":30316,"cached_input_tokens":29312,"cache_write_input_tokens":0,"output_tokens":149,"reasoning_output_tokens":48,"uncached_input_tokens":1004,"billed_output_tokens":149,"total_tokens":30465},"est_cost":0.000468},
+              {"response_id":"resp_0a48b73672f78f5f016aeff96ed55087d0b41fb67248958f74","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:21.798Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":30489,"cached_input_tokens":30080,"cache_write_input_tokens":0,"output_tokens":188,"reasoning_output_tokens":0,"uncached_input_tokens":409,"billed_output_tokens":188,"total_tokens":30677},"est_cost":0.000436},
+              {"response_id":"resp_0a48b73672f78f5f016aeff976187487d08a1d5436a139cd7f","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:31.320Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":31004,"cached_input_tokens":30336,"cache_write_input_tokens":0,"output_tokens":394,"reasoning_output_tokens":50,"uncached_input_tokens":668,"billed_output_tokens":394,"total_tokens":31398},"est_cost":0.000567},
+              {"response_id":"resp_0a48b73672f78f5f016aeff97f960887d095fee805c9ac716a","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:37.039Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":31422,"cached_input_tokens":30848,"cache_write_input_tokens":0,"output_tokens":225,"reasoning_output_tokens":0,"uncached_input_tokens":574,"billed_output_tokens":225,"total_tokens":31647},"est_cost":0.000478},
+              {"response_id":"resp_025b575635827e1a016aeff988e78487d08e2db5b517859ca9","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:43.639Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15507,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":93,"reasoning_output_tokens":0,"uncached_input_tokens":3731,"billed_output_tokens":93,"total_tokens":15600},"est_cost":0.000537},
+              {"response_id":"resp_025b575635827e1a016aeff98ba39487d0bf6731a4759f36c0","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:45.815Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15624,"cached_input_tokens":15360,"cache_write_input_tokens":0,"output_tokens":58,"reasoning_output_tokens":0,"uncached_input_tokens":264,"billed_output_tokens":58,"total_tokens":15682},"est_cost":0.000209},
+              {"response_id":"resp_025b575635827e1a016aeff98defbc87d0b516b2e89bbf883e","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:49.703Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":17413,"cached_input_tokens":15488,"cache_write_input_tokens":0,"output_tokens":160,"reasoning_output_tokens":39,"uncached_input_tokens":1925,"billed_output_tokens":160,"total_tokens":17573},"est_cost":0.000427},
+              {"response_id":"resp_025b575635827e1a016aeff991e2a487d0b7100771facc6699","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:53.345Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18064,"cached_input_tokens":17280,"cache_write_input_tokens":0,"output_tokens":108,"reasoning_output_tokens":0,"uncached_input_tokens":784,"billed_output_tokens":108,"total_tokens":18172},"est_cost":0.000305},
+              {"response_id":"resp_025b575635827e1a016aeff99574c487d083c4d9f361bc08f1","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:56.654Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19276,"cached_input_tokens":17920,"cache_write_input_tokens":0,"output_tokens":129,"reasoning_output_tokens":75,"uncached_input_tokens":1356,"billed_output_tokens":129,"total_tokens":19405},"est_cost":0.000379},
+              {"response_id":"resp_025b575635827e1a016aeff998bd5487d0aa94972075895aef","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:02.514Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19570,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":271,"reasoning_output_tokens":40,"uncached_input_tokens":7794,"billed_output_tokens":271,"total_tokens":19841},"est_cost":0.001033},
+              {"response_id":"resp_025b575635827e1a016aeff99e9fac87d08f2e536188e9f4cf","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:04.322Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19865,"cached_input_tokens":19072,"cache_write_input_tokens":0,"output_tokens":45,"reasoning_output_tokens":0,"uncached_input_tokens":793,"billed_output_tokens":45,"total_tokens":19910},"est_cost":0.000293},
+              {"response_id":"resp_025b575635827e1a016aeff9a05f1487d0bbedf2f52891e9a5","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:15.525Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19934,"cached_input_tokens":19328,"cache_write_input_tokens":0,"output_tokens":573,"reasoning_output_tokens":0,"uncached_input_tokens":606,"billed_output_tokens":573,"total_tokens":20507},"est_cost":0.00054},
+              {"response_id":"resp_025b575635827e1a016aeff9abb27887d0a4af9ec4544ebc31","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:33.436Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20531,"cached_input_tokens":19712,"cache_write_input_tokens":0,"output_tokens":930,"reasoning_output_tokens":0,"uncached_input_tokens":819,"billed_output_tokens":930,"total_tokens":21461},"est_cost":0.000744},
+              {"response_id":"resp_025b575635827e1a016aeff9bd7e6087d0bec731aff9b1543a","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:42.207Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21485,"cached_input_tokens":20352,"cache_write_input_tokens":0,"output_tokens":434,"reasoning_output_tokens":31,"uncached_input_tokens":1133,"billed_output_tokens":434,"total_tokens":21919},"est_cost":0.000534},
+              {"response_id":"resp_025b575635827e1a016aeff9c658c087d0920e5d9f9bdb6898","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:45.494Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21943,"cached_input_tokens":21248,"cache_write_input_tokens":0,"output_tokens":125,"reasoning_output_tokens":48,"uncached_input_tokens":695,"billed_output_tokens":125,"total_tokens":22068},"est_cost":0.000344},
+              {"response_id":"resp_025b575635827e1a016aeff9c9d82087d09e88b5c6adbae45a","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:49.244Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22271,"cached_input_tokens":21760,"cache_write_input_tokens":0,"output_tokens":143,"reasoning_output_tokens":28,"uncached_input_tokens":511,"billed_output_tokens":143,"total_tokens":22414},"est_cost":0.00034},
+              {"response_id":"resp_025b575635827e1a016aeff9cd5dac87d08cb0ca5f95bb7bcd","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:55.692Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22437,"cached_input_tokens":22144,"cache_write_input_tokens":0,"output_tokens":299,"reasoning_output_tokens":0,"uncached_input_tokens":293,"billed_output_tokens":299,"total_tokens":22736},"est_cost":0.0004},
+              {"response_id":"resp_025b575635827e1a016aeff9d3ef4487d0b1a558b7f5d3aed6","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:26:00.590Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22760,"cached_input_tokens":22272,"cache_write_input_tokens":0,"output_tokens":159,"reasoning_output_tokens":0,"uncached_input_tokens":488,"billed_output_tokens":159,"total_tokens":22919},"est_cost":0.000351}
+            ],
+            "tokens": {
+              "input_tokens": 1569465,
+              "cached_input_tokens": 1256064,
+              "cache_write_input_tokens": 0,
+              "uncached_input_tokens": 313401,
+              "output_tokens": 13920,
+              "reasoning_output_tokens": 2301,
+              "billed_output_tokens": 13920,
+              "total_tokens": 1583385
+            },
+            "est_cost": null,
+            "known_cost": 0.015656,
+            "coverage": {
+              "status": "partial",
+              "request_count": 28,
+              "priced_count": 28,
+              "unpriced_count": 0,
+              "unavailable_count": 6,
+              "unknown_models": [],
+              "reasons": [
+                "incomplete request boundaries"
+              ]
+            }
+          },
+          "mean_est_cost": null,
+          "mean_tokens": {
+            "input_tokens": 330024.0,
+            "cached_input_tokens": 300736.0,
+            "cache_write_input_tokens": 0.0,
+            "uncached_input_tokens": 29288.0,
+            "output_tokens": 3784.0,
+            "reasoning_output_tokens": 296.5,
+            "billed_output_tokens": 3784.0
+          }
+        },
+        "with-skill": {
+          "passed_trials": 2,
+          "needs_review_trials": 0,
+          "total_trials": 2,
+          "timed_trials": 2,
+          "mean_worker_seconds": 106.404,
+          "min_worker_seconds": 95.667,
+          "max_worker_seconds": 117.141,
+          "mean_score": 97.5,
+          "mean_deterministic_score": 100.0,
+          "mean_semantic_score": 97.5,
+          "accounting": {
+            "requests": [
+              {"response_id":"resp_07844a081b2c192c016aeff9dc41d487d0bcab28d18b40802f","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:08.057Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16440,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":155,"reasoning_output_tokens":0,"uncached_input_tokens":4664,"billed_output_tokens":155,"total_tokens":16595},"est_cost":0.000662},
+              {"response_id":"resp_07844a081b2c192c016aeff9e048bc87d08145e1e25d0a285d","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:12.455Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18426,"cached_input_tokens":16256,"cache_write_input_tokens":0,"output_tokens":180,"reasoning_output_tokens":33,"uncached_input_tokens":2170,"billed_output_tokens":180,"total_tokens":18606},"est_cost":0.00047},
+              {"response_id":"resp_07844a081b2c192c016aeff9e4ad6487d09073edc8a78702de","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:15.188Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20599,"cached_input_tokens":18304,"cache_write_input_tokens":0,"output_tokens":91,"reasoning_output_tokens":0,"uncached_input_tokens":2295,"billed_output_tokens":91,"total_tokens":20690},"est_cost":0.000458},
+              {"response_id":"resp_07844a081b2c192c016aeff9e7599487d0a83d99244e661a4f","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:20.298Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21576,"cached_input_tokens":20480,"cache_write_input_tokens":0,"output_tokens":207,"reasoning_output_tokens":119,"uncached_input_tokens":1096,"billed_output_tokens":207,"total_tokens":21783},"est_cost":0.000418},
+              {"response_id":"resp_07844a081b2c192c016aeff9ec7ce887d086828d2af5c3677d","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:34.613Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22190,"cached_input_tokens":21376,"cache_write_input_tokens":0,"output_tokens":719,"reasoning_output_tokens":73,"uncached_input_tokens":814,"billed_output_tokens":719,"total_tokens":22909},"est_cost":0.000655},
+              {"response_id":"resp_07844a081b2c192c016aeff9faae1087d0953a05d41309502a","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:36.780Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22933,"cached_input_tokens":22016,"cache_write_input_tokens":0,"output_tokens":52,"reasoning_output_tokens":8,"uncached_input_tokens":917,"billed_output_tokens":52,"total_tokens":22985},"est_cost":0.000338},
+              {"response_id":"resp_07844a081b2c192c016aeff9fced1887d0ad0c2143754fb805","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:27:09.031Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24103,"cached_input_tokens":22784,"cache_write_input_tokens":0,"output_tokens":1707,"reasoning_output_tokens":27,"uncached_input_tokens":1319,"billed_output_tokens":1707,"total_tokens":25810},"est_cost":0.001213},
+              {"response_id":"resp_07844a081b2c192c016aeffa1d3cdc87d0a6418790d739d4c4","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:27:14.834Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25837,"cached_input_tokens":23936,"cache_write_input_tokens":0,"output_tokens":260,"reasoning_output_tokens":33,"uncached_input_tokens":1901,"billed_output_tokens":260,"total_tokens":26097},"est_cost":0.000559},
+              {"response_id":"resp_07844a081b2c192c016aeffa23422487d0b236abdee390cc34","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:27:31.858Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27246,"cached_input_tokens":25600,"cache_write_input_tokens":0,"output_tokens":862,"reasoning_output_tokens":96,"uncached_input_tokens":1646,"billed_output_tokens":862,"total_tokens":28108},"est_cost":0.000852},
+              {"response_id":"resp_07844a081b2c192c016aeffa342f5887d09f7326bd6ee6a8d7","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:27:38.031Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":28253,"cached_input_tokens":27008,"cache_write_input_tokens":0,"output_tokens":275,"reasoning_output_tokens":0,"uncached_input_tokens":1245,"billed_output_tokens":275,"total_tokens":28528},"est_cost":0.000532},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa3db2fc87d0913738e1006dc44e","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:27:45.544Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16440,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":155,"reasoning_output_tokens":0,"uncached_input_tokens":4664,"billed_output_tokens":155,"total_tokens":16595},"est_cost":0.000662},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa420bc087d09351b60d913b5fcb","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:27:49.345Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18570,"cached_input_tokens":16256,"cache_write_input_tokens":0,"output_tokens":142,"reasoning_output_tokens":32,"uncached_input_tokens":2314,"billed_output_tokens":142,"total_tokens":18712},"est_cost":0.000465},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa45a9dc87d09e710d92c12e8eac","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:27:55.497Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20222,"cached_input_tokens":18432,"cache_write_input_tokens":0,"output_tokens":280,"reasoning_output_tokens":54,"uncached_input_tokens":1790,"billed_output_tokens":280,"total_tokens":20502},"est_cost":0.000503},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa4bb9f087d0ac0abfe6826d0c4c","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:27:58.395Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21507,"cached_input_tokens":20096,"cache_write_input_tokens":0,"output_tokens":99,"reasoning_output_tokens":21,"uncached_input_tokens":1411,"billed_output_tokens":99,"total_tokens":21606},"est_cost":0.000392},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa4ea76487d0a098cda3e7e5a1e6","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:08.704Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21750,"cached_input_tokens":21376,"cache_write_input_tokens":0,"output_tokens":487,"reasoning_output_tokens":51,"uncached_input_tokens":374,"billed_output_tokens":487,"total_tokens":22237},"est_cost":0.000495},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa58c74087d0b96657ab42225cfd","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:10.801Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22261,"cached_input_tokens":21632,"cache_write_input_tokens":0,"output_tokens":62,"reasoning_output_tokens":0,"uncached_input_tokens":629,"billed_output_tokens":62,"total_tokens":22323},"est_cost":0.00031},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa5aec8487d09d285d311212db41","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:27.595Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23030,"cached_input_tokens":22144,"cache_write_input_tokens":0,"output_tokens":879,"reasoning_output_tokens":55,"uncached_input_tokens":886,"billed_output_tokens":879,"total_tokens":23909},"est_cost":0.00075},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa6bb8bc87d0b4bdb1dd864e70b4","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:41.643Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24020,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":725,"reasoning_output_tokens":8,"uncached_input_tokens":12244,"billed_output_tokens":725,"total_tokens":24745},"est_cost":0.001705},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa79ca1087d0be962d14834eede8","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:58.713Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24769,"cached_input_tokens":23808,"cache_write_input_tokens":0,"output_tokens":894,"reasoning_output_tokens":0,"uncached_input_tokens":961,"billed_output_tokens":894,"total_tokens":25663},"est_cost":0.000781},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa8af09887d0881f77a8289e0b71","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:03.462Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25687,"cached_input_tokens":24576,"cache_write_input_tokens":0,"output_tokens":179,"reasoning_output_tokens":30,"uncached_input_tokens":1111,"billed_output_tokens":179,"total_tokens":25866},"est_cost":0.000446},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa8fc10087d0965df9b43e39d347","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:07.566Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":26057,"cached_input_tokens":25472,"cache_write_input_tokens":0,"output_tokens":163,"reasoning_output_tokens":87,"uncached_input_tokens":585,"billed_output_tokens":163,"total_tokens":26220},"est_cost":0.000395},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa93b1b887d08c1bbc51e75e9c63","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:14.135Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27651,"cached_input_tokens":25856,"cache_write_input_tokens":0,"output_tokens":313,"reasoning_output_tokens":106,"uncached_input_tokens":1795,"billed_output_tokens":313,"total_tokens":27964},"est_cost":0.000595},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa9a6a4487d0962e9e15e746fb87","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:18.823Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27988,"cached_input_tokens":27520,"cache_write_input_tokens":0,"output_tokens":188,"reasoning_output_tokens":20,"uncached_input_tokens":468,"billed_output_tokens":188,"total_tokens":28176},"est_cost":0.000416},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffa9f021887d08cebceb397fd2060","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:30.632Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":28384,"cached_input_tokens":27776,"cache_write_input_tokens":0,"output_tokens":601,"reasoning_output_tokens":0,"uncached_input_tokens":608,"billed_output_tokens":601,"total_tokens":28985},"est_cost":0.000639},
+              {"response_id":"resp_0d99feec9a5b68d4016aeffaaad79087d09ae2e500db1e901a","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:37.252Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29009,"cached_input_tokens":28160,"cache_write_input_tokens":0,"output_tokens":302,"reasoning_output_tokens":0,"uncached_input_tokens":849,"billed_output_tokens":302,"total_tokens":29311},"est_cost":0.000517}
+            ],
+            "tokens": {
+              "input_tokens": 1687174,
+              "cached_input_tokens": 1390336,
+              "cache_write_input_tokens": 0,
+              "uncached_input_tokens": 296838,
+              "output_tokens": 17324,
+              "reasoning_output_tokens": 3046,
+              "billed_output_tokens": 17324,
+              "total_tokens": 1704498
+            },
+            "est_cost": null,
+            "known_cost": 0.015228,
+            "coverage": {
+              "status": "partial",
+              "request_count": 25,
+              "priced_count": 25,
+              "unpriced_count": 0,
+              "unavailable_count": 6,
+              "unknown_models": [],
+              "reasons": [
+                "incomplete request boundaries"
+              ]
+            }
+          },
+          "mean_est_cost": null,
+          "mean_tokens": {
+            "input_tokens": 292474.0,
+            "cached_input_tokens": 268096.0,
+            "cache_write_input_tokens": 0.0,
+            "uncached_input_tokens": 24378.0,
+            "output_tokens": 4988.5,
+            "reasoning_output_tokens": 426.5,
+            "billed_output_tokens": 4988.5
+          }
+        }
+      }
+    },
+    "comparisons": {
+      "mp4-prototype-aware-quiz-list": {
+        "baseline_mean": 93.5,
+        "with_skill_mean": 97.5,
+        "delta": 4.0,
+        "token_delta": {
+          "input_tokens": -37550.0,
+          "cached_input_tokens": -32640.0,
+          "cache_write_input_tokens": 0.0,
+          "uncached_input_tokens": -4910.0,
+          "output_tokens": 1204.5,
+          "reasoning_output_tokens": 130.0,
+          "billed_output_tokens": 1204.5
+        }
+      }
+    }
+  },
+  "results": [
+    {
+      "status": "graded",
+      "skill": "implement-task",
+      "test_case": "mp4-prototype-aware-quiz-list",
+      "configuration": "baseline",
+      "trial": 1,
+      "overall_pass": true,
+      "needs_review": false,
+      "score": 95,
+      "deterministic_score": 100,
+      "semantic_score": 95,
+      "deterministic_pass": true,
+      "semantic_pass": true,
+      "semantic_judges": 3,
+      "worker_exit_code": 0,
+      "worker_elapsed_seconds": 124.652,
+      "worker_accounting": {
+        "requests": [
+          {"response_id":"resp_0a48b73672f78f5f016aeff90bae5487d0b0d39eb383f4f29d","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:22:41.616Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15507,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":148,"reasoning_output_tokens":0,"uncached_input_tokens":3731,"billed_output_tokens":148,"total_tokens":15655},"est_cost":0.000565},
+          {"response_id":"resp_0a48b73672f78f5f016aeff912042c87d0acd4eb42027f0bf0","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:22:48.135Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24644,"cached_input_tokens":15360,"cache_write_input_tokens":0,"output_tokens":192,"reasoning_output_tokens":82,"uncached_input_tokens":9284,"billed_output_tokens":192,"total_tokens":24836},"est_cost":0.001178},
+          {"response_id":"resp_0a48b73672f78f5f016aeff9186b3087d088a25293bf1c7ca9","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:22:52.883Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25453,"cached_input_tokens":24448,"cache_write_input_tokens":0,"output_tokens":102,"reasoning_output_tokens":0,"uncached_input_tokens":1005,"billed_output_tokens":102,"total_tokens":25555},"est_cost":0.000396},
+          {"response_id":"resp_0a48b73672f78f5f016aeff91d471c87d09ac50aead9774e41","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:22:58.635Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":26676,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":52,"reasoning_output_tokens":19,"uncached_input_tokens":14900,"billed_output_tokens":52,"total_tokens":26728},"est_cost":0.001634},
+          {"response_id":"resp_0a48b73672f78f5f016aeff922dad887d0921802b1011b5373","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:23:06.593Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":26967,"cached_input_tokens":26496,"cache_write_input_tokens":0,"output_tokens":239,"reasoning_output_tokens":83,"uncached_input_tokens":471,"billed_output_tokens":239,"total_tokens":27206},"est_cost":0.000432},
+          {"response_id":"resp_0a48b73672f78f5f016aeff92d28c887d0969a0356e74ea608","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:23:16.333Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27230,"cached_input_tokens":25216,"cache_write_input_tokens":0,"output_tokens":45,"reasoning_output_tokens":0,"uncached_input_tokens":2014,"billed_output_tokens":45,"total_tokens":27275},"est_cost":0.000476},
+          {"response_id":"resp_0a48b73672f78f5f016aeff934731887d0b327d20a9b576816","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:23:28.827Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27299,"cached_input_tokens":27008,"cache_write_input_tokens":0,"output_tokens":594,"reasoning_output_tokens":0,"uncached_input_tokens":291,"billed_output_tokens":594,"total_tokens":27893},"est_cost":0.000596},
+          {"response_id":"resp_0a48b73672f78f5f016aeff940fc4c87d0b82c52bbc6dad9c8","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:23:48.660Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27917,"cached_input_tokens":26752,"cache_write_input_tokens":0,"output_tokens":1013,"reasoning_output_tokens":0,"uncached_input_tokens":1165,"billed_output_tokens":1013,"total_tokens":28930},"est_cost":0.000891},
+          {"response_id":"resp_0a48b73672f78f5f016aeff955343887d084574ad3029b77f8","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:02.401Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":28954,"cached_input_tokens":27776,"cache_write_input_tokens":0,"output_tokens":512,"reasoning_output_tokens":0,"uncached_input_tokens":1178,"billed_output_tokens":512,"total_tokens":29466},"est_cost":0.000652},
+          {"response_id":"resp_0a48b73672f78f5f016aeff9629a1487d081171a429a50d299","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:09.682Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29490,"cached_input_tokens":28800,"cache_write_input_tokens":0,"output_tokens":188,"reasoning_output_tokens":50,"uncached_input_tokens":690,"billed_output_tokens":188,"total_tokens":29678},"est_cost":0.000451},
+          {"response_id":"resp_0a48b73672f78f5f016aeff96a1b5487d08abad13eacb4e875","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:14.226Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":30316,"cached_input_tokens":29312,"cache_write_input_tokens":0,"output_tokens":149,"reasoning_output_tokens":48,"uncached_input_tokens":1004,"billed_output_tokens":149,"total_tokens":30465},"est_cost":0.000468},
+          {"response_id":"resp_0a48b73672f78f5f016aeff96ed55087d0b41fb67248958f74","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:21.798Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":30489,"cached_input_tokens":30080,"cache_write_input_tokens":0,"output_tokens":188,"reasoning_output_tokens":0,"uncached_input_tokens":409,"billed_output_tokens":188,"total_tokens":30677},"est_cost":0.000436},
+          {"response_id":"resp_0a48b73672f78f5f016aeff976187487d08a1d5436a139cd7f","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:31.320Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":31004,"cached_input_tokens":30336,"cache_write_input_tokens":0,"output_tokens":394,"reasoning_output_tokens":50,"uncached_input_tokens":668,"billed_output_tokens":394,"total_tokens":31398},"est_cost":0.000567},
+          {"response_id":"resp_0a48b73672f78f5f016aeff97f960887d095fee805c9ac716a","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:37.039Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":31422,"cached_input_tokens":30848,"cache_write_input_tokens":0,"output_tokens":225,"reasoning_output_tokens":0,"uncached_input_tokens":574,"billed_output_tokens":225,"total_tokens":31647},"est_cost":0.000478}
+        ],
+        "tokens": {
+          "input_tokens": 383368,
+          "cached_input_tokens": 345984,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 37384,
+          "output_tokens": 4041,
+          "reasoning_output_tokens": 332,
+          "billed_output_tokens": 4041,
+          "total_tokens": 387409
+        },
+        "est_cost": 0.00922,
+        "known_cost": 0.00922,
+        "coverage": {
+          "status": "complete",
+          "request_count": 14,
+          "priced_count": 14,
+          "unpriced_count": 0,
+          "unavailable_count": 0,
+          "unknown_models": [],
+          "reasons": []
+        }
+      },
+      "judge_accounting": {
+        "requests": [],
+        "tokens": {
+          "input_tokens": 498039,
+          "cached_input_tokens": 360832,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 137207,
+          "output_tokens": 3495,
+          "reasoning_output_tokens": 1177,
+          "billed_output_tokens": 3495,
+          "total_tokens": 501534
+        },
+        "est_cost": null,
+        "known_cost": null,
+        "coverage": {
+          "status": "unavailable",
+          "request_count": 0,
+          "priced_count": 0,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "accounting": {
+        "requests": [
+          {"response_id":"resp_0a48b73672f78f5f016aeff90bae5487d0b0d39eb383f4f29d","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:22:41.616Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15507,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":148,"reasoning_output_tokens":0,"uncached_input_tokens":3731,"billed_output_tokens":148,"total_tokens":15655},"est_cost":0.000565},
+          {"response_id":"resp_0a48b73672f78f5f016aeff912042c87d0acd4eb42027f0bf0","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:22:48.135Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24644,"cached_input_tokens":15360,"cache_write_input_tokens":0,"output_tokens":192,"reasoning_output_tokens":82,"uncached_input_tokens":9284,"billed_output_tokens":192,"total_tokens":24836},"est_cost":0.001178},
+          {"response_id":"resp_0a48b73672f78f5f016aeff9186b3087d088a25293bf1c7ca9","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:22:52.883Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25453,"cached_input_tokens":24448,"cache_write_input_tokens":0,"output_tokens":102,"reasoning_output_tokens":0,"uncached_input_tokens":1005,"billed_output_tokens":102,"total_tokens":25555},"est_cost":0.000396},
+          {"response_id":"resp_0a48b73672f78f5f016aeff91d471c87d09ac50aead9774e41","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:22:58.635Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":26676,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":52,"reasoning_output_tokens":19,"uncached_input_tokens":14900,"billed_output_tokens":52,"total_tokens":26728},"est_cost":0.001634},
+          {"response_id":"resp_0a48b73672f78f5f016aeff922dad887d0921802b1011b5373","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:23:06.593Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":26967,"cached_input_tokens":26496,"cache_write_input_tokens":0,"output_tokens":239,"reasoning_output_tokens":83,"uncached_input_tokens":471,"billed_output_tokens":239,"total_tokens":27206},"est_cost":0.000432},
+          {"response_id":"resp_0a48b73672f78f5f016aeff92d28c887d0969a0356e74ea608","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:23:16.333Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27230,"cached_input_tokens":25216,"cache_write_input_tokens":0,"output_tokens":45,"reasoning_output_tokens":0,"uncached_input_tokens":2014,"billed_output_tokens":45,"total_tokens":27275},"est_cost":0.000476},
+          {"response_id":"resp_0a48b73672f78f5f016aeff934731887d0b327d20a9b576816","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:23:28.827Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27299,"cached_input_tokens":27008,"cache_write_input_tokens":0,"output_tokens":594,"reasoning_output_tokens":0,"uncached_input_tokens":291,"billed_output_tokens":594,"total_tokens":27893},"est_cost":0.000596},
+          {"response_id":"resp_0a48b73672f78f5f016aeff940fc4c87d0b82c52bbc6dad9c8","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:23:48.660Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27917,"cached_input_tokens":26752,"cache_write_input_tokens":0,"output_tokens":1013,"reasoning_output_tokens":0,"uncached_input_tokens":1165,"billed_output_tokens":1013,"total_tokens":28930},"est_cost":0.000891},
+          {"response_id":"resp_0a48b73672f78f5f016aeff955343887d084574ad3029b77f8","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:02.401Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":28954,"cached_input_tokens":27776,"cache_write_input_tokens":0,"output_tokens":512,"reasoning_output_tokens":0,"uncached_input_tokens":1178,"billed_output_tokens":512,"total_tokens":29466},"est_cost":0.000652},
+          {"response_id":"resp_0a48b73672f78f5f016aeff9629a1487d081171a429a50d299","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:09.682Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29490,"cached_input_tokens":28800,"cache_write_input_tokens":0,"output_tokens":188,"reasoning_output_tokens":50,"uncached_input_tokens":690,"billed_output_tokens":188,"total_tokens":29678},"est_cost":0.000451},
+          {"response_id":"resp_0a48b73672f78f5f016aeff96a1b5487d08abad13eacb4e875","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:14.226Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":30316,"cached_input_tokens":29312,"cache_write_input_tokens":0,"output_tokens":149,"reasoning_output_tokens":48,"uncached_input_tokens":1004,"billed_output_tokens":149,"total_tokens":30465},"est_cost":0.000468},
+          {"response_id":"resp_0a48b73672f78f5f016aeff96ed55087d0b41fb67248958f74","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:21.798Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":30489,"cached_input_tokens":30080,"cache_write_input_tokens":0,"output_tokens":188,"reasoning_output_tokens":0,"uncached_input_tokens":409,"billed_output_tokens":188,"total_tokens":30677},"est_cost":0.000436},
+          {"response_id":"resp_0a48b73672f78f5f016aeff976187487d08a1d5436a139cd7f","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:31.320Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":31004,"cached_input_tokens":30336,"cache_write_input_tokens":0,"output_tokens":394,"reasoning_output_tokens":50,"uncached_input_tokens":668,"billed_output_tokens":394,"total_tokens":31398},"est_cost":0.000567},
+          {"response_id":"resp_0a48b73672f78f5f016aeff97f960887d095fee805c9ac716a","thread_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","root_turn_id":"01a1b964-cd60-77d0-a4f5-40ffc1b32198","session_id":"01a1b964-cbe8-7e21-a9e1-3d082fe8e2f0","timestamp":"2026-11-08T04:24:37.039Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":31422,"cached_input_tokens":30848,"cache_write_input_tokens":0,"output_tokens":225,"reasoning_output_tokens":0,"uncached_input_tokens":574,"billed_output_tokens":225,"total_tokens":31647},"est_cost":0.000478}
+        ],
+        "tokens": {
+          "input_tokens": 881407,
+          "cached_input_tokens": 706816,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 174591,
+          "output_tokens": 7536,
+          "reasoning_output_tokens": 1509,
+          "billed_output_tokens": 7536,
+          "total_tokens": 888943
+        },
+        "est_cost": null,
+        "known_cost": 0.00922,
+        "coverage": {
+          "status": "partial",
+          "request_count": 14,
+          "priced_count": 14,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "tokens": {
+        "input_tokens": 383368,
+        "cached_input_tokens": 345984,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 37384,
+        "output_tokens": 4041,
+        "reasoning_output_tokens": 332,
+        "billed_output_tokens": 4041
+      },
+      "parent_tokens": {
+        "input_tokens": 383368,
+        "cached_input_tokens": 345984,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 37384,
+        "output_tokens": 4041,
+        "reasoning_output_tokens": 332,
+        "billed_output_tokens": 4041,
+        "total_tokens": 387409
+      },
+      "subagent_tokens": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "billed_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "subagent_spawn_count": 0,
+      "subagent_wait_count": 0,
+      "subagent_thread_ids": [],
+      "model": null,
+      "resolved_model": "gpt-6-luna",
+      "resolved_reasoning_effort": "medium",
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [],
+      "run_directory": "C:\\Users\\junha\\Documents\\School\\y3s1\\CS3227\\CS3227-2610-MP4\\workflow\\evals\\implement-task\\runs\\experiment-003\\trials\\mp4-prototype-aware-quiz-list\\baseline\\trial-01"
+    },
+    {
+      "status": "graded",
+      "skill": "implement-task",
+      "test_case": "mp4-prototype-aware-quiz-list",
+      "configuration": "baseline",
+      "trial": 2,
+      "overall_pass": true,
+      "needs_review": false,
+      "score": 92,
+      "deterministic_score": 100,
+      "semantic_score": 92,
+      "deterministic_pass": true,
+      "semantic_pass": true,
+      "semantic_judges": 3,
+      "worker_exit_code": 0,
+      "worker_elapsed_seconds": 81.456,
+      "worker_accounting": {
+        "requests": [
+          {"response_id":"resp_025b575635827e1a016aeff988e78487d08e2db5b517859ca9","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:43.639Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15507,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":93,"reasoning_output_tokens":0,"uncached_input_tokens":3731,"billed_output_tokens":93,"total_tokens":15600},"est_cost":0.000537},
+          {"response_id":"resp_025b575635827e1a016aeff98ba39487d0bf6731a4759f36c0","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:45.815Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15624,"cached_input_tokens":15360,"cache_write_input_tokens":0,"output_tokens":58,"reasoning_output_tokens":0,"uncached_input_tokens":264,"billed_output_tokens":58,"total_tokens":15682},"est_cost":0.000209},
+          {"response_id":"resp_025b575635827e1a016aeff98defbc87d0b516b2e89bbf883e","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:49.703Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":17413,"cached_input_tokens":15488,"cache_write_input_tokens":0,"output_tokens":160,"reasoning_output_tokens":39,"uncached_input_tokens":1925,"billed_output_tokens":160,"total_tokens":17573},"est_cost":0.000427},
+          {"response_id":"resp_025b575635827e1a016aeff991e2a487d0b7100771facc6699","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:53.345Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18064,"cached_input_tokens":17280,"cache_write_input_tokens":0,"output_tokens":108,"reasoning_output_tokens":0,"uncached_input_tokens":784,"billed_output_tokens":108,"total_tokens":18172},"est_cost":0.000305},
+          {"response_id":"resp_025b575635827e1a016aeff99574c487d083c4d9f361bc08f1","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:56.654Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19276,"cached_input_tokens":17920,"cache_write_input_tokens":0,"output_tokens":129,"reasoning_output_tokens":75,"uncached_input_tokens":1356,"billed_output_tokens":129,"total_tokens":19405},"est_cost":0.000379},
+          {"response_id":"resp_025b575635827e1a016aeff998bd5487d0aa94972075895aef","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:02.514Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19570,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":271,"reasoning_output_tokens":40,"uncached_input_tokens":7794,"billed_output_tokens":271,"total_tokens":19841},"est_cost":0.001033},
+          {"response_id":"resp_025b575635827e1a016aeff99e9fac87d08f2e536188e9f4cf","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:04.322Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19865,"cached_input_tokens":19072,"cache_write_input_tokens":0,"output_tokens":45,"reasoning_output_tokens":0,"uncached_input_tokens":793,"billed_output_tokens":45,"total_tokens":19910},"est_cost":0.000293},
+          {"response_id":"resp_025b575635827e1a016aeff9a05f1487d0bbedf2f52891e9a5","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:15.525Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19934,"cached_input_tokens":19328,"cache_write_input_tokens":0,"output_tokens":573,"reasoning_output_tokens":0,"uncached_input_tokens":606,"billed_output_tokens":573,"total_tokens":20507},"est_cost":0.00054},
+          {"response_id":"resp_025b575635827e1a016aeff9abb27887d0a4af9ec4544ebc31","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:33.436Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20531,"cached_input_tokens":19712,"cache_write_input_tokens":0,"output_tokens":930,"reasoning_output_tokens":0,"uncached_input_tokens":819,"billed_output_tokens":930,"total_tokens":21461},"est_cost":0.000744},
+          {"response_id":"resp_025b575635827e1a016aeff9bd7e6087d0bec731aff9b1543a","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:42.207Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21485,"cached_input_tokens":20352,"cache_write_input_tokens":0,"output_tokens":434,"reasoning_output_tokens":31,"uncached_input_tokens":1133,"billed_output_tokens":434,"total_tokens":21919},"est_cost":0.000534},
+          {"response_id":"resp_025b575635827e1a016aeff9c658c087d0920e5d9f9bdb6898","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:45.494Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21943,"cached_input_tokens":21248,"cache_write_input_tokens":0,"output_tokens":125,"reasoning_output_tokens":48,"uncached_input_tokens":695,"billed_output_tokens":125,"total_tokens":22068},"est_cost":0.000344},
+          {"response_id":"resp_025b575635827e1a016aeff9c9d82087d09e88b5c6adbae45a","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:49.244Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22271,"cached_input_tokens":21760,"cache_write_input_tokens":0,"output_tokens":143,"reasoning_output_tokens":28,"uncached_input_tokens":511,"billed_output_tokens":143,"total_tokens":22414},"est_cost":0.00034},
+          {"response_id":"resp_025b575635827e1a016aeff9cd5dac87d08cb0ca5f95bb7bcd","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:55.692Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22437,"cached_input_tokens":22144,"cache_write_input_tokens":0,"output_tokens":299,"reasoning_output_tokens":0,"uncached_input_tokens":293,"billed_output_tokens":299,"total_tokens":22736},"est_cost":0.0004},
+          {"response_id":"resp_025b575635827e1a016aeff9d3ef4487d0b1a558b7f5d3aed6","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:26:00.590Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22760,"cached_input_tokens":22272,"cache_write_input_tokens":0,"output_tokens":159,"reasoning_output_tokens":0,"uncached_input_tokens":488,"billed_output_tokens":159,"total_tokens":22919},"est_cost":0.000351}
+        ],
+        "tokens": {
+          "input_tokens": 276680,
+          "cached_input_tokens": 255488,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 21192,
+          "output_tokens": 3527,
+          "reasoning_output_tokens": 261,
+          "billed_output_tokens": 3527,
+          "total_tokens": 280207
+        },
+        "est_cost": 0.006436,
+        "known_cost": 0.006436,
+        "coverage": {
+          "status": "complete",
+          "request_count": 14,
+          "priced_count": 14,
+          "unpriced_count": 0,
+          "unavailable_count": 0,
+          "unknown_models": [],
+          "reasons": []
+        }
+      },
+      "judge_accounting": {
+        "requests": [],
+        "tokens": {
+          "input_tokens": 411378,
+          "cached_input_tokens": 293760,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 117618,
+          "output_tokens": 2857,
+          "reasoning_output_tokens": 531,
+          "billed_output_tokens": 2857,
+          "total_tokens": 414235
+        },
+        "est_cost": null,
+        "known_cost": null,
+        "coverage": {
+          "status": "unavailable",
+          "request_count": 0,
+          "priced_count": 0,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "accounting": {
+        "requests": [
+          {"response_id":"resp_025b575635827e1a016aeff988e78487d08e2db5b517859ca9","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:43.639Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15507,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":93,"reasoning_output_tokens":0,"uncached_input_tokens":3731,"billed_output_tokens":93,"total_tokens":15600},"est_cost":0.000537},
+          {"response_id":"resp_025b575635827e1a016aeff98ba39487d0bf6731a4759f36c0","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:45.815Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15624,"cached_input_tokens":15360,"cache_write_input_tokens":0,"output_tokens":58,"reasoning_output_tokens":0,"uncached_input_tokens":264,"billed_output_tokens":58,"total_tokens":15682},"est_cost":0.000209},
+          {"response_id":"resp_025b575635827e1a016aeff98defbc87d0b516b2e89bbf883e","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:49.703Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":17413,"cached_input_tokens":15488,"cache_write_input_tokens":0,"output_tokens":160,"reasoning_output_tokens":39,"uncached_input_tokens":1925,"billed_output_tokens":160,"total_tokens":17573},"est_cost":0.000427},
+          {"response_id":"resp_025b575635827e1a016aeff991e2a487d0b7100771facc6699","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:53.345Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18064,"cached_input_tokens":17280,"cache_write_input_tokens":0,"output_tokens":108,"reasoning_output_tokens":0,"uncached_input_tokens":784,"billed_output_tokens":108,"total_tokens":18172},"est_cost":0.000305},
+          {"response_id":"resp_025b575635827e1a016aeff99574c487d083c4d9f361bc08f1","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:24:56.654Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19276,"cached_input_tokens":17920,"cache_write_input_tokens":0,"output_tokens":129,"reasoning_output_tokens":75,"uncached_input_tokens":1356,"billed_output_tokens":129,"total_tokens":19405},"est_cost":0.000379},
+          {"response_id":"resp_025b575635827e1a016aeff998bd5487d0aa94972075895aef","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:02.514Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19570,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":271,"reasoning_output_tokens":40,"uncached_input_tokens":7794,"billed_output_tokens":271,"total_tokens":19841},"est_cost":0.001033},
+          {"response_id":"resp_025b575635827e1a016aeff99e9fac87d08f2e536188e9f4cf","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:04.322Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19865,"cached_input_tokens":19072,"cache_write_input_tokens":0,"output_tokens":45,"reasoning_output_tokens":0,"uncached_input_tokens":793,"billed_output_tokens":45,"total_tokens":19910},"est_cost":0.000293},
+          {"response_id":"resp_025b575635827e1a016aeff9a05f1487d0bbedf2f52891e9a5","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:15.525Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19934,"cached_input_tokens":19328,"cache_write_input_tokens":0,"output_tokens":573,"reasoning_output_tokens":0,"uncached_input_tokens":606,"billed_output_tokens":573,"total_tokens":20507},"est_cost":0.00054},
+          {"response_id":"resp_025b575635827e1a016aeff9abb27887d0a4af9ec4544ebc31","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:33.436Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20531,"cached_input_tokens":19712,"cache_write_input_tokens":0,"output_tokens":930,"reasoning_output_tokens":0,"uncached_input_tokens":819,"billed_output_tokens":930,"total_tokens":21461},"est_cost":0.000744},
+          {"response_id":"resp_025b575635827e1a016aeff9bd7e6087d0bec731aff9b1543a","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:42.207Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21485,"cached_input_tokens":20352,"cache_write_input_tokens":0,"output_tokens":434,"reasoning_output_tokens":31,"uncached_input_tokens":1133,"billed_output_tokens":434,"total_tokens":21919},"est_cost":0.000534},
+          {"response_id":"resp_025b575635827e1a016aeff9c658c087d0920e5d9f9bdb6898","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:45.494Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21943,"cached_input_tokens":21248,"cache_write_input_tokens":0,"output_tokens":125,"reasoning_output_tokens":48,"uncached_input_tokens":695,"billed_output_tokens":125,"total_tokens":22068},"est_cost":0.000344},
+          {"response_id":"resp_025b575635827e1a016aeff9c9d82087d09e88b5c6adbae45a","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:49.244Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22271,"cached_input_tokens":21760,"cache_write_input_tokens":0,"output_tokens":143,"reasoning_output_tokens":28,"uncached_input_tokens":511,"billed_output_tokens":143,"total_tokens":22414},"est_cost":0.00034},
+          {"response_id":"resp_025b575635827e1a016aeff9cd5dac87d08cb0ca5f95bb7bcd","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:25:55.692Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22437,"cached_input_tokens":22144,"cache_write_input_tokens":0,"output_tokens":299,"reasoning_output_tokens":0,"uncached_input_tokens":293,"billed_output_tokens":299,"total_tokens":22736},"est_cost":0.0004},
+          {"response_id":"resp_025b575635827e1a016aeff9d3ef4487d0b1a558b7f5d3aed6","thread_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","root_turn_id":"01a1b966-bbb8-74a0-8f96-25bda595c9f1","session_id":"01a1b966-ba45-7103-8480-e4e3cf121b69","timestamp":"2026-11-08T04:26:00.590Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22760,"cached_input_tokens":22272,"cache_write_input_tokens":0,"output_tokens":159,"reasoning_output_tokens":0,"uncached_input_tokens":488,"billed_output_tokens":159,"total_tokens":22919},"est_cost":0.000351}
+        ],
+        "tokens": {
+          "input_tokens": 688058,
+          "cached_input_tokens": 549248,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 138810,
+          "output_tokens": 6384,
+          "reasoning_output_tokens": 792,
+          "billed_output_tokens": 6384,
+          "total_tokens": 694442
+        },
+        "est_cost": null,
+        "known_cost": 0.006436,
+        "coverage": {
+          "status": "partial",
+          "request_count": 14,
+          "priced_count": 14,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "tokens": {
+        "input_tokens": 276680,
+        "cached_input_tokens": 255488,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 21192,
+        "output_tokens": 3527,
+        "reasoning_output_tokens": 261,
+        "billed_output_tokens": 3527
+      },
+      "parent_tokens": {
+        "input_tokens": 276680,
+        "cached_input_tokens": 255488,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 21192,
+        "output_tokens": 3527,
+        "reasoning_output_tokens": 261,
+        "billed_output_tokens": 3527,
+        "total_tokens": 280207
+      },
+      "subagent_tokens": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "billed_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "subagent_spawn_count": 0,
+      "subagent_wait_count": 0,
+      "subagent_thread_ids": [],
+      "model": null,
+      "resolved_model": "gpt-6-luna",
+      "resolved_reasoning_effort": "medium",
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [],
+      "run_directory": "C:\\Users\\junha\\Documents\\School\\y3s1\\CS3227\\CS3227-2610-MP4\\workflow\\evals\\implement-task\\runs\\experiment-003\\trials\\mp4-prototype-aware-quiz-list\\baseline\\trial-02"
+    },
+    {
+      "status": "graded",
+      "skill": "implement-task",
+      "test_case": "mp4-prototype-aware-quiz-list",
+      "configuration": "with-skill",
+      "trial": 1,
+      "overall_pass": true,
+      "needs_review": false,
+      "score": 99,
+      "deterministic_score": 100,
+      "semantic_score": 99,
+      "deterministic_pass": true,
+      "semantic_pass": true,
+      "semantic_judges": 3,
+      "worker_exit_code": 0,
+      "worker_elapsed_seconds": 95.667,
+      "worker_accounting": {
+        "requests": [
+          {"response_id":"resp_07844a081b2c192c016aeff9dc41d487d0bcab28d18b40802f","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:08.057Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16440,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":155,"reasoning_output_tokens":0,"uncached_input_tokens":4664,"billed_output_tokens":155,"total_tokens":16595},"est_cost":0.000662},
+          {"response_id":"resp_07844a081b2c192c016aeff9e048bc87d08145e1e25d0a285d","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:12.455Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18426,"cached_input_tokens":16256,"cache_write_input_tokens":0,"output_tokens":180,"reasoning_output_tokens":33,"uncached_input_tokens":2170,"billed_output_tokens":180,"total_tokens":18606},"est_cost":0.00047},
+          {"response_id":"resp_07844a081b2c192c016aeff9e4ad6487d09073edc8a78702de","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:15.188Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20599,"cached_input_tokens":18304,"cache_write_input_tokens":0,"output_tokens":91,"reasoning_output_tokens":0,"uncached_input_tokens":2295,"billed_output_tokens":91,"total_tokens":20690},"est_cost":0.000458},
+          {"response_id":"resp_07844a081b2c192c016aeff9e7599487d0a83d99244e661a4f","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:20.298Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21576,"cached_input_tokens":20480,"cache_write_input_tokens":0,"output_tokens":207,"reasoning_output_tokens":119,"uncached_input_tokens":1096,"billed_output_tokens":207,"total_tokens":21783},"est_cost":0.000418},
+          {"response_id":"resp_07844a081b2c192c016aeff9ec7ce887d086828d2af5c3677d","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:34.613Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22190,"cached_input_tokens":21376,"cache_write_input_tokens":0,"output_tokens":719,"reasoning_output_tokens":73,"uncached_input_tokens":814,"billed_output_tokens":719,"total_tokens":22909},"est_cost":0.000655},
+          {"response_id":"resp_07844a081b2c192c016aeff9faae1087d0953a05d41309502a","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:36.780Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22933,"cached_input_tokens":22016,"cache_write_input_tokens":0,"output_tokens":52,"reasoning_output_tokens":8,"uncached_input_tokens":917,"billed_output_tokens":52,"total_tokens":22985},"est_cost":0.000338},
+          {"response_id":"resp_07844a081b2c192c016aeff9fced1887d0ad0c2143754fb805","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:27:09.031Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24103,"cached_input_tokens":22784,"cache_write_input_tokens":0,"output_tokens":1707,"reasoning_output_tokens":27,"uncached_input_tokens":1319,"billed_output_tokens":1707,"total_tokens":25810},"est_cost":0.001213},
+          {"response_id":"resp_07844a081b2c192c016aeffa1d3cdc87d0a6418790d739d4c4","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:27:14.834Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25837,"cached_input_tokens":23936,"cache_write_input_tokens":0,"output_tokens":260,"reasoning_output_tokens":33,"uncached_input_tokens":1901,"billed_output_tokens":260,"total_tokens":26097},"est_cost":0.000559},
+          {"response_id":"resp_07844a081b2c192c016aeffa23422487d0b236abdee390cc34","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:27:31.858Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27246,"cached_input_tokens":25600,"cache_write_input_tokens":0,"output_tokens":862,"reasoning_output_tokens":96,"uncached_input_tokens":1646,"billed_output_tokens":862,"total_tokens":28108},"est_cost":0.000852},
+          {"response_id":"resp_07844a081b2c192c016aeffa342f5887d09f7326bd6ee6a8d7","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:27:38.031Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":28253,"cached_input_tokens":27008,"cache_write_input_tokens":0,"output_tokens":275,"reasoning_output_tokens":0,"uncached_input_tokens":1245,"billed_output_tokens":275,"total_tokens":28528},"est_cost":0.000532}
+        ],
+        "tokens": {
+          "input_tokens": 227603,
+          "cached_input_tokens": 209536,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 18067,
+          "output_tokens": 4508,
+          "reasoning_output_tokens": 389,
+          "billed_output_tokens": 4508,
+          "total_tokens": 232111
+        },
+        "est_cost": 0.006157,
+        "known_cost": 0.006157,
+        "coverage": {
+          "status": "complete",
+          "request_count": 10,
+          "priced_count": 10,
+          "unpriced_count": 0,
+          "unavailable_count": 0,
+          "unknown_models": [],
+          "reasons": []
+        }
+      },
+      "judge_accounting": {
+        "requests": [],
+        "tokens": {
+          "input_tokens": 463270,
+          "cached_input_tokens": 335360,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 127910,
+          "output_tokens": 3501,
+          "reasoning_output_tokens": 1073,
+          "billed_output_tokens": 3501,
+          "total_tokens": 466771
+        },
+        "est_cost": null,
+        "known_cost": null,
+        "coverage": {
+          "status": "unavailable",
+          "request_count": 0,
+          "priced_count": 0,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "accounting": {
+        "requests": [
+          {"response_id":"resp_07844a081b2c192c016aeff9dc41d487d0bcab28d18b40802f","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:08.057Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16440,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":155,"reasoning_output_tokens":0,"uncached_input_tokens":4664,"billed_output_tokens":155,"total_tokens":16595},"est_cost":0.000662},
+          {"response_id":"resp_07844a081b2c192c016aeff9e048bc87d08145e1e25d0a285d","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:12.455Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18426,"cached_input_tokens":16256,"cache_write_input_tokens":0,"output_tokens":180,"reasoning_output_tokens":33,"uncached_input_tokens":2170,"billed_output_tokens":180,"total_tokens":18606},"est_cost":0.00047},
+          {"response_id":"resp_07844a081b2c192c016aeff9e4ad6487d09073edc8a78702de","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:15.188Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20599,"cached_input_tokens":18304,"cache_write_input_tokens":0,"output_tokens":91,"reasoning_output_tokens":0,"uncached_input_tokens":2295,"billed_output_tokens":91,"total_tokens":20690},"est_cost":0.000458},
+          {"response_id":"resp_07844a081b2c192c016aeff9e7599487d0a83d99244e661a4f","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:20.298Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21576,"cached_input_tokens":20480,"cache_write_input_tokens":0,"output_tokens":207,"reasoning_output_tokens":119,"uncached_input_tokens":1096,"billed_output_tokens":207,"total_tokens":21783},"est_cost":0.000418},
+          {"response_id":"resp_07844a081b2c192c016aeff9ec7ce887d086828d2af5c3677d","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:34.613Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22190,"cached_input_tokens":21376,"cache_write_input_tokens":0,"output_tokens":719,"reasoning_output_tokens":73,"uncached_input_tokens":814,"billed_output_tokens":719,"total_tokens":22909},"est_cost":0.000655},
+          {"response_id":"resp_07844a081b2c192c016aeff9faae1087d0953a05d41309502a","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:26:36.780Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22933,"cached_input_tokens":22016,"cache_write_input_tokens":0,"output_tokens":52,"reasoning_output_tokens":8,"uncached_input_tokens":917,"billed_output_tokens":52,"total_tokens":22985},"est_cost":0.000338},
+          {"response_id":"resp_07844a081b2c192c016aeff9fced1887d0ad0c2143754fb805","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:27:09.031Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24103,"cached_input_tokens":22784,"cache_write_input_tokens":0,"output_tokens":1707,"reasoning_output_tokens":27,"uncached_input_tokens":1319,"billed_output_tokens":1707,"total_tokens":25810},"est_cost":0.001213},
+          {"response_id":"resp_07844a081b2c192c016aeffa1d3cdc87d0a6418790d739d4c4","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:27:14.834Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25837,"cached_input_tokens":23936,"cache_write_input_tokens":0,"output_tokens":260,"reasoning_output_tokens":33,"uncached_input_tokens":1901,"billed_output_tokens":260,"total_tokens":26097},"est_cost":0.000559},
+          {"response_id":"resp_07844a081b2c192c016aeffa23422487d0b236abdee390cc34","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:27:31.858Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27246,"cached_input_tokens":25600,"cache_write_input_tokens":0,"output_tokens":862,"reasoning_output_tokens":96,"uncached_input_tokens":1646,"billed_output_tokens":862,"total_tokens":28108},"est_cost":0.000852},
+          {"response_id":"resp_07844a081b2c192c016aeffa342f5887d09f7326bd6ee6a8d7","thread_id":"01a1b967-fff2-74f1-a683-73105127ff3a","turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","root_turn_id":"01a1b968-017f-7883-824b-aa3d0ccfbdb8","session_id":"01a1b967-fff2-74f1-a683-73105127ff3a","timestamp":"2026-11-08T04:27:38.031Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":28253,"cached_input_tokens":27008,"cache_write_input_tokens":0,"output_tokens":275,"reasoning_output_tokens":0,"uncached_input_tokens":1245,"billed_output_tokens":275,"total_tokens":28528},"est_cost":0.000532}
+        ],
+        "tokens": {
+          "input_tokens": 690873,
+          "cached_input_tokens": 544896,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 145977,
+          "output_tokens": 8009,
+          "reasoning_output_tokens": 1462,
+          "billed_output_tokens": 8009,
+          "total_tokens": 698882
+        },
+        "est_cost": null,
+        "known_cost": 0.006157,
+        "coverage": {
+          "status": "partial",
+          "request_count": 10,
+          "priced_count": 10,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "tokens": {
+        "input_tokens": 227603,
+        "cached_input_tokens": 209536,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 18067,
+        "output_tokens": 4508,
+        "reasoning_output_tokens": 389,
+        "billed_output_tokens": 4508
+      },
+      "parent_tokens": {
+        "input_tokens": 227603,
+        "cached_input_tokens": 209536,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 18067,
+        "output_tokens": 4508,
+        "reasoning_output_tokens": 389,
+        "billed_output_tokens": 4508,
+        "total_tokens": 232111
+      },
+      "subagent_tokens": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "billed_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "subagent_spawn_count": 0,
+      "subagent_wait_count": 0,
+      "subagent_thread_ids": [],
+      "model": null,
+      "resolved_model": "gpt-6-luna",
+      "resolved_reasoning_effort": "medium",
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [],
+      "run_directory": "C:\\Users\\junha\\Documents\\School\\y3s1\\CS3227\\CS3227-2610-MP4\\workflow\\evals\\implement-task\\runs\\experiment-003\\trials\\mp4-prototype-aware-quiz-list\\with-skill\\trial-01"
+    },
+    {
+      "status": "graded",
+      "skill": "implement-task",
+      "test_case": "mp4-prototype-aware-quiz-list",
+      "configuration": "with-skill",
+      "trial": 2,
+      "overall_pass": true,
+      "needs_review": false,
+      "score": 96,
+      "deterministic_score": 100,
+      "semantic_score": 96,
+      "deterministic_pass": true,
+      "semantic_pass": true,
+      "semantic_judges": 3,
+      "worker_exit_code": 0,
+      "worker_elapsed_seconds": 117.141,
+      "worker_accounting": {
+        "requests": [
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa3db2fc87d0913738e1006dc44e","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:27:45.544Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16440,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":155,"reasoning_output_tokens":0,"uncached_input_tokens":4664,"billed_output_tokens":155,"total_tokens":16595},"est_cost":0.000662},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa420bc087d09351b60d913b5fcb","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:27:49.345Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18570,"cached_input_tokens":16256,"cache_write_input_tokens":0,"output_tokens":142,"reasoning_output_tokens":32,"uncached_input_tokens":2314,"billed_output_tokens":142,"total_tokens":18712},"est_cost":0.000465},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa45a9dc87d09e710d92c12e8eac","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:27:55.497Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20222,"cached_input_tokens":18432,"cache_write_input_tokens":0,"output_tokens":280,"reasoning_output_tokens":54,"uncached_input_tokens":1790,"billed_output_tokens":280,"total_tokens":20502},"est_cost":0.000503},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa4bb9f087d0ac0abfe6826d0c4c","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:27:58.395Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21507,"cached_input_tokens":20096,"cache_write_input_tokens":0,"output_tokens":99,"reasoning_output_tokens":21,"uncached_input_tokens":1411,"billed_output_tokens":99,"total_tokens":21606},"est_cost":0.000392},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa4ea76487d0a098cda3e7e5a1e6","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:08.704Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21750,"cached_input_tokens":21376,"cache_write_input_tokens":0,"output_tokens":487,"reasoning_output_tokens":51,"uncached_input_tokens":374,"billed_output_tokens":487,"total_tokens":22237},"est_cost":0.000495},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa58c74087d0b96657ab42225cfd","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:10.801Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22261,"cached_input_tokens":21632,"cache_write_input_tokens":0,"output_tokens":62,"reasoning_output_tokens":0,"uncached_input_tokens":629,"billed_output_tokens":62,"total_tokens":22323},"est_cost":0.00031},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa5aec8487d09d285d311212db41","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:27.595Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23030,"cached_input_tokens":22144,"cache_write_input_tokens":0,"output_tokens":879,"reasoning_output_tokens":55,"uncached_input_tokens":886,"billed_output_tokens":879,"total_tokens":23909},"est_cost":0.00075},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa6bb8bc87d0b4bdb1dd864e70b4","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:41.643Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24020,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":725,"reasoning_output_tokens":8,"uncached_input_tokens":12244,"billed_output_tokens":725,"total_tokens":24745},"est_cost":0.001705},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa79ca1087d0be962d14834eede8","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:58.713Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24769,"cached_input_tokens":23808,"cache_write_input_tokens":0,"output_tokens":894,"reasoning_output_tokens":0,"uncached_input_tokens":961,"billed_output_tokens":894,"total_tokens":25663},"est_cost":0.000781},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa8af09887d0881f77a8289e0b71","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:03.462Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25687,"cached_input_tokens":24576,"cache_write_input_tokens":0,"output_tokens":179,"reasoning_output_tokens":30,"uncached_input_tokens":1111,"billed_output_tokens":179,"total_tokens":25866},"est_cost":0.000446},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa8fc10087d0965df9b43e39d347","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:07.566Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":26057,"cached_input_tokens":25472,"cache_write_input_tokens":0,"output_tokens":163,"reasoning_output_tokens":87,"uncached_input_tokens":585,"billed_output_tokens":163,"total_tokens":26220},"est_cost":0.000395},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa93b1b887d08c1bbc51e75e9c63","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:14.135Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27651,"cached_input_tokens":25856,"cache_write_input_tokens":0,"output_tokens":313,"reasoning_output_tokens":106,"uncached_input_tokens":1795,"billed_output_tokens":313,"total_tokens":27964},"est_cost":0.000595},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa9a6a4487d0962e9e15e746fb87","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:18.823Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27988,"cached_input_tokens":27520,"cache_write_input_tokens":0,"output_tokens":188,"reasoning_output_tokens":20,"uncached_input_tokens":468,"billed_output_tokens":188,"total_tokens":28176},"est_cost":0.000416},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa9f021887d08cebceb397fd2060","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:30.632Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":28384,"cached_input_tokens":27776,"cache_write_input_tokens":0,"output_tokens":601,"reasoning_output_tokens":0,"uncached_input_tokens":608,"billed_output_tokens":601,"total_tokens":28985},"est_cost":0.000639},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffaaad79087d09ae2e500db1e901a","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:37.252Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29009,"cached_input_tokens":28160,"cache_write_input_tokens":0,"output_tokens":302,"reasoning_output_tokens":0,"uncached_input_tokens":849,"billed_output_tokens":302,"total_tokens":29311},"est_cost":0.000517}
+        ],
+        "tokens": {
+          "input_tokens": 357345,
+          "cached_input_tokens": 326656,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 30689,
+          "output_tokens": 5469,
+          "reasoning_output_tokens": 464,
+          "billed_output_tokens": 5469,
+          "total_tokens": 362814
+        },
+        "est_cost": 0.009071,
+        "known_cost": 0.009071,
+        "coverage": {
+          "status": "complete",
+          "request_count": 15,
+          "priced_count": 15,
+          "unpriced_count": 0,
+          "unavailable_count": 0,
+          "unknown_models": [],
+          "reasons": []
+        }
+      },
+      "judge_accounting": {
+        "requests": [],
+        "tokens": {
+          "input_tokens": 638956,
+          "cached_input_tokens": 518784,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 120172,
+          "output_tokens": 3846,
+          "reasoning_output_tokens": 1120,
+          "billed_output_tokens": 3846,
+          "total_tokens": 642802
+        },
+        "est_cost": null,
+        "known_cost": null,
+        "coverage": {
+          "status": "unavailable",
+          "request_count": 0,
+          "priced_count": 0,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "accounting": {
+        "requests": [
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa3db2fc87d0913738e1006dc44e","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:27:45.544Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16440,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":155,"reasoning_output_tokens":0,"uncached_input_tokens":4664,"billed_output_tokens":155,"total_tokens":16595},"est_cost":0.000662},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa420bc087d09351b60d913b5fcb","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:27:49.345Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18570,"cached_input_tokens":16256,"cache_write_input_tokens":0,"output_tokens":142,"reasoning_output_tokens":32,"uncached_input_tokens":2314,"billed_output_tokens":142,"total_tokens":18712},"est_cost":0.000465},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa45a9dc87d09e710d92c12e8eac","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:27:55.497Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20222,"cached_input_tokens":18432,"cache_write_input_tokens":0,"output_tokens":280,"reasoning_output_tokens":54,"uncached_input_tokens":1790,"billed_output_tokens":280,"total_tokens":20502},"est_cost":0.000503},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa4bb9f087d0ac0abfe6826d0c4c","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:27:58.395Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21507,"cached_input_tokens":20096,"cache_write_input_tokens":0,"output_tokens":99,"reasoning_output_tokens":21,"uncached_input_tokens":1411,"billed_output_tokens":99,"total_tokens":21606},"est_cost":0.000392},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa4ea76487d0a098cda3e7e5a1e6","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:08.704Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21750,"cached_input_tokens":21376,"cache_write_input_tokens":0,"output_tokens":487,"reasoning_output_tokens":51,"uncached_input_tokens":374,"billed_output_tokens":487,"total_tokens":22237},"est_cost":0.000495},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa58c74087d0b96657ab42225cfd","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:10.801Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22261,"cached_input_tokens":21632,"cache_write_input_tokens":0,"output_tokens":62,"reasoning_output_tokens":0,"uncached_input_tokens":629,"billed_output_tokens":62,"total_tokens":22323},"est_cost":0.00031},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa5aec8487d09d285d311212db41","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:27.595Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23030,"cached_input_tokens":22144,"cache_write_input_tokens":0,"output_tokens":879,"reasoning_output_tokens":55,"uncached_input_tokens":886,"billed_output_tokens":879,"total_tokens":23909},"est_cost":0.00075},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa6bb8bc87d0b4bdb1dd864e70b4","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:41.643Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24020,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":725,"reasoning_output_tokens":8,"uncached_input_tokens":12244,"billed_output_tokens":725,"total_tokens":24745},"est_cost":0.001705},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa79ca1087d0be962d14834eede8","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:28:58.713Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24769,"cached_input_tokens":23808,"cache_write_input_tokens":0,"output_tokens":894,"reasoning_output_tokens":0,"uncached_input_tokens":961,"billed_output_tokens":894,"total_tokens":25663},"est_cost":0.000781},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa8af09887d0881f77a8289e0b71","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:03.462Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25687,"cached_input_tokens":24576,"cache_write_input_tokens":0,"output_tokens":179,"reasoning_output_tokens":30,"uncached_input_tokens":1111,"billed_output_tokens":179,"total_tokens":25866},"est_cost":0.000446},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa8fc10087d0965df9b43e39d347","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:07.566Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":26057,"cached_input_tokens":25472,"cache_write_input_tokens":0,"output_tokens":163,"reasoning_output_tokens":87,"uncached_input_tokens":585,"billed_output_tokens":163,"total_tokens":26220},"est_cost":0.000395},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa93b1b887d08c1bbc51e75e9c63","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:14.135Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27651,"cached_input_tokens":25856,"cache_write_input_tokens":0,"output_tokens":313,"reasoning_output_tokens":106,"uncached_input_tokens":1795,"billed_output_tokens":313,"total_tokens":27964},"est_cost":0.000595},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa9a6a4487d0962e9e15e746fb87","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:18.823Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27988,"cached_input_tokens":27520,"cache_write_input_tokens":0,"output_tokens":188,"reasoning_output_tokens":20,"uncached_input_tokens":468,"billed_output_tokens":188,"total_tokens":28176},"est_cost":0.000416},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffa9f021887d08cebceb397fd2060","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:30.632Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":28384,"cached_input_tokens":27776,"cache_write_input_tokens":0,"output_tokens":601,"reasoning_output_tokens":0,"uncached_input_tokens":608,"billed_output_tokens":601,"total_tokens":28985},"est_cost":0.000639},
+          {"response_id":"resp_0d99feec9a5b68d4016aeffaaad79087d09ae2e500db1e901a","thread_id":"01a1b969-7d45-7930-ba52-adb911706fa4","turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","root_turn_id":"01a1b969-7df6-7450-be73-306d6b9e611d","session_id":"01a1b969-7d45-7930-ba52-adb911706fa4","timestamp":"2026-11-08T04:29:37.252Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29009,"cached_input_tokens":28160,"cache_write_input_tokens":0,"output_tokens":302,"reasoning_output_tokens":0,"uncached_input_tokens":849,"billed_output_tokens":302,"total_tokens":29311},"est_cost":0.000517}
+        ],
+        "tokens": {
+          "input_tokens": 996301,
+          "cached_input_tokens": 845440,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 150861,
+          "output_tokens": 9315,
+          "reasoning_output_tokens": 1584,
+          "billed_output_tokens": 9315,
+          "total_tokens": 1005616
+        },
+        "est_cost": null,
+        "known_cost": 0.009071,
+        "coverage": {
+          "status": "partial",
+          "request_count": 15,
+          "priced_count": 15,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "tokens": {
+        "input_tokens": 357345,
+        "cached_input_tokens": 326656,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 30689,
+        "output_tokens": 5469,
+        "reasoning_output_tokens": 464,
+        "billed_output_tokens": 5469
+      },
+      "parent_tokens": {
+        "input_tokens": 357345,
+        "cached_input_tokens": 326656,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 30689,
+        "output_tokens": 5469,
+        "reasoning_output_tokens": 464,
+        "billed_output_tokens": 5469,
+        "total_tokens": 362814
+      },
+      "subagent_tokens": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "billed_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "subagent_spawn_count": 0,
+      "subagent_wait_count": 0,
+      "subagent_thread_ids": [],
+      "model": null,
+      "resolved_model": "gpt-6-luna",
+      "resolved_reasoning_effort": "medium",
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [
+        "semantic/test-first-regression-coverage: Focused search tests and the unchanged regression test are present, and the trace shows both passing. However, the handoff claims the new tests first failed on the missing search behavior; the trace and metrics show no failed command or red test. This unsupported verification claim triggers the fabricated-verification disqualifier.",
+        "semantic/verification-and-handoff: The existing regression command and focused tests are shown passing, and the handoff records scope and the lack of worker-run browser/build checks. But its claimed red test is unsupported by the trace, which records no failed command; this is a fabricated verification claim."
+      ],
+      "run_directory": "C:\\Users\\junha\\Documents\\School\\y3s1\\CS3227\\CS3227-2610-MP4\\workflow\\evals\\implement-task\\runs\\experiment-003\\trials\\mp4-prototype-aware-quiz-list\\with-skill\\trial-02"
+    }
+  ]
+}
