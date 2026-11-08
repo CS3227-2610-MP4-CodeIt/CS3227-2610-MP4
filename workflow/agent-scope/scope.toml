@@ -1,0 +1,60 @@
+# Agent write-scope policy for CodeIt.
+#
+# Human-authored boundary for the specialized Codex agents in this repository.
+# The orchestrator (main session) is unrestricted and authors this file; each
+# delegated role may write only the paths its entry permits. A role that needs a
+# path outside its lane must stop and escalate to the orchestrator rather than
+# work around the boundary.
+#
+# Matching: paths are repository-relative with forward slashes. Patterns use
+# fnmatch semantics where "*" spans any characters including "/". A write is
+# permitted when it matches at least one "allow" pattern and no "block" pattern.
+# "block" always overrides "allow". An unknown role is unrestricted (that is the
+# orchestrator or a built-in agent); an empty "allow" forbids every write.
+#
+# This policy is enforced by workflow/agent-scope/guard.py. It is NOT read by
+# Codex itself and adds no keys to .codex/config.toml.
+
+schema = 1
+
+[roles.task_implementer]
+# The sole writer of product code. Applies approved spec deltas alongside the
+# implementation, but never authors review artifacts or planning briefs, and
+# never touches environment secrets.
+allow = [
+  "backend/**",
+  "frontend/**",
+  "code-execution/**",
+  "specs/**",
+  "docs/**",
+]
+block = [
+  "**/.env",
+  "**/.env.*",
+  "workflow/reviews/**",
+  "workflow/tasks/**",
+]
+
+[roles.code_quality_reviewer]
+# Read-only review panel: may emit its findings artifact under the reviews tree
+# and nothing else. Source, tests, specs and config stay untouched.
+allow = ["workflow/reviews/**"]
+block = []
+
+[roles.spec_contract_reviewer]
+allow = ["workflow/reviews/**"]
+block = []
+
+[roles.security_boundary_reviewer]
+allow = ["workflow/reviews/**"]
+block = []
+
+[roles.verification_reviewer]
+allow = ["workflow/reviews/**"]
+block = []
+
+[roles.review_aggregator]
+# Consolidates the panel's artifacts into the canonical report; writes only in
+# the reviews tree, never re-touching source.
+allow = ["workflow/reviews/**"]
+block = []
