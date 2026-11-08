@@ -1,0 +1,95 @@
+# student-results-mistake-review — Focused review of incorrect quiz answers
+
+Status: READY — review mode is confirmed: show all questions by default, with an option to show only incorrect questions. No backend, permission, data, or AI changes are required.
+Owner: Unassigned
+Depends on: none
+Sources: User request and decision (2026-10-20); [frontend student screens](../../specs/frontend-spec.md#frontend-screens); [frontend product rules](../../specs/frontend-spec.md#scope-and-product-rules); [student results implementation](../../frontend/src/student/QuizPage.tsx); [student UI tests](../../frontend/tests/StudentUI.test.tsx)
+Baseline: `3a91516753592fa9e5f2b1ffff7a375d62de8d50`; worktree clean at planning start.
+
+## Outcome and scope
+
+The submitted student results screen already fetches authoritative results and
+renders the score, every question, the selected answer, the correct answer, and
+the explanation. Students can reach it from the quiz list through “View results”.
+However, all questions are always displayed in one long list, so a student must
+scan the full result to find mistakes.
+
+Deliver one frontend vertical slice that keeps all result questions visible by
+default and adds an accessible control to show only questions where
+`is_correct` is false. The result summary should make the current review scope
+clear and the filtered state should remain usable for zero, one, and many
+incorrect answers. Preserve the existing authoritative result data, answer-key
+visibility rules, refresh/retry behavior, quiz-list navigation, and current
+student visual theme.
+
+Primary touchpoints are `frontend/src/student/QuizPage.tsx`, student styles if
+needed, `frontend/tests/StudentUI.test.tsx` or a focused student-results test,
+and the relevant student-results section of `specs/frontend-spec.md`.
+
+Exclusions: backend/API/schema changes; new result fields; score or grading
+logic; changing the default from all questions; changing the quiz-taking flow;
+answer explanations or answer-key policy; persistent filter preferences;
+sorting, pagination, search, exports, teacher/admin screens, AI behavior, and
+global theme changes.
+
+Spec delta: extend the Student results screen requirement to state that the
+default view shows all submitted questions and provides an optional incorrect-
+only view. The filter is presentation-only over the already-authorized results
+response; no additional request or membership lookup is introduced.
+
+Decisions: all questions is the default; students can opt into incorrect-only
+review. The control type, exact copy, and component structure remain
+implementation choices, provided the selected scope is apparent and keyboard
+accessible.
+
+Security boundary: unchanged. The UI may filter only the already-authorized
+`GET /attempts/{attempt_id}/results` response. It must not infer correctness,
+fetch answer keys separately, expose results before submission, or alter the
+backend ownership and submission checks. No threat-model update is needed for
+this presentation-only scope.
+
+## Acceptance and planned verification
+
+All frontend checks run from `frontend/`; repository-wide diff hygiene runs
+from the repository root. These checks are planned and have not been run by
+this planning task.
+
+| ID | Observable outcome | Source | Test/manual scenario and working directory |
+|---|---|---|---|
+| AC-01 | After a submitted result loads, all questions are shown by default, including both correct and incorrect questions, with the existing selected-answer, correct-answer, and explanation content intact. | Existing frontend screen contract; confirmed product decision | Render a result containing mixed correctness and assert every question and explanation is visible initially; `frontend/`. |
+| AC-02 | The results screen provides an accessible control that changes the view to incorrect-only; activating it shows every incorrect question and no correct question. | Proposed frontend spec delta; confirmed product decision | Component test using mixed results; activate the control by role/name and assert the filtered question set and visible scope label; `frontend/`. |
+| AC-03 | Returning to the all-questions view restores every question without refetching results or changing the authoritative score. | Proposed frontend spec delta; existing results API behavior | Toggle incorrect-only on and off; assert `api.results` is called only for initial load/explicit refresh, score remains unchanged, and question order follows the existing position order; `frontend/`. |
+| AC-04 | A perfect score has a clear no-mistakes state when incorrect-only is selected; it does not show a misleading blank failure or fabricate a question. | Boundary behavior implied by requested filter | Render zero incorrect questions, select incorrect-only, and assert a useful empty-state message plus the unchanged score; `frontend/`. |
+| AC-05 | A result with one incorrect question isolates that question, and a result with all questions incorrect shows all questions in incorrect-only mode. | Boundary coverage | Component tests for one-mistake and all-mistakes fixtures; `frontend/`. |
+| AC-06 | Filter interaction is keyboard-operable, has an accessible name/state, and does not rely on color alone to communicate correctness or the active scope. | Frontend accessibility expectations; existing student theme | Accessibility assertions plus browser/manual check at narrow and desktop widths; verify focus visibility, readable labels, and no horizontal overflow; run dev server from `frontend/`. |
+| AC-07 | Loading, refresh, retry/error, direct submitted-results navigation, and the pre-submission answer-key guard remain unchanged. No result content appears before the authorized submitted-results response. | Existing frontend spec and regression tests | Run student result/session regressions, including failed initial load and direct results route tests; `frontend/`. |
+| AC-08 | The change is confined to the agreed student-results presentation, its specification, and tests; no backend route, schema, or authorization behavior changes. | Approved scope | Review `git diff --check` and the final diff; run the full frontend suite, build, lint, and format checks from `frontend/`. |
+
+## Implementer handoff
+
+First update the Student results screen requirement in
+`specs/frontend-spec.md`, then add failing component tests around the existing
+`ResultsPage` path and mixed/empty result fixtures. Implement the local view
+state and presentation control without changing the results API contract.
+
+Use [React best practices](../../.agents/skills/vercel-react-best-practices/SKILL.md)
+for component state and rendering, then use
+[web design guidelines](../../.agents/skills/web-design-guidelines/SKILL.md)
+for the accessibility and responsive review. Run
+[code review](../../.agents/skills/code-review/SKILL.md) and
+[verification review](../../.agents/skills/verification-review/SKILL.md) after
+implementation because the student result state and acceptance evidence change.
+
+Planned checks:
+
+- `npm test -- tests/StudentUI.test.tsx tests/StudentSession.test.tsx tests/studentApi.test.ts`
+- `npm test`
+- `npm run build`
+- `npm run lint`
+- `npm run format:check`
+- `git diff --check` from the repository root
+
+Browser verification should use a submitted student attempt containing mixed
+correct/incorrect answers and a perfect-score attempt, at approximately 320px
+and 1280px widths. No live AI request or backend schema migration is needed.
+Automated tests can continue to mock the existing results API.

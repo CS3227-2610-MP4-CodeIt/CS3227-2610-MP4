@@ -1,0 +1,22 @@
+{
+  "kind": "assistant-simulated-user/manual-exec-resume",
+  "completed_at": "2026-10-20T04:11:28.004208+00:00",
+  "thread_id": "01a1577c-29a3-7e62-9021-c9fd861a4166",
+  "worker_turns": 2,
+  "worker_elapsed_seconds": 141.3,
+  "per_turn_elapsed_seconds": [
+    63.714,
+    77.586
+  ],
+  "changed_paths": [
+    "workflow/tasks/student-results-mistake-review.md"
+  ],
+  "protected_skill_unchanged": true,
+  "frozen_scenario_unchanged": true,
+  "provenance": {
+    "model": "gpt-5.6-luna",
+    "reasoning_effort": "low"
+  },
+  "semantic_jury_run": false,
+  "scored": false
+}
