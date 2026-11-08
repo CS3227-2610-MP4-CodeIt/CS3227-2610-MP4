@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import re
 import shlex
-import contextlib
+import subprocess
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -2963,7 +2964,25 @@ def codex_usage_hook_command(evals_root: Path, project_root: Path) -> str:
     )
 
 
-def configure_codex_stop_hook(hooks_path: Path, command: str) -> str:
+def codex_usage_hook_command_windows(evals_root: Path, project_root: Path) -> str:
+    """Build the Windows PowerShell override for the project usage hook."""
+    eval_script = (evals_root.resolve() / "eval.py").relative_to(project_root.resolve())
+    windows_script = eval_script.as_posix().replace("'", "''")
+    powershell = (
+        "$root = git rev-parse --show-toplevel; "
+        f"& python (Join-Path $root '{windows_script}') "
+        "usage --quiet --lifecycle-hook; exit $LASTEXITCODE"
+    )
+    return subprocess.list2cmdline(
+        ["powershell.exe", "-NoProfile", "-Command", powershell]
+    )
+
+
+def configure_codex_stop_hook(
+    hooks_path: Path,
+    command: str,
+    command_windows: str | None = None,
+) -> str:
     """Merge the project usage refresh into Codex's project hooks.json."""
     created = not hooks_path.exists()
     if created:
@@ -2995,23 +3014,29 @@ def configure_codex_stop_hook(hooks_path: Path, command: str) -> str:
             ):
                 if (
                     handler.get("command") == command
+                    and handler.get("command_windows") == command_windows
                     and handler.get("async") is True
                     and handler.get("timeout") == 120
                 ):
                     return "unchanged"
                 handler.update({"command": command, "async": True, "timeout": 120})
+                if command_windows is not None:
+                    handler["command_windows"] = command_windows
+                else:
+                    handler.pop("command_windows", None)
                 hooks_path.parent.mkdir(parents=True, exist_ok=True)
                 hooks_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
                 return "updated"
 
-    stop_groups.append({
-        "hooks": [{
-            "type": "command",
-            "command": command,
-            "async": True,
-            "timeout": 120,
-        }]
-    })
+    hook: dict[str, Any] = {
+        "type": "command",
+        "command": command,
+        "async": True,
+        "timeout": 120,
+    }
+    if command_windows is not None:
+        hook["command_windows"] = command_windows
+    stop_groups.append({"hooks": [hook]})
     hooks_path.parent.mkdir(parents=True, exist_ok=True)
     hooks_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
     return "created" if created else "updated"
@@ -3031,11 +3056,17 @@ def setup_project_usage(
     )
     config_path: Path | None = None
     hook_command: str | None = None
+    hook_command_windows: str | None = None
     hook_status = "skipped"
     if configure_hook:
         config_path = resolved_project / ".codex" / "hooks.json"
         hook_command = codex_usage_hook_command(evals_root, resolved_project)
-        hook_status = configure_codex_stop_hook(config_path, hook_command)
+        hook_command_windows = codex_usage_hook_command_windows(
+            evals_root, resolved_project
+        )
+        hook_status = configure_codex_stop_hook(
+            config_path, hook_command, hook_command_windows
+        )
     report_info = generate_usage_report(
         evals_root=evals_root,
         project_root=resolved_project,
@@ -3045,6 +3076,7 @@ def setup_project_usage(
         "project_root": resolved_project,
         "config_path": config_path,
         "hook_command": hook_command,
+        "hook_command_windows": hook_command_windows,
         "hook_status": hook_status,
         **report_info,
     }

@@ -6,6 +6,15 @@ How to run skill evaluations and interpret the pass/fail decision. See [authorin
 
 Run commands from the repository root.
 
+The harness supports macOS, Linux, and Windows. Use `python3` on macOS/Linux
+and `python` (or `py -3`) on Windows. Codex CLI and Git must be available on
+`PATH` in the same shell that starts the harness.
+
+Individual cases can require additional tools in their disposable workspaces.
+For example, migrated MP2 cases use Java and some ask the worker to run Bash
+scripts; those case-specific prerequisites must also be installed and available
+on `PATH` on the host OS.
+
 ### Commands
 
 | Goal | Command | Calls a model? |
