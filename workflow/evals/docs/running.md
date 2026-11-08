@@ -6,6 +6,15 @@ How to run skill evaluations and interpret the pass/fail decision. See [authorin
 
 Run commands from the repository root.
 
+The harness supports macOS, Linux, and Windows. Use `python3` on macOS/Linux
+and `python` (or `py -3`) on Windows. Codex CLI and Git must be available on
+`PATH` in the same shell that starts the harness.
+
+Individual cases can require additional tools in their disposable workspaces.
+For example, migrated MP2 cases use Java and some ask the worker to run Bash
+scripts; those case-specific prerequisites must also be installed and available
+on `PATH` on the host OS.
+
 ### Commands
 
 | Goal | Command | Calls a model? |
@@ -34,6 +43,7 @@ parallel when `expected.md` is present.
 | Flag | Default | Meaning |
 |---|---:|---|
 | `--compare` | Off | Run a no-skill baseline and a with-skill trial for every selected test case |
+| `--case-prefix PREFIX` | Off | Run only cases whose names begin with `PREFIX`; cannot be combined with a positional test-case name |
 | `--trials N` | `1` | Repeat each test-case/configuration cell `N` times |
 | `--judges N` | `3` | Use `N` parallel semantic judges for each worker trial |
 | `--no-semantic-judges` | Off | Run the worker and `check.py`, but make no semantic-judge model calls |
@@ -132,15 +142,17 @@ To compare two saved experiments (for example before and after editing
 `SKILL.md`) without making any new model calls:
 
 ```bash
-# Compare with-skill cells (default) -> writes comparisons/<old>-vs-<new>.md
+# Compare with-skill cells (default) -> writes comparisons/<old>-vs-<new>.md and .html
 python3 workflow/evals/eval.py compare <skill-name> experiment-001 experiment-002
 
-# Compare baseline cells -> writes comparisons/<old>-vs-<new>-baseline.md
+# Compare baseline cells -> writes comparisons/<old>-vs-<new>-baseline.md and .html
 python3 workflow/evals/eval.py compare <skill-name> experiment-001 experiment-002 --config baseline
 ```
 
-The generated Markdown report under `workflow/evals/<skill-name>/comparisons/`
-includes a `Setup` and `Summary` header, a one-row-per-case `## Case overview`
+The generated Markdown and standalone HTML reports under
+`workflow/evals/<skill-name>/comparisons/` (the HTML page links back to the
+usage dashboard and to its Markdown source). Both include a `Setup` and
+`Summary` header, a one-row-per-case `## Case overview`
 table, per-case score/token/cost breakdowns (including `det score` and
 `sem score` when available), confound detection when the model or fixture
 changed, and a unified diff of the captured `SKILL.md` snapshots.
@@ -205,8 +217,10 @@ workspaces, links spawned subagents to their parent sessions, and updates:
   subagent breakdown including `0`-spawn `.codex/agents/*.toml` profiles, model
   mix, daily usage bars, descriptive session observations with links to their
   trace evidence, and a searchable/filterable session table);
-- `workflow/evals/_usage/report.md` — clean GitHub-flavored Markdown summary; and
-- `workflow/evals/_usage/summary.json` — machine-readable aggregate data.
+- `workflow/evals/_usage/report.md` — clean GitHub-flavored Markdown summary;
+- `workflow/evals/_usage/summary.json` — machine-readable aggregate data; and
+- `workflow/evals/_usage/header-data.js` — the current summary counts used by
+  standalone comparison-page headers.
 
 The hook refresh is best effort: Codex may cancel unfinished asynchronous hooks
 when a session ends. Run `python3 workflow/evals/eval.py usage` for an explicit

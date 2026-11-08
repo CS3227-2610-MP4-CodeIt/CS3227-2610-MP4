@@ -1,0 +1,896 @@
+{
+  "id": "experiment-002",
+  "skill": "implement-task",
+  "test_cases": [
+    "mp4-prototype-aware-quiz-list"
+  ],
+  "configurations": [
+    "baseline",
+    "with-skill"
+  ],
+  "trials": 2,
+  "worker_trials": 4,
+  "worker_calls": 4,
+  "model": "codex-configured-default",
+  "timeout_seconds": 600,
+  "semantic_grading": true,
+  "semantic_judges": 3,
+  "started_at": "2026-11-08T03:49:15.103725+00:00",
+  "status": "completed",
+  "completed_at": "2026-11-08T03:57:05.303818+00:00",
+  "graded_trials": 4,
+  "needs_review_trials": 0,
+  "passed_trials": 0,
+  "completed_trials": 4,
+  "mean_score": 41.0,
+  "overall_pass": false,
+  "aggregates": {
+    "cells": {
+      "mp4-prototype-aware-quiz-list": {
+        "baseline": {
+          "passed_trials": 0,
+          "needs_review_trials": 0,
+          "total_trials": 2,
+          "timed_trials": 2,
+          "mean_worker_seconds": 82.121,
+          "min_worker_seconds": 78.943,
+          "max_worker_seconds": 85.3,
+          "mean_score": 40.0,
+          "mean_deterministic_score": 42.0,
+          "mean_semantic_score": 59.5,
+          "accounting": {
+            "requests": [
+              {"response_id":"resp_075e02d0a1a909cc016aeff13fa73087d0bf040cbd268abccb","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:22.209Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15491,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":97,"reasoning_output_tokens":0,"uncached_input_tokens":3715,"billed_output_tokens":97,"total_tokens":15588},"est_cost":0.000538},
+              {"response_id":"resp_075e02d0a1a909cc016aeff142a2a487d0ac6f9d2aea7fddb1","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:25.583Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15612,"cached_input_tokens":15360,"cache_write_input_tokens":0,"output_tokens":128,"reasoning_output_tokens":38,"uncached_input_tokens":252,"billed_output_tokens":128,"total_tokens":15740},"est_cost":0.000243},
+              {"response_id":"resp_075e02d0a1a909cc016aeff145c75c87d09a23ed9aec243b76","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:28.836Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16132,"cached_input_tokens":15488,"cache_write_input_tokens":0,"output_tokens":133,"reasoning_output_tokens":29,"uncached_input_tokens":644,"billed_output_tokens":133,"total_tokens":16265},"est_cost":0.000286},
+              {"response_id":"resp_075e02d0a1a909cc016aeff1492da087d08bab8e8633b2decd","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:33.943Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18614,"cached_input_tokens":16000,"cache_write_input_tokens":0,"output_tokens":227,"reasoning_output_tokens":27,"uncached_input_tokens":2614,"billed_output_tokens":227,"total_tokens":18841},"est_cost":0.000535},
+              {"response_id":"resp_075e02d0a1a909cc016aeff14e206c87d081d0758aa30cac3d","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:36.981Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19586,"cached_input_tokens":18432,"cache_write_input_tokens":0,"output_tokens":117,"reasoning_output_tokens":64,"uncached_input_tokens":1154,"billed_output_tokens":117,"total_tokens":19703},"est_cost":0.000358},
+              {"response_id":"resp_075e02d0a1a909cc016aeff1512f6887d085b7b1c4d4119b89","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:52.430Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20090,"cached_input_tokens":19456,"cache_write_input_tokens":0,"output_tokens":776,"reasoning_output_tokens":0,"uncached_input_tokens":634,"billed_output_tokens":776,"total_tokens":20866},"est_cost":0.000646},
+              {"response_id":"resp_075e02d0a1a909cc016aeff162416487d0bc5c220ade57416c","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:19.361Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20890,"cached_input_tokens":19968,"cache_write_input_tokens":0,"output_tokens":1359,"reasoning_output_tokens":44,"uncached_input_tokens":922,"billed_output_tokens":1359,"total_tokens":22249},"est_cost":0.000971},
+              {"response_id":"resp_075e02d0a1a909cc016aeff17b737487d0b91f7146fd54dc4b","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:24.907Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22273,"cached_input_tokens":20736,"cache_write_input_tokens":0,"output_tokens":266,"reasoning_output_tokens":70,"uncached_input_tokens":1537,"billed_output_tokens":266,"total_tokens":22539},"est_cost":0.000494},
+              {"response_id":"resp_075e02d0a1a909cc016aeff181353887d0970db6760f6abea6","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:29.645Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23207,"cached_input_tokens":22144,"cache_write_input_tokens":0,"output_tokens":212,"reasoning_output_tokens":79,"uncached_input_tokens":1063,"billed_output_tokens":212,"total_tokens":23419},"est_cost":0.000434},
+              {"response_id":"resp_075e02d0a1a909cc016aeff185ebc087d0b6fa3623dc0b19e4","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:36.593Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24070,"cached_input_tokens":23040,"cache_write_input_tokens":0,"output_tokens":332,"reasoning_output_tokens":25,"uncached_input_tokens":1030,"billed_output_tokens":332,"total_tokens":24402},"est_cost":0.000499},
+              {"response_id":"resp_075e02d0a1a909cc016aeff18cdc7c87d082b4aa0f2984d960","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:40.394Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24838,"cached_input_tokens":23936,"cache_write_input_tokens":0,"output_tokens":153,"reasoning_output_tokens":0,"uncached_input_tokens":902,"billed_output_tokens":153,"total_tokens":24991},"est_cost":0.000406},
+              {"response_id":"resp_0a27fea8fc2da20f016aeff196687c87d0bc4be6531c864599","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:50:49.851Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":14939,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":133,"reasoning_output_tokens":0,"uncached_input_tokens":3163,"billed_output_tokens":133,"total_tokens":15072},"est_cost":0.000501},
+              {"response_id":"resp_0a27fea8fc2da20f016aeff19a18a887d09ea943a48737fce5","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:50:54.324Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16973,"cached_input_tokens":14720,"cache_write_input_tokens":0,"output_tokens":186,"reasoning_output_tokens":65,"uncached_input_tokens":2253,"billed_output_tokens":186,"total_tokens":17159},"est_cost":0.000465},
+              {"response_id":"resp_0a27fea8fc2da20f016aeff19e7f4887d08e6b87f25a8187c5","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:50:58.660Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18108,"cached_input_tokens":16768,"cache_write_input_tokens":0,"output_tokens":176,"reasoning_output_tokens":51,"uncached_input_tokens":1340,"billed_output_tokens":176,"total_tokens":18284},"est_cost":0.00039},
+              {"response_id":"resp_0a27fea8fc2da20f016aeff1a2c96487d0ac74e0d0fe144e6e","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:28.506Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18702,"cached_input_tokens":17920,"cache_write_input_tokens":0,"output_tokens":1589,"reasoning_output_tokens":69,"uncached_input_tokens":782,"billed_output_tokens":1589,"total_tokens":20291},"est_cost":0.001052},
+              {"response_id":"resp_0a27fea8fc2da20f016aeff1c0aeb487d091158bb60476b372","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:38.742Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20315,"cached_input_tokens":18560,"cache_write_input_tokens":0,"output_tokens":489,"reasoning_output_tokens":25,"uncached_input_tokens":1755,"billed_output_tokens":489,"total_tokens":20804},"est_cost":0.000606},
+              {"response_id":"resp_0a27fea8fc2da20f016aeff1cacee087d0b4063d48f4efbedd","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:44.592Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20828,"cached_input_tokens":20096,"cache_write_input_tokens":0,"output_tokens":214,"reasoning_output_tokens":13,"uncached_input_tokens":732,"billed_output_tokens":214,"total_tokens":21042},"est_cost":0.000381},
+              {"response_id":"resp_0a27fea8fc2da20f016aeff1d0c94887d0b9df426240c440fe","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:50.697Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21586,"cached_input_tokens":20608,"cache_write_input_tokens":0,"output_tokens":194,"reasoning_output_tokens":64,"uncached_input_tokens":978,"billed_output_tokens":194,"total_tokens":21780},"est_cost":0.000401},
+              {"response_id":"resp_0a27fea8fc2da20f016aeff1d6ef9c87d0b81f32f46391af46","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:59.601Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22092,"cached_input_tokens":21376,"cache_write_input_tokens":0,"output_tokens":425,"reasoning_output_tokens":76,"uncached_input_tokens":716,"billed_output_tokens":425,"total_tokens":22517},"est_cost":0.000498},
+              {"response_id":"resp_0a27fea8fc2da20f016aeff1dfba4c87d0bb2956293b2e5c9f","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:52:03.515Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22540,"cached_input_tokens":21888,"cache_write_input_tokens":0,"output_tokens":149,"reasoning_output_tokens":0,"uncached_input_tokens":652,"billed_output_tokens":149,"total_tokens":22689},"est_cost":0.000359}
+            ],
+            "tokens": {
+              "input_tokens": 1176874,
+              "cached_input_tokens": 902528,
+              "cache_write_input_tokens": 0,
+              "uncached_input_tokens": 274346,
+              "output_tokens": 15151,
+              "reasoning_output_tokens": 3891,
+              "billed_output_tokens": 15151,
+              "total_tokens": 1192025
+            },
+            "est_cost": null,
+            "known_cost": 0.010063,
+            "coverage": {
+              "status": "partial",
+              "request_count": 20,
+              "priced_count": 20,
+              "unpriced_count": 0,
+              "unavailable_count": 6,
+              "unknown_models": [],
+              "reasons": [
+                "incomplete request boundaries"
+              ]
+            }
+          },
+          "mean_est_cost": null,
+          "mean_tokens": {
+            "input_tokens": 198443.0,
+            "cached_input_tokens": 185024.0,
+            "cache_write_input_tokens": 0.0,
+            "uncached_input_tokens": 13419.0,
+            "output_tokens": 3677.5,
+            "reasoning_output_tokens": 369.5,
+            "billed_output_tokens": 3677.5
+          }
+        },
+        "with-skill": {
+          "passed_trials": 0,
+          "needs_review_trials": 0,
+          "total_trials": 2,
+          "timed_trials": 2,
+          "mean_worker_seconds": 128.438,
+          "min_worker_seconds": 119.369,
+          "max_worker_seconds": 137.507,
+          "mean_score": 42.0,
+          "mean_deterministic_score": 42.0,
+          "mean_semantic_score": 62.0,
+          "accounting": {
+            "requests": [
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff1e8a73887d0846347b13fc34c27","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:12.124Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16424,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":122,"reasoning_output_tokens":0,"uncached_input_tokens":4648,"billed_output_tokens":122,"total_tokens":16546},"est_cost":0.000644},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff1ec627887d0830700b29c414b4b","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:15.786Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":17927,"cached_input_tokens":16256,"cache_write_input_tokens":0,"output_tokens":146,"reasoning_output_tokens":24,"uncached_input_tokens":1671,"billed_output_tokens":146,"total_tokens":18073},"est_cost":0.000403},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff1f026c887d0858655930222f8a4","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:21.388Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20426,"cached_input_tokens":17792,"cache_write_input_tokens":0,"output_tokens":248,"reasoning_output_tokens":17,"uncached_input_tokens":2634,"billed_output_tokens":248,"total_tokens":20674},"est_cost":0.000565},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff1f5b74087d088b8b63b0b32b3d3","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:24.901Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21737,"cached_input_tokens":20224,"cache_write_input_tokens":0,"output_tokens":134,"reasoning_output_tokens":73,"uncached_input_tokens":1513,"billed_output_tokens":134,"total_tokens":21871},"est_cost":0.000421},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff1f9162087d0a8093e178a2164d2","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:35.524Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22208,"cached_input_tokens":21504,"cache_write_input_tokens":0,"output_tokens":532,"reasoning_output_tokens":23,"uncached_input_tokens":704,"billed_output_tokens":532,"total_tokens":22740},"est_cost":0.000551},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff204081087d09b2675880fa06ef3","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:39.404Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23185,"cached_input_tokens":22016,"cache_write_input_tokens":0,"output_tokens":138,"reasoning_output_tokens":26,"uncached_input_tokens":1169,"billed_output_tokens":138,"total_tokens":23323},"est_cost":0.000406},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff207bfe087d086171b4f867c53d3","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:55.634Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23760,"cached_input_tokens":23040,"cache_write_input_tokens":0,"output_tokens":803,"reasoning_output_tokens":41,"uncached_input_tokens":720,"billed_output_tokens":803,"total_tokens":24563},"est_cost":0.000704},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff217c13887d085fbdd8827bbc6d4","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:09.488Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24674,"cached_input_tokens":23552,"cache_write_input_tokens":0,"output_tokens":713,"reasoning_output_tokens":9,"uncached_input_tokens":1122,"billed_output_tokens":713,"total_tokens":25387},"est_cost":0.000704},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff22592bc87d0ba8b21484d34d169","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:26.283Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25411,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":884,"reasoning_output_tokens":0,"uncached_input_tokens":13635,"billed_output_tokens":884,"total_tokens":26295},"est_cost":0.001923},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff236588087d0a6c8f041d6e8f216","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:28.733Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":26319,"cached_input_tokens":25216,"cache_write_input_tokens":0,"output_tokens":89,"reasoning_output_tokens":32,"uncached_input_tokens":1103,"billed_output_tokens":89,"total_tokens":26408},"est_cost":0.000407},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff238ed2887d0954c94b1687a33e9","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:41.360Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27079,"cached_input_tokens":24448,"cache_write_input_tokens":0,"output_tokens":630,"reasoning_output_tokens":176,"uncached_input_tokens":2631,"billed_output_tokens":630,"total_tokens":27709},"est_cost":0.000823},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff245e27087d08d25bd442dcaed05","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:49.344Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29126,"cached_input_tokens":26112,"cache_write_input_tokens":0,"output_tokens":371,"reasoning_output_tokens":88,"uncached_input_tokens":3014,"billed_output_tokens":371,"total_tokens":29497},"est_cost":0.000748},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff24d918487d0a3709a07aae22542","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:56.534Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29521,"cached_input_tokens":28928,"cache_write_input_tokens":0,"output_tokens":343,"reasoning_output_tokens":0,"uncached_input_tokens":593,"billed_output_tokens":343,"total_tokens":29864},"est_cost":0.00052},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff254ba5087d0a2b2c30eaafcb6a2","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:54:18.111Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":30016,"cached_input_tokens":29312,"cache_write_input_tokens":0,"output_tokens":1127,"reasoning_output_tokens":52,"uncached_input_tokens":704,"billed_output_tokens":1127,"total_tokens":31143},"est_cost":0.000927},
+              {"response_id":"resp_0d4d0dc52d0798b4016aeff26a49d887d08a7af27212f3f601","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:54:23.141Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":31290,"cached_input_tokens":29824,"cache_write_input_tokens":0,"output_tokens":224,"reasoning_output_tokens":0,"uncached_input_tokens":1466,"billed_output_tokens":224,"total_tokens":31514},"est_cost":0.000557},
+              {"response_id":"resp_0f713f0af6536e98016aeff275f38087d09abf1280ef39729f","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:34.111Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16424,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":172,"reasoning_output_tokens":0,"uncached_input_tokens":4648,"billed_output_tokens":172,"total_tokens":16596},"est_cost":0.000669},
+              {"response_id":"resp_0f713f0af6536e98016aeff27a5c5487d0b5f069cec0f8b7cd","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:37.414Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18406,"cached_input_tokens":16256,"cache_write_input_tokens":0,"output_tokens":122,"reasoning_output_tokens":18,"uncached_input_tokens":2150,"billed_output_tokens":122,"total_tokens":18528},"est_cost":0.000439},
+              {"response_id":"resp_0f713f0af6536e98016aeff27d829487d0899069c87d5a6bb6","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:43.192Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18605,"cached_input_tokens":18176,"cache_write_input_tokens":0,"output_tokens":118,"reasoning_output_tokens":0,"uncached_input_tokens":429,"billed_output_tokens":118,"total_tokens":18723},"est_cost":0.000284},
+              {"response_id":"resp_0f713f0af6536e98016aeff2836ac487d098b4e07262dc4611","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:46.837Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21021,"cached_input_tokens":18432,"cache_write_input_tokens":0,"output_tokens":148,"reasoning_output_tokens":60,"uncached_input_tokens":2589,"billed_output_tokens":148,"total_tokens":21169},"est_cost":0.000517},
+              {"response_id":"resp_0f713f0af6536e98016aeff286f51487d0bda19769f8d18cef","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:51.665Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21760,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":116,"reasoning_output_tokens":44,"uncached_input_tokens":9984,"billed_output_tokens":116,"total_tokens":21876},"est_cost":0.001174},
+              {"response_id":"resp_0f713f0af6536e98016aeff28bb4d087d080d6df008f974d77","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:58.156Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22350,"cached_input_tokens":20864,"cache_write_input_tokens":0,"output_tokens":270,"reasoning_output_tokens":33,"uncached_input_tokens":1486,"billed_output_tokens":270,"total_tokens":22620},"est_cost":0.000492},
+              {"response_id":"resp_0f713f0af6536e98016aeff292459c87d0bd5f441632a5b5e2","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:55:08.385Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22644,"cached_input_tokens":22144,"cache_write_input_tokens":0,"output_tokens":479,"reasoning_output_tokens":14,"uncached_input_tokens":500,"billed_output_tokens":479,"total_tokens":23123},"est_cost":0.000511},
+              {"response_id":"resp_0f713f0af6536e98016aeff29c8dc087d085aa6ee92dd2239c","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:55:22.237Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23446,"cached_input_tokens":22528,"cache_write_input_tokens":0,"output_tokens":688,"reasoning_output_tokens":39,"uncached_input_tokens":918,"billed_output_tokens":688,"total_tokens":24134},"est_cost":0.000661},
+              {"response_id":"resp_0f713f0af6536e98016aeff2aa853087d0a9c302a08355fde0","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:55:39.986Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24158,"cached_input_tokens":23296,"cache_write_input_tokens":0,"output_tokens":904,"reasoning_output_tokens":0,"uncached_input_tokens":862,"billed_output_tokens":904,"total_tokens":25062},"est_cost":0.000771},
+              {"response_id":"resp_0f713f0af6536e98016aeff2bc849487d09f3093d2cc1cd5d2","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:55:49.921Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25606,"cached_input_tokens":21632,"cache_write_input_tokens":0,"output_tokens":451,"reasoning_output_tokens":155,"uncached_input_tokens":3974,"billed_output_tokens":451,"total_tokens":26057},"est_cost":0.000839},
+              {"response_id":"resp_0f713f0af6536e98016aeff2c627d887d0abc21db715495f36","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:56:00.563Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27782,"cached_input_tokens":25472,"cache_write_input_tokens":0,"output_tokens":482,"reasoning_output_tokens":42,"uncached_input_tokens":2310,"billed_output_tokens":482,"total_tokens":28264},"est_cost":0.000727},
+              {"response_id":"resp_0f713f0af6536e98016aeff2d0d99087d09a59c1c556f8f305","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:56:06.271Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":28819,"cached_input_tokens":27648,"cache_write_input_tokens":0,"output_tokens":236,"reasoning_output_tokens":108,"uncached_input_tokens":1171,"billed_output_tokens":236,"total_tokens":29055},"est_cost":0.000512},
+              {"response_id":"resp_0f713f0af6536e98016aeff2d6c3dc87d0a963511266ac04ff","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:56:19.799Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29079,"cached_input_tokens":28672,"cache_write_input_tokens":0,"output_tokens":627,"reasoning_output_tokens":0,"uncached_input_tokens":407,"billed_output_tokens":627,"total_tokens":29706},"est_cost":0.000641},
+              {"response_id":"resp_0f713f0af6536e98016aeff2e4729c87d080c1066282181c45","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:56:27.061Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29730,"cached_input_tokens":28928,"cache_write_input_tokens":0,"output_tokens":303,"reasoning_output_tokens":0,"uncached_input_tokens":802,"billed_output_tokens":303,"total_tokens":30033},"est_cost":0.000521}
+            ],
+            "tokens": {
+              "input_tokens": 1547567,
+              "cached_input_tokens": 1168512,
+              "cache_write_input_tokens": 0,
+              "uncached_input_tokens": 379055,
+              "output_tokens": 19105,
+              "reasoning_output_tokens": 3402,
+              "billed_output_tokens": 19105,
+              "total_tokens": 1566672
+            },
+            "est_cost": null,
+            "known_cost": 0.019061,
+            "coverage": {
+              "status": "partial",
+              "request_count": 29,
+              "priced_count": 29,
+              "unpriced_count": 0,
+              "unavailable_count": 6,
+              "unknown_models": [],
+              "reasons": [
+                "incomplete request boundaries"
+              ]
+            }
+          },
+          "mean_est_cost": null,
+          "mean_tokens": {
+            "input_tokens": 349466.5,
+            "cached_input_tokens": 314688.0,
+            "cache_write_input_tokens": 0.0,
+            "uncached_input_tokens": 34778.5,
+            "output_tokens": 5810.0,
+            "reasoning_output_tokens": 537.0,
+            "billed_output_tokens": 5810.0
+          }
+        }
+      }
+    },
+    "comparisons": {
+      "mp4-prototype-aware-quiz-list": {
+        "baseline_mean": 40.0,
+        "with_skill_mean": 42.0,
+        "delta": 2.0,
+        "token_delta": {
+          "input_tokens": 151023.5,
+          "cached_input_tokens": 129664.0,
+          "cache_write_input_tokens": 0.0,
+          "uncached_input_tokens": 21359.5,
+          "output_tokens": 2132.5,
+          "reasoning_output_tokens": 167.5,
+          "billed_output_tokens": 2132.5
+        }
+      }
+    }
+  },
+  "results": [
+    {
+      "status": "graded",
+      "skill": "implement-task",
+      "test_case": "mp4-prototype-aware-quiz-list",
+      "configuration": "baseline",
+      "trial": 1,
+      "overall_pass": false,
+      "needs_review": false,
+      "score": 15,
+      "deterministic_score": 15,
+      "semantic_score": 54,
+      "deterministic_pass": false,
+      "semantic_pass": false,
+      "semantic_judges": 3,
+      "worker_exit_code": 0,
+      "worker_elapsed_seconds": 85.3,
+      "worker_accounting": {
+        "requests": [
+          {"response_id":"resp_075e02d0a1a909cc016aeff13fa73087d0bf040cbd268abccb","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:22.209Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15491,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":97,"reasoning_output_tokens":0,"uncached_input_tokens":3715,"billed_output_tokens":97,"total_tokens":15588},"est_cost":0.000538},
+          {"response_id":"resp_075e02d0a1a909cc016aeff142a2a487d0ac6f9d2aea7fddb1","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:25.583Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15612,"cached_input_tokens":15360,"cache_write_input_tokens":0,"output_tokens":128,"reasoning_output_tokens":38,"uncached_input_tokens":252,"billed_output_tokens":128,"total_tokens":15740},"est_cost":0.000243},
+          {"response_id":"resp_075e02d0a1a909cc016aeff145c75c87d09a23ed9aec243b76","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:28.836Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16132,"cached_input_tokens":15488,"cache_write_input_tokens":0,"output_tokens":133,"reasoning_output_tokens":29,"uncached_input_tokens":644,"billed_output_tokens":133,"total_tokens":16265},"est_cost":0.000286},
+          {"response_id":"resp_075e02d0a1a909cc016aeff1492da087d08bab8e8633b2decd","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:33.943Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18614,"cached_input_tokens":16000,"cache_write_input_tokens":0,"output_tokens":227,"reasoning_output_tokens":27,"uncached_input_tokens":2614,"billed_output_tokens":227,"total_tokens":18841},"est_cost":0.000535},
+          {"response_id":"resp_075e02d0a1a909cc016aeff14e206c87d081d0758aa30cac3d","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:36.981Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19586,"cached_input_tokens":18432,"cache_write_input_tokens":0,"output_tokens":117,"reasoning_output_tokens":64,"uncached_input_tokens":1154,"billed_output_tokens":117,"total_tokens":19703},"est_cost":0.000358},
+          {"response_id":"resp_075e02d0a1a909cc016aeff1512f6887d085b7b1c4d4119b89","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:52.430Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20090,"cached_input_tokens":19456,"cache_write_input_tokens":0,"output_tokens":776,"reasoning_output_tokens":0,"uncached_input_tokens":634,"billed_output_tokens":776,"total_tokens":20866},"est_cost":0.000646},
+          {"response_id":"resp_075e02d0a1a909cc016aeff162416487d0bc5c220ade57416c","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:19.361Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20890,"cached_input_tokens":19968,"cache_write_input_tokens":0,"output_tokens":1359,"reasoning_output_tokens":44,"uncached_input_tokens":922,"billed_output_tokens":1359,"total_tokens":22249},"est_cost":0.000971},
+          {"response_id":"resp_075e02d0a1a909cc016aeff17b737487d0b91f7146fd54dc4b","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:24.907Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22273,"cached_input_tokens":20736,"cache_write_input_tokens":0,"output_tokens":266,"reasoning_output_tokens":70,"uncached_input_tokens":1537,"billed_output_tokens":266,"total_tokens":22539},"est_cost":0.000494},
+          {"response_id":"resp_075e02d0a1a909cc016aeff181353887d0970db6760f6abea6","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:29.645Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23207,"cached_input_tokens":22144,"cache_write_input_tokens":0,"output_tokens":212,"reasoning_output_tokens":79,"uncached_input_tokens":1063,"billed_output_tokens":212,"total_tokens":23419},"est_cost":0.000434},
+          {"response_id":"resp_075e02d0a1a909cc016aeff185ebc087d0b6fa3623dc0b19e4","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:36.593Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24070,"cached_input_tokens":23040,"cache_write_input_tokens":0,"output_tokens":332,"reasoning_output_tokens":25,"uncached_input_tokens":1030,"billed_output_tokens":332,"total_tokens":24402},"est_cost":0.000499},
+          {"response_id":"resp_075e02d0a1a909cc016aeff18cdc7c87d082b4aa0f2984d960","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:40.394Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24838,"cached_input_tokens":23936,"cache_write_input_tokens":0,"output_tokens":153,"reasoning_output_tokens":0,"uncached_input_tokens":902,"billed_output_tokens":153,"total_tokens":24991},"est_cost":0.000406}
+        ],
+        "tokens": {
+          "input_tokens": 220803,
+          "cached_input_tokens": 206336,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 14467,
+          "output_tokens": 3800,
+          "reasoning_output_tokens": 376,
+          "billed_output_tokens": 3800,
+          "total_tokens": 224603
+        },
+        "est_cost": 0.00541,
+        "known_cost": 0.00541,
+        "coverage": {
+          "status": "complete",
+          "request_count": 11,
+          "priced_count": 11,
+          "unpriced_count": 0,
+          "unavailable_count": 0,
+          "unknown_models": [],
+          "reasons": []
+        }
+      },
+      "judge_accounting": {
+        "requests": [],
+        "tokens": {
+          "input_tokens": 329941,
+          "cached_input_tokens": 211200,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 118741,
+          "output_tokens": 3659,
+          "reasoning_output_tokens": 1383,
+          "billed_output_tokens": 3659,
+          "total_tokens": 333600
+        },
+        "est_cost": null,
+        "known_cost": null,
+        "coverage": {
+          "status": "unavailable",
+          "request_count": 0,
+          "priced_count": 0,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "accounting": {
+        "requests": [
+          {"response_id":"resp_075e02d0a1a909cc016aeff13fa73087d0bf040cbd268abccb","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:22.209Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15491,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":97,"reasoning_output_tokens":0,"uncached_input_tokens":3715,"billed_output_tokens":97,"total_tokens":15588},"est_cost":0.000538},
+          {"response_id":"resp_075e02d0a1a909cc016aeff142a2a487d0ac6f9d2aea7fddb1","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:25.583Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":15612,"cached_input_tokens":15360,"cache_write_input_tokens":0,"output_tokens":128,"reasoning_output_tokens":38,"uncached_input_tokens":252,"billed_output_tokens":128,"total_tokens":15740},"est_cost":0.000243},
+          {"response_id":"resp_075e02d0a1a909cc016aeff145c75c87d09a23ed9aec243b76","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:28.836Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16132,"cached_input_tokens":15488,"cache_write_input_tokens":0,"output_tokens":133,"reasoning_output_tokens":29,"uncached_input_tokens":644,"billed_output_tokens":133,"total_tokens":16265},"est_cost":0.000286},
+          {"response_id":"resp_075e02d0a1a909cc016aeff1492da087d08bab8e8633b2decd","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:33.943Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18614,"cached_input_tokens":16000,"cache_write_input_tokens":0,"output_tokens":227,"reasoning_output_tokens":27,"uncached_input_tokens":2614,"billed_output_tokens":227,"total_tokens":18841},"est_cost":0.000535},
+          {"response_id":"resp_075e02d0a1a909cc016aeff14e206c87d081d0758aa30cac3d","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:36.981Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":19586,"cached_input_tokens":18432,"cache_write_input_tokens":0,"output_tokens":117,"reasoning_output_tokens":64,"uncached_input_tokens":1154,"billed_output_tokens":117,"total_tokens":19703},"est_cost":0.000358},
+          {"response_id":"resp_075e02d0a1a909cc016aeff1512f6887d085b7b1c4d4119b89","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:49:52.430Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20090,"cached_input_tokens":19456,"cache_write_input_tokens":0,"output_tokens":776,"reasoning_output_tokens":0,"uncached_input_tokens":634,"billed_output_tokens":776,"total_tokens":20866},"est_cost":0.000646},
+          {"response_id":"resp_075e02d0a1a909cc016aeff162416487d0bc5c220ade57416c","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:19.361Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20890,"cached_input_tokens":19968,"cache_write_input_tokens":0,"output_tokens":1359,"reasoning_output_tokens":44,"uncached_input_tokens":922,"billed_output_tokens":1359,"total_tokens":22249},"est_cost":0.000971},
+          {"response_id":"resp_075e02d0a1a909cc016aeff17b737487d0b91f7146fd54dc4b","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:24.907Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22273,"cached_input_tokens":20736,"cache_write_input_tokens":0,"output_tokens":266,"reasoning_output_tokens":70,"uncached_input_tokens":1537,"billed_output_tokens":266,"total_tokens":22539},"est_cost":0.000494},
+          {"response_id":"resp_075e02d0a1a909cc016aeff181353887d0970db6760f6abea6","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:29.645Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23207,"cached_input_tokens":22144,"cache_write_input_tokens":0,"output_tokens":212,"reasoning_output_tokens":79,"uncached_input_tokens":1063,"billed_output_tokens":212,"total_tokens":23419},"est_cost":0.000434},
+          {"response_id":"resp_075e02d0a1a909cc016aeff185ebc087d0b6fa3623dc0b19e4","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:36.593Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24070,"cached_input_tokens":23040,"cache_write_input_tokens":0,"output_tokens":332,"reasoning_output_tokens":25,"uncached_input_tokens":1030,"billed_output_tokens":332,"total_tokens":24402},"est_cost":0.000499},
+          {"response_id":"resp_075e02d0a1a909cc016aeff18cdc7c87d082b4aa0f2984d960","thread_id":"01a1b946-5a8a-7821-b877-7513a0d45070","turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","root_turn_id":"01a1b946-5c14-7ea1-a676-cd4068eda62a","session_id":"01a1b946-5a8a-7821-b877-7513a0d45070","timestamp":"2026-11-08T03:50:40.394Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24838,"cached_input_tokens":23936,"cache_write_input_tokens":0,"output_tokens":153,"reasoning_output_tokens":0,"uncached_input_tokens":902,"billed_output_tokens":153,"total_tokens":24991},"est_cost":0.000406}
+        ],
+        "tokens": {
+          "input_tokens": 550744,
+          "cached_input_tokens": 417536,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 133208,
+          "output_tokens": 7459,
+          "reasoning_output_tokens": 1759,
+          "billed_output_tokens": 7459,
+          "total_tokens": 558203
+        },
+        "est_cost": null,
+        "known_cost": 0.00541,
+        "coverage": {
+          "status": "partial",
+          "request_count": 11,
+          "priced_count": 11,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "tokens": {
+        "input_tokens": 220803,
+        "cached_input_tokens": 206336,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 14467,
+        "output_tokens": 3800,
+        "reasoning_output_tokens": 376,
+        "billed_output_tokens": 3800
+      },
+      "parent_tokens": {
+        "input_tokens": 220803,
+        "cached_input_tokens": 206336,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 14467,
+        "output_tokens": 3800,
+        "reasoning_output_tokens": 376,
+        "billed_output_tokens": 3800,
+        "total_tokens": 224603
+      },
+      "subagent_tokens": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "billed_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "subagent_spawn_count": 0,
+      "subagent_wait_count": 0,
+      "subagent_thread_ids": [],
+      "model": null,
+      "resolved_model": "gpt-6-luna",
+      "resolved_reasoning_effort": "medium",
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [
+        "deterministic/scope-and-protected-inputs: changed=['frontend/src/QuizList.jsx', 'frontend/src/quiz-list.css', 'frontend/src/quiz-list.mjs', 'frontend/tests/search.test.mjs', 'workflow/implementations/quiz-list.md']; path_scope=False; git_unchanged=True; protected_inputs=True",
+        "deterministic/browser-functional-acceptance: initial-cards-and-actions: titles=[\"Arrays\",\"Trees\",\"Regex a[\",\"Graphs\"] actions=[\"Start\",\"Resume\",\"View results\",\"Start\"] hrefs=[\"#/student/attempt/7\",\"#/student/attempt/3\",\"#/student/results/9\",\"#/student/attempt/12\"]; trimmed-case-insensitive-title-search: Search trims whitespace and ignores case; visible titles=[\"Trees\"]; course-name-search-preserves-order: Search also matches course names and preserves source order; visible titles=[\"Arrays\",\"Regex a[\"]; literal-search-text: Search treats regex metacharacters literally; visible titles=[\"Regex a[\"]; no-results-and-clear-control: cards=0 message=true clear=false; clear-restores-list: Interaction failed: locator.click: Timeout 1000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Clear search' })\u001b[22m\n",
+        "deterministic/desktop-prototype-layout: prototype-layout: Layout metrics unavailable: locator.evaluate: Timeout 1500ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('region', { name: 'Quiz list' })\u001b[22m\n",
+        "semantic/semantic-jury: consensus score 54 (median of [42, 62, 54]) -> band 'partial', pass=False at threshold 70; 0/3 deciding judges individually cleared the bar (0 abstained of 3 requested).",
+        "semantic/meaningful-tdd-and-regression-coverage: A focused search test file was added and the existing fixed regression test is unchanged in the Git evidence. However, the trace shows test execution failed with spawn EPERM, and does not establish a relevant failing behavior assertion before implementation or a passing final test run. The browser oracle also reports the fixed card/action checks passing, but that is not evidence of a worker-run red/green test cycle.",
+        "semantic/sound-implementation: The implementation adds a cohesive search helper and preserves card order and status-specific actions/routes in the browser results. The oracle confirms title, class, trimming/case-insensitivity, and literal matching behavior. It also reports the no-results state lacks the required Clear search control, so clearing does not work. Deducted for that behavior failure.",
+        "semantic/prototype-informed-ui: The mobile browser oracle reports geometry, colors, and one-column layout matching the prototype within 9px. The desktop layout check could not obtain metrics because the required Quiz list region was not found, and the functional oracle also found the clear control missing. Prototype fidelity is therefore only partially evidenced.",
+        "semantic/verification-and-factual-handoff: The handoff accurately reports node syntax checking passed, test execution failed with spawn EPERM, and no worker browser acceptance run. It identifies the implemented scope. However, the handoff was written under workflow/implementations, outside the task's allowed scope; deterministic evidence reports the scope check failed. Verification was incomplete.",
+        "semantic/meaningful-tdd-and-regression-coverage: Added focused search tests, and the existing status/order regression test is unchanged. The trace does not show a meaningful failing behavior assertion before implementation, and the test runner failed with spawn EPERM, so there is no worker-run passing test evidence. The independent browser oracle confirms the initial status actions and destinations.",
+        "semantic/prototype-informed-ui: The independent browser oracle reports that mobile geometry, colors, and one-column layout match the prototype. Desktop layout metrics were unavailable because the expected Quiz list region was not found. Functional acceptance failed: the clear control was not found, and the initial-card check reported a truncated title (\u201cRegex a[\u201d). These browser failures cap the overall score below 70.",
+        "semantic/verification-and-factual-handoff: The handoff reports the syntax check as passed and accurately describes the test runner\u2019s spawn EPERM error; the trace supports both claims. It also states that no browser acceptance run was available in the fixture, without claiming worker-run browser verification. Deducted because the deterministic handoff-presence check failed semantically, and test execution did not provide a passing regression result.",
+        "semantic/meaningful-tdd-regression-coverage: Added focused tests for trimmed case-insensitive title and course matching, literal query handling, order, and unchanged input. The trace records test-runner spawn EPERM failures, so no passing final test run is evidenced. It also does not show a relevant failing behavior assertion before implementation. The existing fixed regression appears untouched in the Git changes, but its passing result is not evidenced.",
+        "semantic/sound-implementation: Search is a small filter over mapped quiz cards and preserves order; the changes retain the card action destinations and render status and count. Browser acceptance found the Clear search control missing by its expected accessible name and could not complete clear-and-restore behavior. No final test run verifies the implementation.",
+        "semantic/prototype-informed-ui: The grader's mobile layout check passed within 9px of the prototype. Functional browser acceptance failed for the no-results clear control, and desktop layout metrics were unavailable because the expected Quiz list region could not be located. These essential browser failures cap the overall score below 70.",
+        "semantic/verification-factual-handoff: The handoff reports the syntax check and Node test-runner EPERM limitation, and says browser acceptance was unavailable to the worker; the trace supports these statements. The handoff is present, but the deterministic handoff-presence check failed semantically. No worker browser verification is claimed, and no browser run appears in the worker trace."
+      ],
+      "run_directory": "C:\\Users\\junha\\Documents\\School\\y3s1\\CS3227\\CS3227-2610-MP4\\workflow\\evals\\implement-task\\runs\\experiment-002\\trials\\mp4-prototype-aware-quiz-list\\baseline\\trial-01"
+    },
+    {
+      "status": "graded",
+      "skill": "implement-task",
+      "test_case": "mp4-prototype-aware-quiz-list",
+      "configuration": "baseline",
+      "trial": 2,
+      "overall_pass": false,
+      "needs_review": false,
+      "score": 65,
+      "deterministic_score": 69,
+      "semantic_score": 65,
+      "deterministic_pass": false,
+      "semantic_pass": false,
+      "semantic_judges": 3,
+      "worker_exit_code": 0,
+      "worker_elapsed_seconds": 78.943,
+      "worker_accounting": {
+        "requests": [
+          {"response_id":"resp_0a27fea8fc2da20f016aeff196687c87d0bc4be6531c864599","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:50:49.851Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":14939,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":133,"reasoning_output_tokens":0,"uncached_input_tokens":3163,"billed_output_tokens":133,"total_tokens":15072},"est_cost":0.000501},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff19a18a887d09ea943a48737fce5","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:50:54.324Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16973,"cached_input_tokens":14720,"cache_write_input_tokens":0,"output_tokens":186,"reasoning_output_tokens":65,"uncached_input_tokens":2253,"billed_output_tokens":186,"total_tokens":17159},"est_cost":0.000465},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff19e7f4887d08e6b87f25a8187c5","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:50:58.660Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18108,"cached_input_tokens":16768,"cache_write_input_tokens":0,"output_tokens":176,"reasoning_output_tokens":51,"uncached_input_tokens":1340,"billed_output_tokens":176,"total_tokens":18284},"est_cost":0.00039},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff1a2c96487d0ac74e0d0fe144e6e","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:28.506Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18702,"cached_input_tokens":17920,"cache_write_input_tokens":0,"output_tokens":1589,"reasoning_output_tokens":69,"uncached_input_tokens":782,"billed_output_tokens":1589,"total_tokens":20291},"est_cost":0.001052},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff1c0aeb487d091158bb60476b372","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:38.742Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20315,"cached_input_tokens":18560,"cache_write_input_tokens":0,"output_tokens":489,"reasoning_output_tokens":25,"uncached_input_tokens":1755,"billed_output_tokens":489,"total_tokens":20804},"est_cost":0.000606},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff1cacee087d0b4063d48f4efbedd","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:44.592Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20828,"cached_input_tokens":20096,"cache_write_input_tokens":0,"output_tokens":214,"reasoning_output_tokens":13,"uncached_input_tokens":732,"billed_output_tokens":214,"total_tokens":21042},"est_cost":0.000381},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff1d0c94887d0b9df426240c440fe","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:50.697Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21586,"cached_input_tokens":20608,"cache_write_input_tokens":0,"output_tokens":194,"reasoning_output_tokens":64,"uncached_input_tokens":978,"billed_output_tokens":194,"total_tokens":21780},"est_cost":0.000401},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff1d6ef9c87d0b81f32f46391af46","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:59.601Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22092,"cached_input_tokens":21376,"cache_write_input_tokens":0,"output_tokens":425,"reasoning_output_tokens":76,"uncached_input_tokens":716,"billed_output_tokens":425,"total_tokens":22517},"est_cost":0.000498},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff1dfba4c87d0bb2956293b2e5c9f","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:52:03.515Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22540,"cached_input_tokens":21888,"cache_write_input_tokens":0,"output_tokens":149,"reasoning_output_tokens":0,"uncached_input_tokens":652,"billed_output_tokens":149,"total_tokens":22689},"est_cost":0.000359}
+        ],
+        "tokens": {
+          "input_tokens": 176083,
+          "cached_input_tokens": 163712,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 12371,
+          "output_tokens": 3555,
+          "reasoning_output_tokens": 363,
+          "billed_output_tokens": 3555,
+          "total_tokens": 179638
+        },
+        "est_cost": 0.004653,
+        "known_cost": 0.004653,
+        "coverage": {
+          "status": "complete",
+          "request_count": 9,
+          "priced_count": 9,
+          "unpriced_count": 0,
+          "unavailable_count": 0,
+          "unknown_models": [],
+          "reasons": []
+        }
+      },
+      "judge_accounting": {
+        "requests": [],
+        "tokens": {
+          "input_tokens": 450047,
+          "cached_input_tokens": 321280,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 128767,
+          "output_tokens": 4137,
+          "reasoning_output_tokens": 1769,
+          "billed_output_tokens": 4137,
+          "total_tokens": 454184
+        },
+        "est_cost": null,
+        "known_cost": null,
+        "coverage": {
+          "status": "unavailable",
+          "request_count": 0,
+          "priced_count": 0,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "accounting": {
+        "requests": [
+          {"response_id":"resp_0a27fea8fc2da20f016aeff196687c87d0bc4be6531c864599","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:50:49.851Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":14939,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":133,"reasoning_output_tokens":0,"uncached_input_tokens":3163,"billed_output_tokens":133,"total_tokens":15072},"est_cost":0.000501},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff19a18a887d09ea943a48737fce5","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:50:54.324Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16973,"cached_input_tokens":14720,"cache_write_input_tokens":0,"output_tokens":186,"reasoning_output_tokens":65,"uncached_input_tokens":2253,"billed_output_tokens":186,"total_tokens":17159},"est_cost":0.000465},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff19e7f4887d08e6b87f25a8187c5","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:50:58.660Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18108,"cached_input_tokens":16768,"cache_write_input_tokens":0,"output_tokens":176,"reasoning_output_tokens":51,"uncached_input_tokens":1340,"billed_output_tokens":176,"total_tokens":18284},"est_cost":0.00039},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff1a2c96487d0ac74e0d0fe144e6e","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:28.506Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18702,"cached_input_tokens":17920,"cache_write_input_tokens":0,"output_tokens":1589,"reasoning_output_tokens":69,"uncached_input_tokens":782,"billed_output_tokens":1589,"total_tokens":20291},"est_cost":0.001052},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff1c0aeb487d091158bb60476b372","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:38.742Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20315,"cached_input_tokens":18560,"cache_write_input_tokens":0,"output_tokens":489,"reasoning_output_tokens":25,"uncached_input_tokens":1755,"billed_output_tokens":489,"total_tokens":20804},"est_cost":0.000606},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff1cacee087d0b4063d48f4efbedd","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:44.592Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20828,"cached_input_tokens":20096,"cache_write_input_tokens":0,"output_tokens":214,"reasoning_output_tokens":13,"uncached_input_tokens":732,"billed_output_tokens":214,"total_tokens":21042},"est_cost":0.000381},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff1d0c94887d0b9df426240c440fe","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:50.697Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21586,"cached_input_tokens":20608,"cache_write_input_tokens":0,"output_tokens":194,"reasoning_output_tokens":64,"uncached_input_tokens":978,"billed_output_tokens":194,"total_tokens":21780},"est_cost":0.000401},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff1d6ef9c87d0b81f32f46391af46","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:51:59.601Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22092,"cached_input_tokens":21376,"cache_write_input_tokens":0,"output_tokens":425,"reasoning_output_tokens":76,"uncached_input_tokens":716,"billed_output_tokens":425,"total_tokens":22517},"est_cost":0.000498},
+          {"response_id":"resp_0a27fea8fc2da20f016aeff1dfba4c87d0bb2956293b2e5c9f","thread_id":"01a1b947-b01e-77e1-b95a-9756756242ef","turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","root_turn_id":"01a1b947-b0de-7e80-8859-f5eb35f2c0aa","session_id":"01a1b947-b01e-77e1-b95a-9756756242ef","timestamp":"2026-11-08T03:52:03.515Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22540,"cached_input_tokens":21888,"cache_write_input_tokens":0,"output_tokens":149,"reasoning_output_tokens":0,"uncached_input_tokens":652,"billed_output_tokens":149,"total_tokens":22689},"est_cost":0.000359}
+        ],
+        "tokens": {
+          "input_tokens": 626130,
+          "cached_input_tokens": 484992,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 141138,
+          "output_tokens": 7692,
+          "reasoning_output_tokens": 2132,
+          "billed_output_tokens": 7692,
+          "total_tokens": 633822
+        },
+        "est_cost": null,
+        "known_cost": 0.004653,
+        "coverage": {
+          "status": "partial",
+          "request_count": 9,
+          "priced_count": 9,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "tokens": {
+        "input_tokens": 176083,
+        "cached_input_tokens": 163712,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 12371,
+        "output_tokens": 3555,
+        "reasoning_output_tokens": 363,
+        "billed_output_tokens": 3555
+      },
+      "parent_tokens": {
+        "input_tokens": 176083,
+        "cached_input_tokens": 163712,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 12371,
+        "output_tokens": 3555,
+        "reasoning_output_tokens": 363,
+        "billed_output_tokens": 3555,
+        "total_tokens": 179638
+      },
+      "subagent_tokens": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "billed_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "subagent_spawn_count": 0,
+      "subagent_wait_count": 0,
+      "subagent_thread_ids": [],
+      "model": null,
+      "resolved_model": "gpt-6-luna",
+      "resolved_reasoning_effort": "medium",
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [
+        "deterministic/scope-and-protected-inputs: changed=['frontend/src/QuizList.jsx', 'frontend/src/quiz-list.css', 'frontend/src/quiz-list.mjs', 'frontend/tests/search.test.mjs', 'workflow/implementations/quiz-list.md']; path_scope=False; git_unchanged=True; protected_inputs=True",
+        "semantic/semantic-jury: consensus score 65 (median of [65, 69, 64]) -> band 'partial', pass=False at threshold 70; 0/3 deciding judges individually cleared the bar (0 abstained of 3 requested).",
+        "semantic/meaningful_tdd_and_regression_coverage: Added focused search tests and left the fixed regression test unchanged. The trace shows no relevant failing behavior assertion before implementation, and the final Node test runs failed with spawn EPERM before loading tests, so there is no observed passing check on the final code.",
+        "semantic/verification_and_factual_handoff: The handoff accurately reports the successful syntax check and Node test runner EPERM limitation; it does not claim worker-run browser verification. The tests were not executed successfully. The handoff file was written under workflow/implementations, outside the task's allowed frontend/src and frontend/tests scope, failing the essential no-out-of-scope-writes condition.",
+        "semantic/meaningful-tdd-and-regression-coverage: Adds focused tests for trimmed, case-insensitive title/class search, literal matching, order, blank queries, metadata, and immutability. The trace records the test runner failing with spawn EPERM before loading tests, so it provides no meaningful failing assertion before implementation or passing final test run. The existing regression test file remains unchanged, but its passing status is not evidenced.",
+        "semantic/verification-and-factual-handoff: The handoff accurately reports node --check passing, the test runner's spawn EPERM failure, and that browser acceptance was unavailable during worker execution. It summarizes the change and limitations. Relevant automated tests did not complete, and the handoff was written under workflow/implementations/quiz-list.md, outside the task's allowed scope.",
+        "semantic/meaningful-tdd-and-regression-coverage: Added focused search and immutability tests, but the trace shows no relevant failing assertion before implementation. Both test runs failed with spawn EPERM before loading the tests, so neither the new tests nor the fixed regression test are evidenced as passing.",
+        "semantic/verification-and-factual-handoff: The handoff accurately reports the successful syntax check, test-runner EPERM failure, and lack of worker-run browser verification. It identifies the change scope, but gives no next action. The handoff file is outside the task's allowed scope (frontend/src and frontend/tests), failing an essential pass condition."
+      ],
+      "run_directory": "C:\\Users\\junha\\Documents\\School\\y3s1\\CS3227\\CS3227-2610-MP4\\workflow\\evals\\implement-task\\runs\\experiment-002\\trials\\mp4-prototype-aware-quiz-list\\baseline\\trial-02"
+    },
+    {
+      "status": "graded",
+      "skill": "implement-task",
+      "test_case": "mp4-prototype-aware-quiz-list",
+      "configuration": "with-skill",
+      "trial": 1,
+      "overall_pass": false,
+      "needs_review": false,
+      "score": 15,
+      "deterministic_score": 15,
+      "semantic_score": 55,
+      "deterministic_pass": false,
+      "semantic_pass": false,
+      "semantic_judges": 3,
+      "worker_exit_code": 0,
+      "worker_elapsed_seconds": 137.507,
+      "worker_accounting": {
+        "requests": [
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff1e8a73887d0846347b13fc34c27","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:12.124Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16424,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":122,"reasoning_output_tokens":0,"uncached_input_tokens":4648,"billed_output_tokens":122,"total_tokens":16546},"est_cost":0.000644},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff1ec627887d0830700b29c414b4b","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:15.786Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":17927,"cached_input_tokens":16256,"cache_write_input_tokens":0,"output_tokens":146,"reasoning_output_tokens":24,"uncached_input_tokens":1671,"billed_output_tokens":146,"total_tokens":18073},"est_cost":0.000403},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff1f026c887d0858655930222f8a4","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:21.388Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20426,"cached_input_tokens":17792,"cache_write_input_tokens":0,"output_tokens":248,"reasoning_output_tokens":17,"uncached_input_tokens":2634,"billed_output_tokens":248,"total_tokens":20674},"est_cost":0.000565},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff1f5b74087d088b8b63b0b32b3d3","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:24.901Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21737,"cached_input_tokens":20224,"cache_write_input_tokens":0,"output_tokens":134,"reasoning_output_tokens":73,"uncached_input_tokens":1513,"billed_output_tokens":134,"total_tokens":21871},"est_cost":0.000421},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff1f9162087d0a8093e178a2164d2","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:35.524Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22208,"cached_input_tokens":21504,"cache_write_input_tokens":0,"output_tokens":532,"reasoning_output_tokens":23,"uncached_input_tokens":704,"billed_output_tokens":532,"total_tokens":22740},"est_cost":0.000551},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff204081087d09b2675880fa06ef3","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:39.404Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23185,"cached_input_tokens":22016,"cache_write_input_tokens":0,"output_tokens":138,"reasoning_output_tokens":26,"uncached_input_tokens":1169,"billed_output_tokens":138,"total_tokens":23323},"est_cost":0.000406},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff207bfe087d086171b4f867c53d3","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:55.634Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23760,"cached_input_tokens":23040,"cache_write_input_tokens":0,"output_tokens":803,"reasoning_output_tokens":41,"uncached_input_tokens":720,"billed_output_tokens":803,"total_tokens":24563},"est_cost":0.000704},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff217c13887d085fbdd8827bbc6d4","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:09.488Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24674,"cached_input_tokens":23552,"cache_write_input_tokens":0,"output_tokens":713,"reasoning_output_tokens":9,"uncached_input_tokens":1122,"billed_output_tokens":713,"total_tokens":25387},"est_cost":0.000704},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff22592bc87d0ba8b21484d34d169","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:26.283Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25411,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":884,"reasoning_output_tokens":0,"uncached_input_tokens":13635,"billed_output_tokens":884,"total_tokens":26295},"est_cost":0.001923},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff236588087d0a6c8f041d6e8f216","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:28.733Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":26319,"cached_input_tokens":25216,"cache_write_input_tokens":0,"output_tokens":89,"reasoning_output_tokens":32,"uncached_input_tokens":1103,"billed_output_tokens":89,"total_tokens":26408},"est_cost":0.000407},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff238ed2887d0954c94b1687a33e9","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:41.360Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27079,"cached_input_tokens":24448,"cache_write_input_tokens":0,"output_tokens":630,"reasoning_output_tokens":176,"uncached_input_tokens":2631,"billed_output_tokens":630,"total_tokens":27709},"est_cost":0.000823},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff245e27087d08d25bd442dcaed05","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:49.344Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29126,"cached_input_tokens":26112,"cache_write_input_tokens":0,"output_tokens":371,"reasoning_output_tokens":88,"uncached_input_tokens":3014,"billed_output_tokens":371,"total_tokens":29497},"est_cost":0.000748},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff24d918487d0a3709a07aae22542","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:56.534Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29521,"cached_input_tokens":28928,"cache_write_input_tokens":0,"output_tokens":343,"reasoning_output_tokens":0,"uncached_input_tokens":593,"billed_output_tokens":343,"total_tokens":29864},"est_cost":0.00052},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff254ba5087d0a2b2c30eaafcb6a2","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:54:18.111Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":30016,"cached_input_tokens":29312,"cache_write_input_tokens":0,"output_tokens":1127,"reasoning_output_tokens":52,"uncached_input_tokens":704,"billed_output_tokens":1127,"total_tokens":31143},"est_cost":0.000927},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff26a49d887d08a7af27212f3f601","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:54:23.141Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":31290,"cached_input_tokens":29824,"cache_write_input_tokens":0,"output_tokens":224,"reasoning_output_tokens":0,"uncached_input_tokens":1466,"billed_output_tokens":224,"total_tokens":31514},"est_cost":0.000557}
+        ],
+        "tokens": {
+          "input_tokens": 369103,
+          "cached_input_tokens": 331776,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 37327,
+          "output_tokens": 6504,
+          "reasoning_output_tokens": 561,
+          "billed_output_tokens": 6504,
+          "total_tokens": 375607
+        },
+        "est_cost": 0.010303,
+        "known_cost": 0.010303,
+        "coverage": {
+          "status": "complete",
+          "request_count": 15,
+          "priced_count": 15,
+          "unpriced_count": 0,
+          "unavailable_count": 0,
+          "unknown_models": [],
+          "reasons": []
+        }
+      },
+      "judge_accounting": {
+        "requests": [],
+        "tokens": {
+          "input_tokens": 446264,
+          "cached_input_tokens": 262272,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 183992,
+          "output_tokens": 3838,
+          "reasoning_output_tokens": 1089,
+          "billed_output_tokens": 3838,
+          "total_tokens": 450102
+        },
+        "est_cost": null,
+        "known_cost": null,
+        "coverage": {
+          "status": "unavailable",
+          "request_count": 0,
+          "priced_count": 0,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "accounting": {
+        "requests": [
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff1e8a73887d0846347b13fc34c27","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:12.124Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16424,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":122,"reasoning_output_tokens":0,"uncached_input_tokens":4648,"billed_output_tokens":122,"total_tokens":16546},"est_cost":0.000644},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff1ec627887d0830700b29c414b4b","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:15.786Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":17927,"cached_input_tokens":16256,"cache_write_input_tokens":0,"output_tokens":146,"reasoning_output_tokens":24,"uncached_input_tokens":1671,"billed_output_tokens":146,"total_tokens":18073},"est_cost":0.000403},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff1f026c887d0858655930222f8a4","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:21.388Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":20426,"cached_input_tokens":17792,"cache_write_input_tokens":0,"output_tokens":248,"reasoning_output_tokens":17,"uncached_input_tokens":2634,"billed_output_tokens":248,"total_tokens":20674},"est_cost":0.000565},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff1f5b74087d088b8b63b0b32b3d3","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:24.901Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21737,"cached_input_tokens":20224,"cache_write_input_tokens":0,"output_tokens":134,"reasoning_output_tokens":73,"uncached_input_tokens":1513,"billed_output_tokens":134,"total_tokens":21871},"est_cost":0.000421},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff1f9162087d0a8093e178a2164d2","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:35.524Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22208,"cached_input_tokens":21504,"cache_write_input_tokens":0,"output_tokens":532,"reasoning_output_tokens":23,"uncached_input_tokens":704,"billed_output_tokens":532,"total_tokens":22740},"est_cost":0.000551},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff204081087d09b2675880fa06ef3","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:39.404Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23185,"cached_input_tokens":22016,"cache_write_input_tokens":0,"output_tokens":138,"reasoning_output_tokens":26,"uncached_input_tokens":1169,"billed_output_tokens":138,"total_tokens":23323},"est_cost":0.000406},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff207bfe087d086171b4f867c53d3","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:52:55.634Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23760,"cached_input_tokens":23040,"cache_write_input_tokens":0,"output_tokens":803,"reasoning_output_tokens":41,"uncached_input_tokens":720,"billed_output_tokens":803,"total_tokens":24563},"est_cost":0.000704},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff217c13887d085fbdd8827bbc6d4","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:09.488Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24674,"cached_input_tokens":23552,"cache_write_input_tokens":0,"output_tokens":713,"reasoning_output_tokens":9,"uncached_input_tokens":1122,"billed_output_tokens":713,"total_tokens":25387},"est_cost":0.000704},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff22592bc87d0ba8b21484d34d169","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:26.283Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25411,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":884,"reasoning_output_tokens":0,"uncached_input_tokens":13635,"billed_output_tokens":884,"total_tokens":26295},"est_cost":0.001923},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff236588087d0a6c8f041d6e8f216","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:28.733Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":26319,"cached_input_tokens":25216,"cache_write_input_tokens":0,"output_tokens":89,"reasoning_output_tokens":32,"uncached_input_tokens":1103,"billed_output_tokens":89,"total_tokens":26408},"est_cost":0.000407},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff238ed2887d0954c94b1687a33e9","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:41.360Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27079,"cached_input_tokens":24448,"cache_write_input_tokens":0,"output_tokens":630,"reasoning_output_tokens":176,"uncached_input_tokens":2631,"billed_output_tokens":630,"total_tokens":27709},"est_cost":0.000823},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff245e27087d08d25bd442dcaed05","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:49.344Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29126,"cached_input_tokens":26112,"cache_write_input_tokens":0,"output_tokens":371,"reasoning_output_tokens":88,"uncached_input_tokens":3014,"billed_output_tokens":371,"total_tokens":29497},"est_cost":0.000748},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff24d918487d0a3709a07aae22542","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:53:56.534Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29521,"cached_input_tokens":28928,"cache_write_input_tokens":0,"output_tokens":343,"reasoning_output_tokens":0,"uncached_input_tokens":593,"billed_output_tokens":343,"total_tokens":29864},"est_cost":0.00052},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff254ba5087d0a2b2c30eaafcb6a2","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:54:18.111Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":30016,"cached_input_tokens":29312,"cache_write_input_tokens":0,"output_tokens":1127,"reasoning_output_tokens":52,"uncached_input_tokens":704,"billed_output_tokens":1127,"total_tokens":31143},"est_cost":0.000927},
+          {"response_id":"resp_0d4d0dc52d0798b4016aeff26a49d887d08a7af27212f3f601","thread_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","root_turn_id":"01a1b948-ecdb-7681-987f-6808e804fd64","session_id":"01a1b948-ebde-77d1-af0a-63e034b13e0e","timestamp":"2026-11-08T03:54:23.141Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":31290,"cached_input_tokens":29824,"cache_write_input_tokens":0,"output_tokens":224,"reasoning_output_tokens":0,"uncached_input_tokens":1466,"billed_output_tokens":224,"total_tokens":31514},"est_cost":0.000557}
+        ],
+        "tokens": {
+          "input_tokens": 815367,
+          "cached_input_tokens": 594048,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 221319,
+          "output_tokens": 10342,
+          "reasoning_output_tokens": 1650,
+          "billed_output_tokens": 10342,
+          "total_tokens": 825709
+        },
+        "est_cost": null,
+        "known_cost": 0.010303,
+        "coverage": {
+          "status": "partial",
+          "request_count": 15,
+          "priced_count": 15,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "tokens": {
+        "input_tokens": 369103,
+        "cached_input_tokens": 331776,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 37327,
+        "output_tokens": 6504,
+        "reasoning_output_tokens": 561,
+        "billed_output_tokens": 6504
+      },
+      "parent_tokens": {
+        "input_tokens": 369103,
+        "cached_input_tokens": 331776,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 37327,
+        "output_tokens": 6504,
+        "reasoning_output_tokens": 561,
+        "billed_output_tokens": 6504,
+        "total_tokens": 375607
+      },
+      "subagent_tokens": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "billed_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "subagent_spawn_count": 0,
+      "subagent_wait_count": 0,
+      "subagent_thread_ids": [],
+      "model": null,
+      "resolved_model": "gpt-6-luna",
+      "resolved_reasoning_effort": "medium",
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [
+        "deterministic/scope-and-protected-inputs: changed=['frontend/src/QuizList.css', 'frontend/src/QuizList.jsx', 'frontend/src/quiz-list.mjs', 'frontend/tests/quiz-search.test.mjs', 'workflow/implementations/quiz-list-search.md']; path_scope=False; git_unchanged=True; protected_inputs=True",
+        "deterministic/browser-functional-acceptance: initial-cards-and-actions: titles=[\"Arrays\",\"Trees\",\"Regex a[\",\"Graphs\"] actions=[\"Start\",\"Resume\",\"View results\",\"Start\"] hrefs=[\"#/student/attempt/7\",\"#/student/attempt/3\",\"#/student/results/9\",\"#/student/attempt/12\"]; trimmed-case-insensitive-title-search: Search trims whitespace and ignores case; visible titles=[\"Trees\"]; course-name-search-preserves-order: Search also matches course names and preserves source order; visible titles=[\"Arrays\",\"Regex a[\"]; literal-search-text: Search treats regex metacharacters literally; visible titles=[\"Regex a[\"]; no-results-and-clear-control: cards=0 message=true clear=false; clear-restores-list: Interaction failed: locator.click: Timeout 1000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Clear search' })\u001b[22m\n",
+        "deterministic/desktop-prototype-layout: prototype-layout: Layout metrics unavailable: locator.evaluate: Timeout 1500ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('region', { name: 'Quiz list' })\u001b[22m\n",
+        "semantic/semantic-jury: consensus score 55 (median of [63, 45, 55]) -> band 'partial', pass=False at threshold 70; 0/3 deciding judges individually cleared the bar (0 abstained of 3 requested).",
+        "semantic/meaningful-tdd-and-regression-coverage: Added focused tests for trimmed, case-insensitive title/class search, literal matching, blank and no-match results, immutability, card metadata, status actions and routes. The existing fixed regression test remains unchanged. The trace shows the test runner failed with spawn EPERM before executing test bodies, so there is no meaningful failing assertion before implementation or passing test-suite run.",
+        "semantic/sound-implementation: Search filtering preserves order and uses literal matching; card mapping retains the status actions and routes without mutating supplied records. The browser oracle found that the clear control was unavailable by its expected accessible name, so the clear-and-restore interaction failed. No browser evidence confirms keyboard behavior.",
+        "semantic/prototype-informed-ui: The browser oracle confirmed the mobile layout matches the prototype within 9px. Desktop layout metrics were unavailable because the expected Quiz list region could not be located. The independent browser functional acceptance fails on clear-and-restore, so the essential browser pass condition is unmet.",
+        "semantic/meaningful-tdd-and-regression-coverage: Added focused tests for title/class matching, trimming and case folding, literal search, blank queries, no results, immutability, and status routes. The existing fixed regression test remains unchanged. The trace shows the test runner failed with spawn EPERM before executing test bodies; direct assertions passed, but there is no evidence of a meaningful failing behavior assertion before implementation or of the fixed test passing on final code.",
+        "semantic/prototype-informed-ui: The mobile layout matched the prototype according to the browser oracle. Functional browser acceptance failed: no-results omitted the expected \u201cClear search\u201d control, so clear-and-restore could not run. Desktop layout metrics were unavailable. The independent browser functional check is an essential pass condition and failed.",
+        "semantic/verification-and-factual-handoff: The handoff accurately reports the test-runner limitation, direct assertions, and lack of worker-run browser verification. However, it overstates final acceptance by marking the task IMPLEMENTED despite unavailable required tests and browser verification, and it fails to identify the browser oracle\u2019s clear-control failure. It also changed workflow/implementations/quiz-list-search.md, outside the task\u2019s allowed scope.",
+        "semantic/meaningful-tdd-and-regression-coverage: Added focused tests for trimmed, case-insensitive literal title/class search, order, empty results, immutability, and status routes; the existing fixed regression test remains intact. The trace shows test execution failing with spawn EPERM before assertions ran, and does not show a meaningful failing assertion before implementation or a passing test-runner check on final code. Direct behavior assertions passed, but do not establish the requested red/green test sequence.",
+        "semantic/sound-implementation: Search is a small mapping/filtering helper that preserves order and does not mutate supplied records. The final code retains status actions and routes. Deductions: the independent browser oracle reports incorrect initial visible titles/actions/links and no-results behavior; it could not find the expected clear control. The submitted implementation also adds workflow/implementations/quiz-list-search.md outside the task's allowed change scope.",
+        "semantic/prototype-informed-ui: CSS reflects the selected prototype's main dimensions, colors, card styling, and responsive columns. The independent browser oracle reports mobile layout matching within 9px, but functional browser checks fail, clear/restore interaction fails, and desktop layout metrics are unavailable because the expected Quiz list region was not found. The essential independent browser acceptance condition fails.",
+        "semantic/verification-and-factual-handoff: The handoff records changed files, observed Node runner EPERM failures, successful syntax/direct assertions, and unverified browser checks. It accurately says browser verification was not performed by the worker. Deduction: it reports IMPLEMENTED despite the test-runner limitation and the browser checks were not verified by the worker; the handoff itself is outside the approved scope."
+      ],
+      "run_directory": "C:\\Users\\junha\\Documents\\School\\y3s1\\CS3227\\CS3227-2610-MP4\\workflow\\evals\\implement-task\\runs\\experiment-002\\trials\\mp4-prototype-aware-quiz-list\\with-skill\\trial-01"
+    },
+    {
+      "status": "graded",
+      "skill": "implement-task",
+      "test_case": "mp4-prototype-aware-quiz-list",
+      "configuration": "with-skill",
+      "trial": 2,
+      "overall_pass": false,
+      "needs_review": false,
+      "score": 69,
+      "deterministic_score": 69,
+      "semantic_score": 69,
+      "deterministic_pass": false,
+      "semantic_pass": false,
+      "semantic_judges": 3,
+      "worker_exit_code": 0,
+      "worker_elapsed_seconds": 119.369,
+      "worker_accounting": {
+        "requests": [
+          {"response_id":"resp_0f713f0af6536e98016aeff275f38087d09abf1280ef39729f","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:34.111Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16424,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":172,"reasoning_output_tokens":0,"uncached_input_tokens":4648,"billed_output_tokens":172,"total_tokens":16596},"est_cost":0.000669},
+          {"response_id":"resp_0f713f0af6536e98016aeff27a5c5487d0b5f069cec0f8b7cd","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:37.414Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18406,"cached_input_tokens":16256,"cache_write_input_tokens":0,"output_tokens":122,"reasoning_output_tokens":18,"uncached_input_tokens":2150,"billed_output_tokens":122,"total_tokens":18528},"est_cost":0.000439},
+          {"response_id":"resp_0f713f0af6536e98016aeff27d829487d0899069c87d5a6bb6","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:43.192Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18605,"cached_input_tokens":18176,"cache_write_input_tokens":0,"output_tokens":118,"reasoning_output_tokens":0,"uncached_input_tokens":429,"billed_output_tokens":118,"total_tokens":18723},"est_cost":0.000284},
+          {"response_id":"resp_0f713f0af6536e98016aeff2836ac487d098b4e07262dc4611","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:46.837Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21021,"cached_input_tokens":18432,"cache_write_input_tokens":0,"output_tokens":148,"reasoning_output_tokens":60,"uncached_input_tokens":2589,"billed_output_tokens":148,"total_tokens":21169},"est_cost":0.000517},
+          {"response_id":"resp_0f713f0af6536e98016aeff286f51487d0bda19769f8d18cef","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:51.665Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21760,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":116,"reasoning_output_tokens":44,"uncached_input_tokens":9984,"billed_output_tokens":116,"total_tokens":21876},"est_cost":0.001174},
+          {"response_id":"resp_0f713f0af6536e98016aeff28bb4d087d080d6df008f974d77","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:58.156Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22350,"cached_input_tokens":20864,"cache_write_input_tokens":0,"output_tokens":270,"reasoning_output_tokens":33,"uncached_input_tokens":1486,"billed_output_tokens":270,"total_tokens":22620},"est_cost":0.000492},
+          {"response_id":"resp_0f713f0af6536e98016aeff292459c87d0bd5f441632a5b5e2","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:55:08.385Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22644,"cached_input_tokens":22144,"cache_write_input_tokens":0,"output_tokens":479,"reasoning_output_tokens":14,"uncached_input_tokens":500,"billed_output_tokens":479,"total_tokens":23123},"est_cost":0.000511},
+          {"response_id":"resp_0f713f0af6536e98016aeff29c8dc087d085aa6ee92dd2239c","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:55:22.237Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23446,"cached_input_tokens":22528,"cache_write_input_tokens":0,"output_tokens":688,"reasoning_output_tokens":39,"uncached_input_tokens":918,"billed_output_tokens":688,"total_tokens":24134},"est_cost":0.000661},
+          {"response_id":"resp_0f713f0af6536e98016aeff2aa853087d0a9c302a08355fde0","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:55:39.986Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24158,"cached_input_tokens":23296,"cache_write_input_tokens":0,"output_tokens":904,"reasoning_output_tokens":0,"uncached_input_tokens":862,"billed_output_tokens":904,"total_tokens":25062},"est_cost":0.000771},
+          {"response_id":"resp_0f713f0af6536e98016aeff2bc849487d09f3093d2cc1cd5d2","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:55:49.921Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25606,"cached_input_tokens":21632,"cache_write_input_tokens":0,"output_tokens":451,"reasoning_output_tokens":155,"uncached_input_tokens":3974,"billed_output_tokens":451,"total_tokens":26057},"est_cost":0.000839},
+          {"response_id":"resp_0f713f0af6536e98016aeff2c627d887d0abc21db715495f36","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:56:00.563Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27782,"cached_input_tokens":25472,"cache_write_input_tokens":0,"output_tokens":482,"reasoning_output_tokens":42,"uncached_input_tokens":2310,"billed_output_tokens":482,"total_tokens":28264},"est_cost":0.000727},
+          {"response_id":"resp_0f713f0af6536e98016aeff2d0d99087d09a59c1c556f8f305","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:56:06.271Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":28819,"cached_input_tokens":27648,"cache_write_input_tokens":0,"output_tokens":236,"reasoning_output_tokens":108,"uncached_input_tokens":1171,"billed_output_tokens":236,"total_tokens":29055},"est_cost":0.000512},
+          {"response_id":"resp_0f713f0af6536e98016aeff2d6c3dc87d0a963511266ac04ff","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:56:19.799Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29079,"cached_input_tokens":28672,"cache_write_input_tokens":0,"output_tokens":627,"reasoning_output_tokens":0,"uncached_input_tokens":407,"billed_output_tokens":627,"total_tokens":29706},"est_cost":0.000641},
+          {"response_id":"resp_0f713f0af6536e98016aeff2e4729c87d080c1066282181c45","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:56:27.061Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29730,"cached_input_tokens":28928,"cache_write_input_tokens":0,"output_tokens":303,"reasoning_output_tokens":0,"uncached_input_tokens":802,"billed_output_tokens":303,"total_tokens":30033},"est_cost":0.000521}
+        ],
+        "tokens": {
+          "input_tokens": 329830,
+          "cached_input_tokens": 297600,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 32230,
+          "output_tokens": 5116,
+          "reasoning_output_tokens": 513,
+          "billed_output_tokens": 5116,
+          "total_tokens": 334946
+        },
+        "est_cost": 0.008758,
+        "known_cost": 0.008758,
+        "coverage": {
+          "status": "complete",
+          "request_count": 14,
+          "priced_count": 14,
+          "unpriced_count": 0,
+          "unavailable_count": 0,
+          "unknown_models": [],
+          "reasons": []
+        }
+      },
+      "judge_accounting": {
+        "requests": [],
+        "tokens": {
+          "input_tokens": 402370,
+          "cached_input_tokens": 276864,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 125506,
+          "output_tokens": 3647,
+          "reasoning_output_tokens": 1239,
+          "billed_output_tokens": 3647,
+          "total_tokens": 406017
+        },
+        "est_cost": null,
+        "known_cost": null,
+        "coverage": {
+          "status": "unavailable",
+          "request_count": 0,
+          "priced_count": 0,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "accounting": {
+        "requests": [
+          {"response_id":"resp_0f713f0af6536e98016aeff275f38087d09abf1280ef39729f","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:34.111Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":16424,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":172,"reasoning_output_tokens":0,"uncached_input_tokens":4648,"billed_output_tokens":172,"total_tokens":16596},"est_cost":0.000669},
+          {"response_id":"resp_0f713f0af6536e98016aeff27a5c5487d0b5f069cec0f8b7cd","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:37.414Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18406,"cached_input_tokens":16256,"cache_write_input_tokens":0,"output_tokens":122,"reasoning_output_tokens":18,"uncached_input_tokens":2150,"billed_output_tokens":122,"total_tokens":18528},"est_cost":0.000439},
+          {"response_id":"resp_0f713f0af6536e98016aeff27d829487d0899069c87d5a6bb6","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:43.192Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":18605,"cached_input_tokens":18176,"cache_write_input_tokens":0,"output_tokens":118,"reasoning_output_tokens":0,"uncached_input_tokens":429,"billed_output_tokens":118,"total_tokens":18723},"est_cost":0.000284},
+          {"response_id":"resp_0f713f0af6536e98016aeff2836ac487d098b4e07262dc4611","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:46.837Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21021,"cached_input_tokens":18432,"cache_write_input_tokens":0,"output_tokens":148,"reasoning_output_tokens":60,"uncached_input_tokens":2589,"billed_output_tokens":148,"total_tokens":21169},"est_cost":0.000517},
+          {"response_id":"resp_0f713f0af6536e98016aeff286f51487d0bda19769f8d18cef","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:51.665Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":21760,"cached_input_tokens":11776,"cache_write_input_tokens":0,"output_tokens":116,"reasoning_output_tokens":44,"uncached_input_tokens":9984,"billed_output_tokens":116,"total_tokens":21876},"est_cost":0.001174},
+          {"response_id":"resp_0f713f0af6536e98016aeff28bb4d087d080d6df008f974d77","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:54:58.156Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22350,"cached_input_tokens":20864,"cache_write_input_tokens":0,"output_tokens":270,"reasoning_output_tokens":33,"uncached_input_tokens":1486,"billed_output_tokens":270,"total_tokens":22620},"est_cost":0.000492},
+          {"response_id":"resp_0f713f0af6536e98016aeff292459c87d0bd5f441632a5b5e2","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:55:08.385Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":22644,"cached_input_tokens":22144,"cache_write_input_tokens":0,"output_tokens":479,"reasoning_output_tokens":14,"uncached_input_tokens":500,"billed_output_tokens":479,"total_tokens":23123},"est_cost":0.000511},
+          {"response_id":"resp_0f713f0af6536e98016aeff29c8dc087d085aa6ee92dd2239c","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:55:22.237Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":23446,"cached_input_tokens":22528,"cache_write_input_tokens":0,"output_tokens":688,"reasoning_output_tokens":39,"uncached_input_tokens":918,"billed_output_tokens":688,"total_tokens":24134},"est_cost":0.000661},
+          {"response_id":"resp_0f713f0af6536e98016aeff2aa853087d0a9c302a08355fde0","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:55:39.986Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":24158,"cached_input_tokens":23296,"cache_write_input_tokens":0,"output_tokens":904,"reasoning_output_tokens":0,"uncached_input_tokens":862,"billed_output_tokens":904,"total_tokens":25062},"est_cost":0.000771},
+          {"response_id":"resp_0f713f0af6536e98016aeff2bc849487d09f3093d2cc1cd5d2","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:55:49.921Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":25606,"cached_input_tokens":21632,"cache_write_input_tokens":0,"output_tokens":451,"reasoning_output_tokens":155,"uncached_input_tokens":3974,"billed_output_tokens":451,"total_tokens":26057},"est_cost":0.000839},
+          {"response_id":"resp_0f713f0af6536e98016aeff2c627d887d0abc21db715495f36","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:56:00.563Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":27782,"cached_input_tokens":25472,"cache_write_input_tokens":0,"output_tokens":482,"reasoning_output_tokens":42,"uncached_input_tokens":2310,"billed_output_tokens":482,"total_tokens":28264},"est_cost":0.000727},
+          {"response_id":"resp_0f713f0af6536e98016aeff2d0d99087d09a59c1c556f8f305","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:56:06.271Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":28819,"cached_input_tokens":27648,"cache_write_input_tokens":0,"output_tokens":236,"reasoning_output_tokens":108,"uncached_input_tokens":1171,"billed_output_tokens":236,"total_tokens":29055},"est_cost":0.000512},
+          {"response_id":"resp_0f713f0af6536e98016aeff2d6c3dc87d0a963511266ac04ff","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:56:19.799Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29079,"cached_input_tokens":28672,"cache_write_input_tokens":0,"output_tokens":627,"reasoning_output_tokens":0,"uncached_input_tokens":407,"billed_output_tokens":627,"total_tokens":29706},"est_cost":0.000641},
+          {"response_id":"resp_0f713f0af6536e98016aeff2e4729c87d080c1066282181c45","thread_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","root_turn_id":"01a1b94b-1886-7e32-a65f-49f5589c6288","session_id":"01a1b94b-1638-7a91-9b6f-ca8bcb27000d","timestamp":"2026-11-08T03:56:27.061Z","model":"gpt-6-luna","source":"token_usage_record","tokens":{"input_tokens":29730,"cached_input_tokens":28928,"cache_write_input_tokens":0,"output_tokens":303,"reasoning_output_tokens":0,"uncached_input_tokens":802,"billed_output_tokens":303,"total_tokens":30033},"est_cost":0.000521}
+        ],
+        "tokens": {
+          "input_tokens": 732200,
+          "cached_input_tokens": 574464,
+          "cache_write_input_tokens": 0,
+          "uncached_input_tokens": 157736,
+          "output_tokens": 8763,
+          "reasoning_output_tokens": 1752,
+          "billed_output_tokens": 8763,
+          "total_tokens": 740963
+        },
+        "est_cost": null,
+        "known_cost": 0.008758,
+        "coverage": {
+          "status": "partial",
+          "request_count": 14,
+          "priced_count": 14,
+          "unpriced_count": 0,
+          "unavailable_count": 3,
+          "unknown_models": [],
+          "reasons": [
+            "incomplete request boundaries"
+          ]
+        }
+      },
+      "tokens": {
+        "input_tokens": 329830,
+        "cached_input_tokens": 297600,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 32230,
+        "output_tokens": 5116,
+        "reasoning_output_tokens": 513,
+        "billed_output_tokens": 5116
+      },
+      "parent_tokens": {
+        "input_tokens": 329830,
+        "cached_input_tokens": 297600,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 32230,
+        "output_tokens": 5116,
+        "reasoning_output_tokens": 513,
+        "billed_output_tokens": 5116,
+        "total_tokens": 334946
+      },
+      "subagent_tokens": {
+        "input_tokens": 0,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "uncached_input_tokens": 0,
+        "output_tokens": 0,
+        "reasoning_output_tokens": 0,
+        "billed_output_tokens": 0,
+        "total_tokens": 0
+      },
+      "subagent_spawn_count": 0,
+      "subagent_wait_count": 0,
+      "subagent_thread_ids": [],
+      "model": null,
+      "resolved_model": "gpt-6-luna",
+      "resolved_reasoning_effort": "medium",
+      "worker_turns_planned": 1,
+      "worker_turns_completed": 1,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [
+        "deterministic/scope-and-protected-inputs: changed=['frontend/src/QuizList.css', 'frontend/src/QuizList.jsx', 'frontend/src/quiz-list.mjs', 'frontend/tests/quiz-list-search.test.mjs', 'workflow/implementations/quiz-list-run-01.md']; path_scope=False; git_unchanged=True; protected_inputs=True",
+        "semantic/semantic-jury: consensus score 69 (median of [69, 69, 62]) -> band 'partial', pass=False at threshold 70; 0/3 deciding judges individually cleared the bar (0 abstained of 3 requested).",
+        "semantic/meaningful-tdd-regression-coverage: Added focused tests for trimmed, case-insensitive title/class matching, literal search, order, blank input, and no results; the existing status/order regression test is unchanged. The trace does not show a relevant failing assertion before implementation or a passing test-runner check afterward; `node --test` failed to launch with EPERM.",
+        "semantic/verification-and-factual-handoff: The handoff records syntax checks, direct assertions, the failed test-runner attempt, and unrun worker browser checks accurately. However, meaningful red/green test evidence is absent, and the handoff file is outside the task's stated allowed scope. The independent browser check is grader evidence, not worker-run verification.",
+        "semantic/meaningful-tdd-and-regression-coverage: Added focused tests for trimmed, case-insensitive title/class matching, literal search, order, blank queries, no results, and input immutability. The trace shows no relevant failing behavior assertion before implementation, so meaningful red/green TDD is not demonstrated. The existing regression test is unchanged, but `node --test tests/*.test.mjs` failed with `spawn EPERM`; it was not observed passing.",
+        "semantic/meaningful-tdd-and-regression-coverage: Focused tests cover trimming, case-insensitive title/class matching, literal search, ordering, blank queries, no results, and input immutability; the existing status/order/routes regression test remains unchanged. The trace and handoff show no meaningful failing behavior assertion before implementation, and the test runner failed with spawn EPERM, so there is no observed red/green run.",
+        "semantic/verification-and-factual-handoff: The handoff reports syntax checks and direct assertions, accurately discloses the test-runner EPERM and that worker browser verification was not performed. However, it claims no browser acceptance was run while the trial evidence shows grader-run browser acceptance; worker-side browser verification remains absent. Deterministic evidence also flags the added workflow/implementations handoff as an out-of-scope changed path relative to the task's allowed scope."
+      ],
+      "run_directory": "C:\\Users\\junha\\Documents\\School\\y3s1\\CS3227\\CS3227-2610-MP4\\workflow\\evals\\implement-task\\runs\\experiment-002\\trials\\mp4-prototype-aware-quiz-list\\with-skill\\trial-02"
+    }
+  ]
+}

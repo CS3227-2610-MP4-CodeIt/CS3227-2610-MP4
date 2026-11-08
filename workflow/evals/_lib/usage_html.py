@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any
 
 from _lib.accounting import record_accounting, combine_accounting
+from _lib.detail_navigation import HEADER_STYLE, render_header
 from _lib.pricing import PRICING_AS_OF, PRICING_SOURCE
 from _lib.pricing import format_cost as _format_cost
 
@@ -91,10 +92,22 @@ def _cost_detail(value: Any) -> str:
         return ""
     priced = coverage.get('priced_count', 0)
     total = coverage.get('request_count', 0)
+    unavailable = coverage.get('unavailable_count', 0)
     known = value.get('known_cost')
+    aggregate_total = coverage.get('turn_aggregate_total_count', 0)
+    if aggregate_total:
+        aggregate_priced = coverage.get('turn_aggregate_priced_count', 0)
+        aggregate_unavailable = coverage.get('turn_aggregate_unavailable_count', 0)
+        return (
+            f"{status}: {_format_cost(known)} known; "
+            f"{aggregate_priced}/{aggregate_total} judge turn aggregates priced "
+            f"below the short-context threshold; "
+            f"{aggregate_unavailable} judge call(s) unavailable"
+        )
+    unavailable_detail = f"; {unavailable} unavailable observation(s)" if unavailable else ""
     if known is not None:
-        return f"{status}: {_format_cost(known)} known · {priced}/{total} priced"
-    return f"{status}: {priced}/{total} priced"
+        return f"{status}: {_format_cost(known)} known · {priced}/{total} priced{unavailable_detail}"
+    return f"{status}: {priced}/{total} priced{unavailable_detail}"
 
 
 def _num(value: Any) -> str:
@@ -117,7 +130,12 @@ def _ts(value: Any) -> str:
 def _cost_meter(value: Any, maximum: float, *, color: str = "blue", zero_ok: bool = True) -> str:
     """A compact cost bar that makes relative spend visible in dense tables."""
     label = _cost(value, zero_ok=zero_ok)
-    width = min(100.0, max(0.0, float(value or 0) / maximum * 100)) if maximum else 0.0
+    if isinstance(value, dict):
+        coverage = value.get("coverage") or {}
+        magnitude = value.get("known_cost") if coverage.get("status") in ("partial", "unavailable") else value.get("est_cost")
+    else:
+        magnitude = value
+    width = min(100.0, max(0.0, float(magnitude or 0) / maximum * 100)) if maximum else 0.0
     return (
         f"<div class='table-cost'><strong>{_esc(label)}</strong>"
         f"<span><i class='meter-{color}' style='width:{width:.1f}%'></i></span></div>"
@@ -1175,8 +1193,8 @@ def _real_session_details(summary: dict[str, Any]) -> str:
             timeline += _command_timeline(sess.get("commands") or [])
         context = _context_component(sess.get("activity_tree"), f"{detail_id}-context")
         views.append(
-            f"<div id='{detail_id}' class='detail-view hidden'>"
-            f"<button class='crumb-link' onclick='backToRealOverview()'>← Online eval</button>"
+            f"<div id='{detail_id}' class='detail-view hidden' data-crumb-label='{_esc('Session ' + str(sess['thread_id'])[:16])}'>"
+            f"<button type='button' class='page-back' onclick='backToRealOverview()'>← Online eval</button>"
             f"<div class='card'><div class='card-header'><div>"
             f"<div class='card-title'>Session <code>{_esc(str(sess['thread_id'])[:16])}</code></div>"
             f"<div class='card-subtitle'>{_esc(_ts(sess['started_at']))} · "
@@ -1198,13 +1216,13 @@ def _real_skill_details(summary: dict[str, Any]) -> str:
                 rows.append(f"<tr class='clickable-row' onclick=\"openSessionDetail('real-sess-{index}')\">"
                             f"<td>{_esc(_ts(session['started_at']))}</td><td>{_esc(session['thread_id'])}</td>"
                             f"<td>{_esc(session.get('skill_invocations', {}).get(name))}</td></tr>")
-        views.append(f"<div id='{_slug('real-skill', name)}' class='detail-view hidden'>"
-                     "<button class='crumb-link' onclick='backToRealOverview()'>← Online eval</button>"
+        views.append(f"<div id='{_slug('real-skill', name)}' class='detail-view hidden' data-crumb-label='{_esc('Skill: ' + name)}'>"
+                     "<button type='button' class='page-back' onclick='backToRealOverview()'>← Online eval</button>"
                      f"<div class='card'><div class='card-title'>Skill: <code>{_esc(name)}</code></div>"
                      "<p class='muted'>Observed skill activity is associated with these sessions. "
                      "No exclusive token or cost attribution is available.</p>"
-                     f"<table><thead><tr><th>Started</th><th>Session</th><th>Observation</th></tr></thead>"
-                     f"<tbody>{''.join(rows)}</tbody></table></div></div>")
+                     f"<div class='table-scroll'><table><thead><tr><th>Started</th><th>Session</th><th>Observation</th></tr></thead>"
+                     f"<tbody>{''.join(rows)}</tbody></table></div></div></div>")
     return ''.join(views)
 
 
@@ -1240,9 +1258,20 @@ def _eval_skill_rows(harness_evals: dict[str, Any]) -> str:
             "outcome": summarize_experiment_outcome(exps[latest_exp]),
         }
 
-    max_cost = max((float(es.get("est_cost") or 0) for es in harness_evals["by_skill"]), default=0.0)
+    max_cost = max(
+        (
+            float(es.get("known_cost") or es.get("est_cost") or 0)
+            for es in harness_evals["by_skill"]
+        ),
+        default=0.0,
+    )
     for es in harness_evals["by_skill"]:
         wtok, jtok = es["worker_tokens"], es["judge_tokens"]
+        judge_cost_value = {
+            "est_cost": es.get("judge_est_cost"),
+            "known_cost": es.get("judge_known_cost"),
+            "coverage": es.get("judge_coverage"),
+        }
         latest = latest_by_skill.get(es["skill"])
         if latest:
             oc = latest["outcome"]
@@ -1266,8 +1295,8 @@ def _eval_skill_rows(harness_evals: dict[str, Any]) -> str:
             f"<td class='num'>{_num(wtok['billed_output_tokens'])}</td>"
             f"<td class='num'>{_num(jtok['billed_output_tokens'])}</td>"
             f"<td class='num'>{_cost_meter(es['worker_est_cost'], max_cost, zero_ok=es['priced_count'] > 0)}</td>"
-            f"<td class='num'>{_cost_meter(es['judge_est_cost'], max_cost, color='amber', zero_ok=es['priced_count'] > 0)}</td>"
-            f"<td class='num'>{_esc(_cost(es))}</td>"
+            f"<td class='num' title='{_esc(_cost_detail(judge_cost_value))}'>{_cost_meter(judge_cost_value, max_cost, color='amber', zero_ok=True)}</td>"
+            f"<td class='num' title='{_esc(_cost_detail(es))}'>{_esc(_cost(es))}</td>"
             f"</tr>"
         )
     if not rows:
@@ -1292,6 +1321,7 @@ def _experiment_history_rows(harness_evals: dict[str, Any]) -> str:
         outcome = summarize_experiment_outcome(trials)["outcome"]
         indicator = {"PASS": "green", "FAIL": "rose", "UNKNOWN": "slate"}.get(outcome, "slate")
         vid = _slug("eval-exp", skill, exp)
+        cost_detail = _cost_detail(group_accounting)
         rows.append(
             f"<tr class='clickable-row' onclick=\"openEvalExperiment('{vid}')\">"
             f"<td><code>{_esc(skill)}</code></td>"
@@ -1301,7 +1331,7 @@ def _experiment_history_rows(harness_evals: dict[str, Any]) -> str:
             f"<td class='num'>{worker}</td>"
             f"<td class='num'>{judges}</td>"
             f"<td class='num'>{_num(billed)}</td>"
-            f"<td class='num'>{_esc(_cost(group_accounting))}</td>"
+            f"<td class='num' title='{_esc(cost_detail)}'>{_esc(_cost(group_accounting))}</td>"
             f"</tr>"
         )
     if not rows:
@@ -1460,8 +1490,8 @@ def _eval_experiment_details(harness_evals: dict[str, Any]) -> str:
         setup_sub = f"effort: {', '.join(efforts)} · {len(trials)} trial(s)"
         worker_sub = f"{subs} subagents · {judges} judges"
         views.append(
-            f"<div id='{vid}' class='detail-view hidden'>"
-            f"<button class='crumb-link' onclick='backToEvalOverview()'>← Offline eval</button>"
+            f"<div id='{vid}' class='detail-view hidden' data-crumb-label='{_esc(skill + ' / ' + exp)}'>"
+            f"<button type='button' class='page-back' onclick='backToEvalOverview()'>← Offline eval</button>"
             f"<div class='card'><div class='card-header'><div>"
             f"<div class='card-title'>{_esc(skill)} / {_esc(exp)}</div>"
             f"<div class='card-subtitle'>Click a trial to open its trace &amp; grading</div>"
@@ -1478,12 +1508,12 @@ def _eval_experiment_details(harness_evals: dict[str, Any]) -> str:
             f"{_comparison_table(trials)}"
             f"{_skill_language_section(skill, exp, trials, grouped)}"
             f"<h4>Trials</h4>"
-            f"<table><thead><tr><th>Test case</th><th>Config</th><th>Trial</th>"
+            f"<div class='table-scroll'><table><thead><tr><th>Test case</th><th>Config</th><th>Trial</th>"
             f"<th>Model</th><th class='num'>Turns</th><th class='num'>Subagents</th>"
             f"<th class='num'>Judges</th><th class='num'>Billed out</th>"
             f"<th class='num'>Est. cost</th></tr></thead>"
-            f"<tbody>{_trial_rows_for_experiment(trials)}</tbody></table>"
-            f"</div></div>"
+            f"<tbody>{_trial_rows_for_experiment(trials)}</tbody></table></div>"
+            f"</div>{_experiment_report_preview(trials)}</div>"
         )
     return "".join(views)
 
@@ -1518,9 +1548,9 @@ def _grade_panel(title: str, grade: dict[str, Any] | None, *, extra: str = "") -
     )
     checks = grade.get("checks") or []
     body = (
-        "<table><thead><tr><th>Check</th><th>Pass</th><th class='num'>Pts</th>"
+        "<div class='table-scroll'><table><thead><tr><th>Check</th><th>Pass</th><th class='num'>Pts</th>"
         "<th>Notes</th></tr></thead>"
-        f"<tbody>{_grade_check_rows(checks)}</tbody></table>"
+        f"<tbody>{_grade_check_rows(checks)}</tbody></table></div>"
         if checks
         else "<p class='muted'>No checks recorded.</p>"
     )
@@ -1549,6 +1579,8 @@ def _cmp_cell(cell: dict[str, Any] | None, key: str, *, cost: bool = False) -> s
         return _cost(val)
     if isinstance(val, (int, float)) and float(val).is_integer():
         return _num(val)
+    if isinstance(val, (int, float)):
+        return f"{val:,.1f}".rstrip("0").rstrip(".")
     return _esc(val)
 
 
@@ -1562,32 +1594,117 @@ def _comparison_table(trials: list[dict[str, Any]]) -> str:
     rows: list[str] = []
     for c in comparison:
         base, skill = c["baseline"], c["with_skill"]
-        rows.append(
-            f"<tr><td rowspan='3'><code>{_esc(c['test_case'])}</code></td>"
-            f"<td>Mean score</td>"
-            f"<td class='num'>{_cmp_cell(base, 'mean_score')}</td>"
-            f"<td class='num'>{_cmp_cell(skill, 'mean_score')}</td>"
-            f"<td class='num'>{_esc(c['score_delta'])}</td>"
-            f"<td>{_verdict_badge(c['score_verdict'])}</td></tr>"
-            f"<tr><td>Billed output</td>"
-            f"<td class='num'>{_cmp_cell(base, 'mean_billed_output')}</td>"
-            f"<td class='num'>{_cmp_cell(skill, 'mean_billed_output')}</td>"
-            f"<td class='num'>{_esc(c['billed_output_delta'])}</td>"
-            f"<td>{_verdict_badge(c['billed_output_verdict'])}</td></tr>"
-            f"<tr><td>Est. cost</td>"
-            f"<td class='num'>{_cmp_cell(base, 'mean_cost', cost=True)}</td>"
-            f"<td class='num'>{_cmp_cell(skill, 'mean_cost', cost=True)}</td>"
-            f"<td class='num'>{_esc(c['cost_delta'])}</td>"
-            f"<td>{_verdict_badge(c['cost_verdict'])}</td></tr>"
-        )
+        metrics = [
+            ("Mean score", "mean_score", "score_delta", "score_verdict", False),
+            ("Uncached input", "mean_uncached_input", "uncached_input_delta", "uncached_input_verdict", False),
+            ("Cached input", "mean_cached_input", "cached_input_delta", "cached_input_verdict", False),
+            ("Billed output", "mean_billed_output", "billed_output_delta", "billed_output_verdict", False),
+            ("Worker cost / trial", "mean_worker_cost", "cost_delta", "cost_verdict", True),
+        ]
+        for index, (label, key, delta_key, verdict_key, is_cost) in enumerate(metrics):
+            case_cell = (
+                f"<td rowspan='{len(metrics)}'><code>{_esc(c['test_case'])}</code></td>"
+                if index == 0 else ""
+            )
+            rows.append(
+                f"<tr>{case_cell}<td>{label}</td>"
+                f"<td class='num'>{_cmp_cell(base, key, cost=is_cost)}</td>"
+                f"<td class='num'>{_cmp_cell(skill, key, cost=is_cost)}</td>"
+                f"<td class='num'>{_esc(c[delta_key])}</td>"
+                f"<td>{_verdict_badge(c[verdict_key])}</td></tr>"
+            )
     return (
         "<h4>Baseline vs With-Skill</h4>"
-        "<p class='muted grade-meta'>Means over the experiment's trials. Score is "
-        "higher-is-better; billed output and cost are lower-is-better.</p>"
-        "<table><thead><tr><th>Test case</th><th>Axis</th>"
+        "<p class='muted grade-meta'>Means over the experiment's trials. All usage rows are for worker work "
+        "(including worker subagents, excluding semantic judges). Score is higher-is-better; usage and cost are lower-is-better. "
+        "Billed output includes reasoning tokens.</p>"
+        "<div class='table-scroll'><table><thead><tr><th>Test case</th><th>Axis</th>"
         "<th class='num'>Baseline</th><th class='num'>With-skill</th>"
         "<th class='num'>Delta</th><th>Verdict</th></tr></thead>"
-        f"<tbody>{''.join(rows)}</tbody></table>"
+        f"<tbody>{''.join(rows)}</tbody></table></div>"
+    )
+
+
+def _experiment_report_preview(trials: list[dict[str, Any]]) -> str:
+    for trial in trials:
+        trial_dir = trial.get("trial_dir")
+        if not isinstance(trial_dir, str) or not trial_dir:
+            continue
+        try:
+            experiment_root = Path(trial_dir).resolve().parents[3]
+            if experiment_root.parent.name != "runs":
+                continue
+            report = experiment_root / "report.md"
+            if report.is_file():
+                source = report.read_text(encoding="utf-8", errors="replace")
+                return (
+                    "<details class='card markdown-artifact'><summary>Full generated report.md</summary>"
+                    "<p class='muted'>The harness report is included here verbatim.</p>"
+                    f"<pre class='markdown-artifact-source'>{_esc(source)}</pre></details>"
+                )
+        except (OSError, IndexError, RuntimeError):
+            continue
+    return ""
+
+
+def _comparison_reports_panel(harness_evals: dict[str, Any]) -> str:
+    skill_dirs: set[Path] = set()
+    for trial in harness_evals.get("sessions", []):
+        trial_dir = trial.get("trial_dir")
+        if not isinstance(trial_dir, str) or not trial_dir:
+            continue
+        try:
+            experiment_root = Path(trial_dir).resolve().parents[3]
+            skill_dirs.add(experiment_root.parents[1])
+        except (OSError, IndexError, RuntimeError):
+            continue
+    reports = sorted(
+        path for skill_dir in skill_dirs
+        for path in (skill_dir / "comparisons").glob("*.md")
+        if path.is_file()
+    )
+    if not reports:
+        body = "<p class='muted compare-empty'>No cross-experiment reports yet. Run <code>eval.py compare</code> to create one.</p>"
+    else:
+        items = []
+        for report in reports:
+            skill = report.parent.parent.name
+            html_report = report.with_suffix(".html")
+            report_name = report.stem
+            sides = report_name.split("-vs-", maxsplit=1)
+
+            def _side_label(side: str) -> str:
+                match = re.fullmatch(r"(?:(mp[23])-)?experiment-(\d+)(-baseline)?", side)
+                if not match:
+                    return side.replace("-", " ")
+                milestone = f"{match.group(1).upper()} " if match.group(1) else "MP4 "
+                baseline = " · baseline" if match.group(3) else ""
+                return f"{milestone}experiment {match.group(2)}{baseline}"
+
+            title = " → ".join(_side_label(side) for side in sides)
+            href = (
+                f"../{skill}/comparisons/{html_report.name}"
+                if html_report.is_file()
+                else f"../{skill}/comparisons/{report.name}"
+            )
+            action = "Open report" if html_report.is_file() else "Open Markdown source"
+            items.append(
+                f"<a class='compare-report-item' href='{_esc(href)}' target='_blank' rel='noopener' aria-label='Open {_esc(skill)} comparison: {_esc(title)}'>"
+                "<span class='compare-report-icon' aria-hidden='true'>↗</span>"
+                "<span class='compare-report-copy'>"
+                f"<span class='compare-report-skill'>{_esc(skill)}</span>"
+                f"<strong class='compare-report-title'>{_esc(title)}</strong>"
+                f"<span class='compare-report-meta'>{_esc(report.name)}</span>"
+                "</span>"
+                f"<span class='compare-report-action'>{action}<b aria-hidden='true'> →</b></span>"
+                "</a>"
+            )
+        body = f"<nav class='compare-report-list' aria-label='Offline comparison reports'>{''.join(items)}</nav>"
+    return (
+        "<section class='card' id='comparison-reports'><div class='card-header'><div>"
+        "<div class='card-title'>Offline experiment comparisons</div>"
+        "<div class='card-subtitle'>Each comparison opens as its own styled report page.</div>"
+        f"</div><span class='badge badge-blue'>{len(reports)} reports</span></div>{body}</section>"
     )
 
 
@@ -1736,9 +1853,10 @@ def _eval_trial_details(harness_evals: dict[str, Any]) -> str:
         context = _context_component(tree, f"{vid}-context")
 
         views.append(
-            f"<div id='{vid}' class='detail-view hidden'>"
-            f"<button class='crumb-link' onclick=\"openEvalExperiment('{exp_vid}')\">"
-            f"← {_esc(t['eval_skill'])} / {_esc(t['experiment'])}</button>"
+            f"<div id='{vid}' class='detail-view hidden' data-crumb-label='{_esc(str(t['trial']))}' "
+            f"data-crumb-title='{_esc(str(t['test_case']) + ' / ' + str(t['configuration']) + ' / ' + str(t['trial']))}' "
+            f"data-crumb-parent-id='{_esc(exp_vid)}' data-crumb-parent-label='{_esc(str(t['eval_skill']) + ' / ' + str(t['experiment']))}'>"
+            f"<button type='button' class='page-back' onclick=\"openEvalExperiment('{exp_vid}')\">← {_esc(t['eval_skill'])} / {_esc(t['experiment'])}</button>"
             f"<div class='card'><div class='card-header'><div>"
             f"<div class='card-title'>{_esc(t['test_case'])} "
             f"<span class='badge {cfg_cls}'>{_esc(cfg)}</span> / {_esc(t['trial'])}</div>"
@@ -1804,7 +1922,6 @@ def render_usage_html(summary: dict[str, Any]) -> str:
 
     project_name = _esc(summary["project_name"])
     project_root = _esc(summary["project_root"])
-    generated_at = _esc(_ts(summary["generated_at"]) + " UTC")
 
     real_cost = _cost(totals, zero_ok=totals["session_count"] > 0)
     eval_cost = _cost(etotals, zero_ok=etotals["total_call_count"] > 0)
@@ -1882,6 +1999,10 @@ def render_usage_html(summary: dict[str, Any]) -> str:
         f"{eval_cost_short} · {len({(s['eval_skill'], s['experiment']) for s in eval_sessions})} exps"
         f" · {etotals['worker_session_count']} trials"
     )
+    header = render_header(
+        str(summary["project_name"]), real_tab_pill, eval_tab_pill,
+        updated=f"Updated {_ts(summary['generated_at'])} UTC",
+    )
 
     cost_note = (
         f"Est. API cost uses public OpenAI list prices as of {_esc(PRICING_AS_OF)} "
@@ -1897,21 +2018,7 @@ def render_usage_html(summary: dict[str, Any]) -> str:
 <style>{_STYLE}</style>
 </head>
 <body>
-<header class="topbar">
-  <div class="brand">
-    <span class="brand-title">Codex Zero-Token Telemetry</span>
-    <span class="repo-badge">{project_name}</span>
-  </div>
-  <div class="mode-tabs">
-    <button class="mode-tab active" id="tab-real" onclick="switchMode('real')">
-      Online eval <span class="tab-pill">{_esc(real_tab_pill)}</span>
-    </button>
-    <button class="mode-tab" id="tab-eval" onclick="switchMode('eval')">
-      Offline eval <span class="tab-pill">{_esc(eval_tab_pill)}</span>
-    </button>
-  </div>
-  <div class="updated">Updated {generated_at}</div>
-</header>
+{header}
 
 <main class="container">
   <div class="root-meta">Project root: <code>{project_root}</code> ·
@@ -1937,22 +2044,22 @@ def render_usage_html(summary: dict[str, Any]) -> str:
           <div class="card-title">Cost &amp; Health by Skill</div>
           <div class="card-subtitle">Click a triggered skill to inspect it</div>
         </div><span class="badge badge-slate">{len(summary['skills'])} skills</span></div>
-        <table><thead><tr><th>Skill</th><th class="num">Triggers</th>
+        <div class="table-scroll"><table><thead><tr><th>Skill</th><th class="num">Triggers</th>
           <th class="num">Explicit / Implicit</th><th class="num">Uncached In</th>
           <th class="num">Cached In</th><th class="num">Billed Out</th>
           <th class="num">Total Cost</th></tr></thead>
-          <tbody>{_real_skill_rows(summary)}</tbody></table>
+          <tbody>{_real_skill_rows(summary)}</tbody></table></div>
       </div>
       <div class="card">
         <div class="card-header"><div>
           <div class="card-title">Subagents (Online eval)</div>
           <div class="card-subtitle">Spawned by real project sessions</div>
         </div><span class="badge badge-slate">{totals['subagent_spawn_count']} spawns</span></div>
-        <table><thead><tr><th>Agent Role</th><th class="num">Spawns</th>
+        <div class="table-scroll"><table><thead><tr><th>Agent Role</th><th class="num">Spawns</th>
           <th class="num">Sessions Used</th><th class="num">Cmds (fail)</th>
           <th class="num">Uncached In</th><th class="num">Billed Out</th>
           <th class="num">Est. Cost</th></tr></thead>
-          <tbody>{_real_subagent_rows(summary)}</tbody></table>
+          <tbody>{_real_subagent_rows(summary)}</tbody></table></div>
       </div>
       <div class="card"><div class="card-header"><div>
           <div class="card-title">Session History</div>
@@ -1985,7 +2092,7 @@ def render_usage_html(summary: dict[str, Any]) -> str:
           <div class="card-title">Benchmarked Skills</div>
           <div class="card-subtitle">Worker + judge cost per evaluated skill</div>
         </div><span class="badge badge-blue">{len(harness_evals['by_skill'])} skills</span></div>
-        <div class="trial-token-table-wrap"><table><thead><tr><th>Evaluated Skill</th><th class="num">Exps</th>
+        <div class="table-scroll"><table><thead><tr><th>Evaluated Skill</th><th class="num">Exps</th>
           <th>Latest Outcome</th>
           <th class="num">Trials</th><th class="num">Subagents</th>
           <th class="num">Judges</th><th class="num">Worker Out</th>
@@ -1998,11 +2105,12 @@ def render_usage_html(summary: dict[str, Any]) -> str:
           <div class="card-title">Experiment Run History</div>
           <div class="card-subtitle">Click an experiment to drill into its trials</div>
         </div></div>
-        <div class="trial-token-table-wrap"><table><thead><tr><th>Skill</th><th>Experiment</th><th>Model</th>
+        <div class="table-scroll"><table><thead><tr><th>Skill</th><th>Experiment</th><th>Model</th>
           <th class="num">Trials</th><th class="num">Judges</th>
           <th>Outcome</th><th class="num">Billed Out</th><th class="num">Total Cost</th></tr></thead>
           <tbody>{_experiment_history_rows(harness_evals)}</tbody></table></div>
       </div>
+      {_comparison_reports_panel(harness_evals)}
     </div>
     {_eval_experiment_details(harness_evals)}
     {_eval_trial_details(harness_evals)}
@@ -2016,6 +2124,13 @@ def render_usage_html(summary: dict[str, Any]) -> str:
 </main>
 
 <script>{_SCRIPT}</script>
+<script>
+if (window.location.hash === '#offline-comparisons') {{
+  switchMode('eval');
+  window.history.replaceState(null, '', '#offline-comparisons');
+  requestAnimationFrame(function () {{ document.getElementById('comparison-reports')?.scrollIntoView(); }});
+}} else if (window.location.hash === '#offline') switchMode('eval');
+</script>
 </body>
 </html>
 """
@@ -2030,20 +2145,6 @@ _STYLE = """
 body { margin:0; background:var(--bg); color:var(--text); line-height:1.5; }
 .hidden { display:none !important; }
 .mono { font-family:var(--mono); }
-.topbar { background:#fff; border-bottom:1px solid var(--border); padding:14px 24px;
-  display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
-.brand { display:flex; align-items:center; gap:10px; }
-.brand-title { font-weight:700; font-size:15px; }
-.repo-badge { font-family:var(--mono); font-size:11px; background:#eef4fb;
-  border:1px solid var(--border); border-radius:6px; padding:2px 8px; color:var(--text-muted); }
-.mode-tabs { display:flex; gap:6px; }
-.mode-tab { background:transparent; border:1px solid transparent; border-radius:8px;
-  padding:7px 14px; font-size:13px; font-weight:600; cursor:pointer; color:var(--text-muted);
-  display:flex; align-items:center; gap:8px; }
-.mode-tab.active { background:#eef4fb; color:var(--primary); border-color:#bfdbfe; }
-.tab-pill { font-family:var(--mono); font-size:11px; font-weight:600; background:#fff;
-  border:1px solid var(--border); border-radius:999px; padding:1px 7px; color:var(--text-muted); }
-.updated { margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--text-muted); }
 .container { max-width:1180px; margin:0 auto; padding:24px; }
 .root-meta { font-size:12px; color:var(--text-muted); margin-bottom:16px; }
 .root-meta code { font-family:var(--mono); }
@@ -2083,7 +2184,7 @@ body { margin:0; background:var(--bg); color:var(--text); line-height:1.5; }
 .obs-summary-title { font-size:14px; font-weight:800; color:var(--text); margin-right:auto; }
 .obs-details .card-subtitle { margin:8px 0 10px; }
 /* Turns as labeled cost bars, matching the timeline/context aesthetic. */
-.turn-list { display:grid; gap:8px; }
+.turn-list { display:grid; grid-template-columns:minmax(0,1fr); gap:8px; }
 .turn-row { display:flex; align-items:center; gap:14px; border:1px solid var(--border); background:#f8fafc; border-radius:9px; padding:9px 12px; }
 .turn-main { min-width:0; flex:1; }
 .turn-label { font-size:13px; font-weight:700; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -2096,8 +2197,20 @@ body { margin:0; background:var(--bg); color:var(--text); line-height:1.5; }
 .card-header { display:flex; justify-content:space-between; align-items:flex-start;
   gap:12px; margin-bottom:10px; flex-wrap:wrap; }
 .overview-usage { margin:0 0 18px; }.overview-usage-head { display:flex; justify-content:space-between; align-items:flex-end; gap:12px; }.overview-usage-head > strong { font-size:16px; font-variant-numeric:tabular-nums; }.usage-legend { display:flex; flex-wrap:wrap; gap:10px 18px; margin-top:9px; color:var(--text-muted); font-size:11px; }.usage-legend span { display:inline-flex; align-items:center; gap:5px; }.usage-legend i { width:9px; height:9px; border-radius:2px; display:inline-block; }.usage-legend .usage-total { margin-left:auto; color:var(--text); font-weight:700; }
-.trial-token-breakdown { margin:0 0 18px; }.trial-token-breakdown h4 { margin:0 0 8px; font-size:13px; color:var(--text); }.trial-token-table-wrap { width:100%; overflow-x:auto; border:1px solid var(--border); border-radius:8px; }.trial-token-table-wrap table { width:100%; min-width:690px; border-collapse:collapse; font-size:12px; }.trial-token-table-wrap th,.trial-token-table-wrap td { padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap; }.trial-token-table-wrap thead { background:#f6f8fc; color:var(--text-muted); font-size:10px; text-transform:uppercase; letter-spacing:.04em; }.trial-token-table-wrap tbody tr:last-child { background:#f6f8fc; font-weight:700; }.trial-token-table-wrap tbody tr:last-child th,.trial-token-table-wrap tbody tr:last-child td { border-bottom:0; }
+.trial-token-breakdown { margin:0 0 18px; }.trial-token-breakdown h4 { margin:0 0 8px; font-size:13px; color:var(--text); }.trial-token-table-wrap { width:100%; overflow-x:auto; }.trial-token-table-wrap table { width:100%; min-width:690px; border-collapse:collapse; font-size:12px; }.trial-token-table-wrap th,.trial-token-table-wrap td { white-space:nowrap; }.trial-token-table-wrap thead { color:var(--text-muted); font-size:10px; text-transform:uppercase; letter-spacing:.04em; }.trial-token-table-wrap tbody tr:last-child { background:#f6f8fc; font-weight:700; }.trial-token-table-wrap tbody tr:last-child th,.trial-token-table-wrap tbody tr:last-child td { border-bottom:0; }
 .table-scroll { width:100%; overflow-x:auto; }
+.markdown-artifact { margin-top:14px; }.markdown-artifact summary,.markdown-artifact-item summary { cursor:pointer; font-weight:700; color:var(--text); }.markdown-artifact-source { max-height:65vh; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:12px; font:11px/1.55 var(--mono); color:var(--text); }.markdown-artifact-item { border-top:1px solid var(--border); padding:10px 0; }
+.compare-report-list { display:grid; gap:8px; }
+.compare-report-item { display:flex; align-items:center; gap:12px; min-width:0; padding:12px 14px; color:inherit; text-decoration:none; background:#fff; border:1px solid var(--border); border-radius:9px; transition:border-color .12s,box-shadow .12s,transform .12s; }
+.compare-report-item:hover { border-color:#93c5fd; box-shadow:0 4px 14px rgba(37,99,235,.10); transform:translateY(-1px); }
+.compare-report-item:focus-visible { outline:3px solid #93c5fd; outline-offset:2px; border-color:var(--primary); }
+.compare-report-icon { display:grid; place-items:center; width:34px; height:34px; flex:none; border-radius:9px; background:var(--blue-soft,#eff6ff); color:var(--primary); font-size:18px; font-weight:750; }
+.compare-report-copy { display:grid; gap:2px; min-width:0; flex:1; }
+.compare-report-skill { color:var(--primary); font-size:11px; font-weight:750; text-transform:uppercase; letter-spacing:.06em; }
+.compare-report-title { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:14px; }
+.compare-report-meta { color:var(--text-muted); font:10px var(--mono); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.compare-report-action { display:flex; align-items:center; gap:4px; flex:none; color:var(--primary); font-size:11px; font-weight:700; }
+.compare-empty { margin:0; padding:12px 14px; background:#fff; border:1px dashed var(--border); border-radius:8px; }
 .card-title { font-weight:700; font-size:15px; }
 .card-subtitle { font-size:12px; color:var(--text-muted); margin-top:2px; }
 .coverage-card { padding:14px 16px; }
@@ -2111,7 +2224,7 @@ body { margin:0; background:var(--bg); color:var(--text); line-height:1.5; }
   border:1px solid #bfdbfe; border-radius:6px; padding:4px 8px; background:#eef4fb; }
 .btn-link:hover { background:#dbeafe; }
 table { width:100%; border-collapse:collapse; font-size:12px; }
-th,td { border-bottom:1px solid #eef1f6; padding:8px 10px; text-align:left; vertical-align:top; }
+th,td { border-bottom:1px solid var(--border); padding:8px 10px; text-align:left; vertical-align:top; }
 th { font-size:10px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted);
   font-weight:600; }
 th.num,td.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
@@ -2143,8 +2256,6 @@ code { font-family:var(--mono); font-size:11px; background:#eef4fb; border:1px s
 .btn { border:none; border-radius:8px; padding:8px 14px; font-size:13px; font-weight:600;
   cursor:pointer; }
 .btn-primary { background:var(--primary); color:#fff; }
-.crumb-link { background:none; border:none; color:var(--primary); font-size:13px; font-weight:600;
-  cursor:pointer; padding:0 0 12px; }
 .detail-view h4 { font-size:11px; text-transform:uppercase; letter-spacing:0.04em;
   color:var(--text-muted); margin:18px 0 8px; }
 .trace-block { background:#f8fafc; border:1px solid var(--border); border-radius:8px;
@@ -2162,9 +2273,9 @@ code { font-family:var(--mono); font-size:11px; background:#eef4fb; border:1px s
   color:#1e293b; }
 .trace-time { font-family:var(--mono); font-size:11px; color:var(--text-muted); min-width:48px;
   flex-shrink:0; padding-top:1px; }
-.grade-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
-@media (max-width:860px){ .grade-grid{ grid-template-columns:1fr; } }
-.grade-panel { background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:12px; }
+.grade-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+@media (max-width:860px){ .grade-grid{ grid-template-columns:minmax(0,1fr); } }
+.grade-panel { min-width:0; background:#f8fafc; border:1px solid var(--border); border-radius:8px; padding:12px; }
 .grade-panel-head { display:flex; justify-content:space-between; align-items:center;
   font-weight:700; font-size:13px; margin-bottom:8px; }
 .grade-score { font-family:var(--mono); font-weight:600; font-size:12px; }
@@ -2181,7 +2292,8 @@ code { font-family:var(--mono); font-size:11px; background:#eef4fb; border:1px s
 .note-box { font-size:12px; color:var(--text-muted); background:#eef4fb;
   border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
 .cost-total { font-size:15px; font-weight:800; font-variant-numeric:tabular-nums; }
-.detail-tabs { display:flex; gap:5px; border-bottom:1px solid var(--border); margin:0 0 14px; }
+.detail-tabs { display:flex; gap:5px; overflow-x:auto; white-space:nowrap;
+  border-bottom:1px solid var(--border); margin:0 0 14px; }
 .detail-tab { border:0; border-bottom:3px solid transparent; padding:9px 13px; background:transparent;
   color:var(--text-muted); font-weight:700; cursor:pointer; }
 .detail-tab.active { color:var(--primary); border-color:var(--primary); }
@@ -2279,7 +2391,7 @@ code { font-family:var(--mono); font-size:11px; background:#eef4fb; border:1px s
 .z-tab::before { content:""; width:9px; height:9px; border-radius:3px; background:var(--agent); }
 .z-tab.active { color:var(--text); border-bottom-color:var(--agent); }
 .z-layout { display:grid; grid-template-columns:210px minmax(0,1fr); gap:28px; align-items:start; }
-.z-tank-column { position:sticky; top:16px; height:calc(100vh - 120px); min-height:440px; display:flex; flex-direction:column; align-items:center; background:#fff; border:1px solid var(--border); border-radius:14px; padding:16px 14px; text-align:center; }
+.z-tank-column { position:sticky; top:calc(var(--app-header-height) + 16px); height:calc(100vh - 120px); min-height:440px; display:flex; flex-direction:column; align-items:center; background:#fff; border:1px solid var(--border); border-radius:14px; padding:16px 14px; text-align:center; }
 .z-tank-column h4 { margin:0 0 10px; font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:#8a97ab; font-weight:800; }
 .z-tank { position:relative; display:flex; flex-direction:column-reverse; flex:1; width:138px; min-height:240px; overflow:hidden; border:2px solid var(--border); border-radius:14px; background:#eef2f8; box-shadow:inset 0 0 0 1px #fff,0 8px 20px -14px rgba(20,30,60,.35); }
 .z-seg { width:100%; flex-shrink:0; border-top:1px solid rgba(255,255,255,.75); }.fill-input { background:#2563eb; }.fill-base { background:#64748b; }.fill-skills { background:#7c3aed; }.fill-environment { background:#0d9488; }.fill-task { background:#2563eb; }.fill-file { background:#0ea5e9; }.fill-output { background:#ea580c; }.fill-unknown { background:#cbd5e1; }
@@ -2321,15 +2433,49 @@ code { font-family:var(--mono); font-size:11px; background:#eef4fb; border:1px s
 @media(max-width:600px){.z-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:900px){.u-stage.open{display:block}.u-stage.open .u-gantt{flex:auto}.u-stage.open .u-trace{height:var(--map-viewport-h);min-height:0;margin-top:12px}}
 @media(max-width:560px){.z-sandbox{flex-direction:column}.z-network{width:100%;flex-direction:row;gap:14px}.z-fsmap{padding:10px}.z-access{font-size:8px;padding:1px 4px}.u-card-head{align-items:flex-start;flex-direction:column}}
-"""
+""" + HEADER_STYLE + "\n#comparison-reports { scroll-margin-top:calc(var(--app-header-height) + 16px); }\n"
 
 
 _SCRIPT = """
+function _setBreadcrumbs(items) {
+  var nav = document.getElementById('header-breadcrumbs');
+  var header = document.getElementById('report-header');
+  if (!nav || !header) return;
+  nav.replaceChildren();
+  nav.hidden = items.length === 0;
+  header.classList.toggle('has-breadcrumb', items.length > 0);
+  if (!items.length) return;
+  var list = document.createElement('ol');
+  items.forEach(function (item, index) {
+    var entry = document.createElement('li');
+    var current = index === items.length - 1;
+    var control = document.createElement(current ? 'span' : 'button');
+    control.textContent = item.label;
+    control.title = item.title || item.label;
+    if (item.title) control.setAttribute('aria-label', item.title);
+    if (current) {
+      control.setAttribute('aria-current', 'page');
+    } else {
+      control.type = 'button';
+      control.addEventListener('click', function () {
+        if (item.kind === 'experiment') openEvalExperiment(item.id);
+        else if (item.kind === 'skill') openSkillDetail(item.id);
+      });
+    }
+    entry.appendChild(control);
+    list.appendChild(entry);
+  });
+  nav.appendChild(list);
+}
 function switchMode(mode) {
   document.getElementById('tab-real').classList.toggle('active', mode === 'real');
   document.getElementById('tab-eval').classList.toggle('active', mode === 'eval');
+  document.getElementById('tab-real').setAttribute('aria-pressed', String(mode === 'real'));
+  document.getElementById('tab-eval').setAttribute('aria-pressed', String(mode === 'eval'));
   document.getElementById('mode-real').classList.toggle('hidden', mode !== 'real');
   document.getElementById('mode-eval').classList.toggle('hidden', mode !== 'eval');
+  var modeHash = mode === 'eval' ? '#offline' : '#online';
+  if (window.location.hash !== modeHash) window.history.replaceState(null, '', modeHash);
   if (mode === 'real') backToRealOverview(); else backToEvalOverview();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -2339,39 +2485,56 @@ function _hideAll(selector) {
 function backToRealOverview() {
   _hideAll('#mode-real .detail-view');
   document.getElementById('real-overview').classList.remove('hidden');
+  _setBreadcrumbs([]);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function openSkillDetail(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
   document.getElementById('real-overview').classList.add('hidden');
   _hideAll('#mode-real .detail-view');
-  var el = document.getElementById(id);
-  if (el) el.classList.remove('hidden');
+  el.classList.remove('hidden');
+  _setBreadcrumbs([{label: el.dataset.crumbLabel || 'Skill'}]);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function openSessionDetail(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var parent = document.querySelector('#mode-real .detail-view:not(.hidden)[id^="real-skill-"]');
   document.getElementById('real-overview').classList.add('hidden');
   _hideAll('#mode-real .detail-view');
-  var el = document.getElementById(id);
-  if (el) el.classList.remove('hidden');
+  el.classList.remove('hidden');
+  var crumbs = [];
+  if (parent) crumbs.push({label: parent.dataset.crumbLabel || 'Skill', kind: 'skill', id: parent.id});
+  crumbs.push({label: el.dataset.crumbLabel || 'Session'});
+  _setBreadcrumbs(crumbs);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function backToEvalOverview() {
   _hideAll('#mode-eval .detail-view');
   document.getElementById('eval-overview').classList.remove('hidden');
+  _setBreadcrumbs([]);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function openEvalExperiment(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
   document.getElementById('eval-overview').classList.add('hidden');
   _hideAll('#mode-eval .detail-view');
-  var el = document.getElementById(id);
-  if (el) el.classList.remove('hidden');
+  el.classList.remove('hidden');
+  _setBreadcrumbs([{label: el.dataset.crumbLabel || 'Experiment'}]);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function openEvalTrial(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
   document.getElementById('eval-overview').classList.add('hidden');
   _hideAll('#mode-eval .detail-view');
-  var el = document.getElementById(id);
-  if (el) el.classList.remove('hidden');
+  el.classList.remove('hidden');
+  _setBreadcrumbs([
+    {label: el.dataset.crumbParentLabel || 'Experiment', kind: 'experiment', id: el.dataset.crumbParentId},
+    {label: el.dataset.crumbLabel || 'Trial', title: el.dataset.crumbTitle}
+  ]);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 function selectDetailTab(prefix, key) {

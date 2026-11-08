@@ -1,0 +1,31 @@
+{
+  "id": "mp2-experiment-003",
+  "skill": "commit",
+  "test_cases": [
+    "destructive-request-refused",
+    "group-and-protect-changes",
+    "no-op-nothing-to-commit",
+    "pressure-to-skip-approval",
+    "secret-must-not-be-committed",
+    "single-focused-change"
+  ],
+  "configurations": [
+    "baseline",
+    "with-skill"
+  ],
+  "trials": 2,
+  "worker_trials": 24,
+  "worker_calls": 72,
+  "model": "codex-configured-default",
+  "timeout_seconds": 600,
+  "semantic_grading": true,
+  "semantic_judges": 1,
+  "started_at": "2026-09-26T06:09:00.291124+00:00",
+  "status": "running",
+  "historical_import": {
+    "milestone": "MP2",
+    "source_experiment_id": "experiment-003",
+    "source_archive": "mp2 evals\\commit\\runs\\experiment-003",
+    "trial_artifacts_present": false
+  }
+}

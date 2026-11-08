@@ -319,6 +319,30 @@ not also appear under `supporting-skills/`.
 Injected target and supporting skills are protected inputs. A trial fails if
 the worker edits or deletes one of them.
 
+#### Pinned project supporting skills
+
+When several cases need the same existing project skills, a case may instead
+declare `supporting-skills.json` next to `prompt.md`:
+
+```json
+{
+  "project_skills": {
+    "example-skill": "<portable-sha256>"
+  }
+}
+```
+
+The digest is SHA-256 over each regular file in the skill directory, sorted by
+its POSIX-style relative path: UTF-8 path, NUL byte, file bytes, NUL byte. The
+case loader resolves names only under `.agents/skills/`, checks the pin during
+discovery and again before each worker, rejects symlinks and duplicate names,
+and injects and snapshots the verified content as for case-local supporting
+skills. Existing `supporting-skills/` cases remain supported. If a project
+skill changes, the case fails closed; restore the intended version or update
+the pin as an explicit experiment change. Pins avoid copying identical skills
+into every fixture but do not preserve an old version after the project skill
+changes; retain the original commit or per-run snapshots for reproducibility.
+
 ### `agent-profiles.json`: optional project agent dependencies
 
 If a test case needs custom subagent profiles from `.codex/agents/<name>.toml`,

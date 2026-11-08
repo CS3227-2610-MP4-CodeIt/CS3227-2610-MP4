@@ -4,6 +4,8 @@ Run the retained harness tests from the MP4 project root. Standard upstream
 `degit` installations omit the development `tests/` directory; this MP4 copy
 keeps it so path and harness regressions can be checked here.
 
+Use `python3` on macOS/Linux or `python` (or `py -3`) on Windows.
+
 ```sh
 python3 -m pip install -r workflow/evals/requirements-test.txt
 python3 -m pytest workflow/evals/tests/ -q

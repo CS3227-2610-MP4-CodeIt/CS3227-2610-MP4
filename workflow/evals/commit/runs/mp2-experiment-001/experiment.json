@@ -1,0 +1,73 @@
+{
+  "id": "mp2-experiment-001",
+  "skill": "commit",
+  "test_cases": [
+    "single-focused-change"
+  ],
+  "configurations": [
+    "with-skill"
+  ],
+  "trials": 1,
+  "worker_trials": 1,
+  "worker_calls": 3,
+  "model": "codex-configured-default",
+  "timeout_seconds": 600,
+  "semantic_grading": true,
+  "semantic_judges": 3,
+  "started_at": "2026-09-26T04:05:29.385266+00:00",
+  "status": "completed",
+  "completed_at": "2026-09-26T04:07:44.266807+00:00",
+  "graded_trials": 1,
+  "passed_trials": 0,
+  "completed_trials": 1,
+  "mean_score": 75.0,
+  "overall_pass": false,
+  "aggregates": {
+    "cells": {
+      "single-focused-change": {
+        "with-skill": {
+          "passed_trials": 0,
+          "total_trials": 1,
+          "mean_score": 75.0
+        }
+      }
+    },
+    "comparisons": {}
+  },
+  "results": [
+    {
+      "status": "graded",
+      "skill": "commit",
+      "test_case": "single-focused-change",
+      "configuration": "with-skill",
+      "trial": 1,
+      "overall_pass": false,
+      "score": 75,
+      "deterministic_score": 100,
+      "semantic_score": 75,
+      "deterministic_pass": true,
+      "semantic_pass": false,
+      "semantic_judges": 3,
+      "worker_exit_code": 0,
+      "worker_turns_planned": 3,
+      "worker_turns_completed": 3,
+      "protected_inputs_intact": true,
+      "deterministic_status": "completed",
+      "semantic_status": "completed",
+      "workspace_git_metadata_removed": true,
+      "failure_reasons": [
+        "semantic/semantic-jury: 0/3 judges voted pass; valid judge scores: [75, 75, 90]; consensus uses the median.",
+        "semantic/conventional-type-and-traceability: Deduction: the subject is a valid concise feat subject, but the required `Refs: #63` trailer was not created as a trailer. Exact commit-message evidence shows literal backslash-n characters in the body (`...tickets,\\nwith...\\n...\\n\\nRefs: #63`) rather than actual line breaks. `git interpret-trailers --parse` produces no parsed trailer, so the commit does not satisfy the required traceability condition even though the worker proposed and reported the intended trailer text.",
+        "semantic/conventional-type-and-traceability: Deduction of 25 points. The commit has the correct `feat(ticket):` type and a concise imperative subject, and the text `Refs: #63` is present. However, observable commit-message bytes show that the worker passed literal `\\\\n` characters in the body, so `Refs: #63` is not on its own final body line and therefore is not a valid Git trailer as required.",
+        "semantic/conventional-type-and-traceability: The commit subject has the required feat type, is concise, and uses an imperative description: `feat(ticket): Show priority as a coloured badge`. However, the recorded commit message contains literal backslash-n characters in the body, as shown by `git log -1 --format=fuller`, so `Refs: #63` is embedded in a single malformed body line rather than being a separate valid trailer. The commit text does mention Issue #63, so partial credit is awarded for type and subject, with 10 points deducted for the malformed trailer."
+      ],
+      "run_directory": "workflow/evals/commit/runs/mp2-experiment-001/trials/single-focused-change/with-skill/trial-01"
+    }
+  ],
+  "historical_import": {
+    "milestone": "MP2",
+    "source_experiment_id": "experiment-001",
+    "source_archive": "mp2 evals\\commit\\runs\\experiment-001",
+    "trial_artifacts_present": true
+  }
+}

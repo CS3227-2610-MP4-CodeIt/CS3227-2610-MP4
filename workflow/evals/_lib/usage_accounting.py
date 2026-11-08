@@ -10,6 +10,40 @@ def attach_cost(target: dict[str, Any], accounting: dict[str, Any], prefix: str 
     target[prefix + 'coverage'] = accounting['coverage']
 
 
+def include_turn_aggregate_estimates(
+    accounting: dict[str, Any], judges: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Add safely priced judge-turn aggregates without inventing request rows."""
+    priced = [
+        judge['turn_aggregate_est_cost']
+        for judge in judges
+        if judge.get('turn_aggregate_est_cost') is not None
+    ]
+    if not priced:
+        return accounting
+    result = dict(accounting)
+    coverage = dict(accounting['coverage'])
+    result['known_cost'] = round((accounting['known_cost'] or 0.0) + sum(priced), 6)
+    coverage['unavailable_count'] = max(
+        0, coverage.get('unavailable_count', 0) - len(priced)
+    )
+    coverage['turn_aggregate_priced_count'] = len(priced)
+    coverage['turn_aggregate_total_count'] = len(judges)
+    coverage['turn_aggregate_unavailable_count'] = len(judges) - len(priced)
+    if coverage['turn_aggregate_unavailable_count']:
+        coverage['status'] = 'partial'
+        coverage['reasons'] = sorted(set(
+            coverage.get('reasons', [])
+            + ['one or more judge turn aggregates cannot be assigned a context tier']
+        ))
+        result['est_cost'] = None
+    elif coverage.get('unavailable_count', 0) == 0 and coverage.get('unpriced_count', 0) == 0:
+        coverage['status'] = 'complete'
+        result['est_cost'] = result['known_cost']
+    result['coverage'] = coverage
+    return result
+
+
 def enrich_session(session: dict[str, Any]) -> None:
     direct = record_accounting(session)
     children = session.get('subagents', [])
@@ -87,14 +121,18 @@ def finalize_usage_accounting(summary: dict[str, Any]) -> dict[str, Any]:
     for session in sessions + trials:
         enrich_session(session)
     real = combine_accounting([s['inclusive_accounting'] for s in sessions])
-    offline = combine_accounting([s['inclusive_accounting'] for s in trials])
+    offline_raw = combine_accounting([s['inclusive_accounting'] for s in trials])
+    all_judges = [j for s in trials for j in s.get('judges', [])]
+    offline = include_turn_aggregate_estimates(offline_raw, all_judges)
     attach_cost(summary['totals'], real)
     attach_cost(summary['totals'], combine_accounting([s['direct_accounting'] for s in sessions]), 'parent_')
     attach_cost(summary['totals'], combine_accounting([record_accounting(c) for s in sessions for c in s.get('subagents', [])]), 'subagent_')
     attach_cost(evals['totals'], offline)
     attach_cost(evals['totals'], combine_accounting([combine_accounting([s['direct_accounting']] + [record_accounting(c) for c in s.get('subagents', [])]) for s in trials]), 'worker_')
-    attach_cost(evals['totals'], combine_accounting([record_accounting(j) for s in trials for j in s.get('judges', [])]), 'judge_')
-    attach_cost(summary['combined_totals'], combine_accounting([real, offline]))
+    judge_raw = combine_accounting([record_accounting(j) for j in all_judges])
+    attach_cost(evals['totals'], include_turn_aggregate_estimates(judge_raw, all_judges), 'judge_')
+    combined_raw = combine_accounting([real, offline_raw])
+    attach_cost(summary['combined_totals'], include_turn_aggregate_estimates(combined_raw, all_judges))
     for skill in summary['skills']:
         # Per-skill cost is attributed upstream only from turns that map to a
         # single skill (see _attribute_skill_costs). Shared/ambiguous turns are
@@ -109,10 +147,13 @@ def finalize_usage_accounting(summary: dict[str, Any]) -> dict[str, Any]:
         field = 'date' if group is summary['daily'] else 'skill'
         for row in group:
             matching = [s for s in source if s.get('date' if field == 'date' else 'eval_skill') == row[field]]
-            attach_cost(row, combine_accounting([s['inclusive_accounting'] for s in matching]))
+            matching_judges = [j for s in matching for j in s.get('judges', [])]
+            row_raw = combine_accounting([s['inclusive_accounting'] for s in matching])
+            attach_cost(row, include_turn_aggregate_estimates(row_raw, matching_judges))
             if field == 'skill':
                 attach_cost(row, combine_accounting([combine_accounting([s['direct_accounting']] + [record_accounting(c) for c in s.get('subagents', [])]) for s in matching]), 'worker_')
-                attach_cost(row, combine_accounting([record_accounting(j) for s in matching for j in s.get('judges', [])]), 'judge_')
+                judge_raw = combine_accounting([record_accounting(j) for j in matching_judges])
+                attach_cost(row, include_turn_aggregate_estimates(judge_raw, matching_judges), 'judge_')
     # Named workers stay distinct even when their configured role is identical.
     installed_profiles = sorted(summary.get('agent_profiles') or [])
     for target, source in ((summary, sessions), (evals, trials)):

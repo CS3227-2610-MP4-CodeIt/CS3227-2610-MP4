@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import hashlib
+import os
 import shutil
+import stat
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -16,6 +18,8 @@ def git(repository: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
         ["git", "-C", str(repository), *arguments],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         check=False,
     )
 
@@ -209,7 +213,7 @@ def capture_git_evidence(
             "--no-index",
             "--binary",
             "--",
-            "/dev/null",
+            os.devnull,
             name,
         )
         if result.returncode not in (0, 1):
@@ -228,7 +232,17 @@ def remove_workspace_git_metadata(workspace: Path) -> None:
         raise HarnessError(
             f"generated workspace Git metadata is missing: {git_metadata}"
         )
-    shutil.rmtree(git_metadata)
+
+    def retry_readonly(function: Any, path: str, error_info: Any) -> None:
+        error = error_info[1]
+        if not isinstance(error, PermissionError):
+            raise error
+        # Git may create read-only loose objects on Windows. Make only the
+        # generated workspace metadata writable, then retry that removal.
+        os.chmod(path, stat.S_IREAD | stat.S_IWRITE | stat.S_IEXEC)
+        function(path)
+
+    shutil.rmtree(git_metadata, onerror=retry_readonly)
     if git_metadata.exists():
         raise HarnessError(
             f"could not remove generated workspace Git metadata: {git_metadata}"

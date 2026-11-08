@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 import hashlib
+import json
+import re
 import shutil
 import sys
 import time
@@ -26,6 +28,7 @@ from _lib.common import (  # noqa: E402, F401
     TerminalProgress,
     _fmt,
     concatenate_files,
+    codex_cli_command,
     elapsed,
     markdown_cell,
     now,
@@ -96,6 +99,48 @@ def discover_skills(evals_root: Path, skills_root: Path) -> dict[str, Path]:
     return discovered
 
 
+def _portable_skill_digest(root: Path) -> str:
+    """Hash skill paths and contents consistently across operating systems."""
+    digest = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda p: p.relative_to(root).as_posix()):
+        if path.is_symlink():
+            raise HarnessError(f"supporting skill must not contain symlinks: {path}")
+        if path.is_file():
+            digest.update(path.relative_to(root).as_posix().encode("utf-8"))
+            digest.update(b"\0")
+            digest.update(path.read_bytes())
+            digest.update(b"\0")
+    return digest.hexdigest()
+
+
+def _project_supporting_skills(case_root: Path, skill_root: Path) -> tuple[Path, ...]:
+    """Resolve and verify a case's pinned project skills, if declared."""
+    manifest = case_root / "supporting-skills.json"
+    if not manifest.exists():
+        return ()
+    if manifest.is_symlink() or not manifest.is_file():
+        raise HarnessError(f"supporting skill manifest must be a regular file: {manifest}")
+    try:
+        data = json.loads(manifest.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, ValueError) as error:
+        raise HarnessError(f"invalid supporting skill manifest: {manifest}: {error}") from error
+    if not isinstance(data, dict) or set(data) != {"project_skills"} or not isinstance(data["project_skills"], dict):
+        raise HarnessError(f"supporting skill manifest must contain a project_skills object: {manifest}")
+    resolved = []
+    for name, expected in sorted(data["project_skills"].items()):
+        if not isinstance(name, str) or not SKILL_NAME.fullmatch(name) or name == skill_root.name:
+            raise HarnessError(f"invalid project supporting skill name: {name}")
+        if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
+            raise HarnessError(f"invalid project supporting skill hash: {name}")
+        candidate = skill_root.parent / name
+        if candidate.is_symlink() or not candidate.is_dir() or not (candidate / "SKILL.md").is_file():
+            raise HarnessError(f"project supporting skill is missing or unsafe: {candidate}")
+        if _portable_skill_digest(candidate) != expected:
+            raise HarnessError(f"project supporting skill changed since pinning: {candidate}")
+        resolved.append(candidate)
+    return tuple(resolved)
+
+
 def discover_cases(eval_root: Path, skill_root: Path) -> dict[str, Case]:
     cases_root = eval_root / "test-cases"
     if not cases_root.is_dir():
@@ -143,6 +188,11 @@ def discover_cases(eval_root: Path, skill_root: Path) -> dict[str, Case]:
                         f"supporting skill {supporting.name} is missing SKILL.md"
                     )
                 supporting_skills.append(supporting)
+
+        for supporting in _project_supporting_skills(root, skill_root):
+            if any(existing.name == supporting.name for existing in supporting_skills):
+                raise HarnessError(f"test case {root.name} repeats supporting skill {supporting.name}")
+            supporting_skills.append(supporting)
 
         interactions: list[Path] = []
         if interactions_root.exists() and not interactions_root.is_dir():
@@ -207,6 +257,11 @@ def run_trial(
     if configuration not in {"baseline", "with-skill"}:
         raise HarnessError(f"unknown trial configuration: {configuration}")
     validate_fixture(case.fixture)
+    # Recheck pins immediately before use, not only during case discovery.
+    pinned = _project_supporting_skills(case.root, skill_root)
+    discovered = tuple(path for path in case.supporting_skills if path.parent == skill_root.parent)
+    if pinned != discovered:
+        raise HarnessError(f"project supporting skill references changed after discovery: {case.root}")
     options = dict(case=case, skill_root=skill_root, configuration=configuration,
                    trial=trial, run_dir=run_dir, schema=schema,
                    semantic_enabled=semantic_enabled, semantic_judges=semantic_judges,
@@ -393,7 +448,7 @@ def _execute_trial(
         (turn_dir / "prompt.md").write_text(turn_prompt, encoding="utf-8")
 
         if index == 1:
-            worker_command = ["codex", "exec"]
+            worker_command = [*codex_cli_command(), "exec"]
             # NOTE: previously single-turn cases used --ephemeral. We now always
             # persist the rollout so provenance (model + reasoning effort) can be
             # read back from turn_context. The harness only READS the rollout; it
@@ -417,7 +472,7 @@ def _execute_trial(
                     f"worker turn 1 did not record a resumable thread ID for {case.name}"
                 )
             worker_command = [
-                "codex",
+                *codex_cli_command(),
                 "exec",
                 "resume",
                 "--json",

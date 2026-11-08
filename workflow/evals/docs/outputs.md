@@ -7,7 +7,8 @@ Reference for the files written under `runs/` by each experiment and trial. See 
 ```text
 workflow/evals/<skill-name>/
 ├── comparisons/
-│   └── <old-exp>-vs-<new-exp>.md
+│   ├── <old-exp>-vs-<new-exp>.md
+│   └── <old-exp>-vs-<new-exp>.html
 └── runs/
     └── experiment-NNN/
         ├── report.md
@@ -35,7 +36,8 @@ Report: .../workflow/evals/<skill-name>/runs/experiment-NNN/report.md
 |---|---|---|
 | `report.md` | Updated when the experiment completes, fails, or is interrupted | One-line `Setup` provenance header (model, reasoning effort, trials, judges, status, start time), horizontal `Result` summary table (outcome, mean score, passed, needs review, completed, est. total cost), `Trials` table (`Score`, `Det`, `Sem`, `Band`, `Pass`, `Evidence`), `Findings` (failures and passing score deductions), `Baseline comparison`, and `Token usage` (mean per cell + total row) |
 | `experiment.json` | Created before the first trial and finalized when the experiment stops | Complete machine-readable manifest, status, aggregate results, and all trial summaries |
-| `comparisons/<old>-vs-<new>.md` | Written by `eval.py compare <skill> <old> <new>` | Cross-experiment diff (`Setup`, `Summary`, `Case overview`, per-case score/token/cost breakdown, and `SKILL.md` snapshot diff) |
+| `comparisons/<old>-vs-<new>.md` | Written by `eval.py compare <skill> <old> <new>` | Source Markdown for the cross-experiment diff (`Setup`, `Summary`, `Case overview`, per-case score/token/cost breakdown, and `SKILL.md` snapshot diff) |
+| `comparisons/<old>-vs-<new>.html` | Written alongside the Markdown by `eval.py compare <skill> <old> <new>` | Standalone styled comparison page with a link back to the usage dashboard and to the Markdown source |
 
 Open `experiment.json` only when a script needs the data or when you need more
 detail than the report provides. Follow the links in `report.md` into
@@ -119,6 +121,7 @@ remain available without the hook.
 | `_usage/report.html` | Ignored by default | Self-contained interactive HTML dashboard with KPI cards, project skill & subagent usage tables, model mix, daily token bars, session observations, and a filterable session log |
 | `_usage/report.md` | Ignored by default | Markdown summary of the same project-scoped session, skill, subagent, model, and daily metrics |
 | `_usage/summary.json` | Ignored by default | Machine-readable aggregate metrics, per-session records, and versioned descriptive observations with source references and evidence-completeness status |
+| `_usage/header-data.js` | Ignored by default | Current usage counts and estimated costs for standalone comparison-page headers; refreshed by `eval.py usage` |
 | `_usage/cache.json` | Ignored | Incremental `(mtime_ns, size)` parse cache for `~/.codex/sessions/` rollouts |
 
 ## Aborted trial records
