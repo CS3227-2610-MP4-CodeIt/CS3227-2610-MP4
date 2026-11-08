@@ -20,6 +20,7 @@ from _lib.pricing import (
     LONG_CONTEXT_THRESHOLD,
     PRICING_AS_OF,
     PRICING_SOURCE,
+    estimate_api_cost,
     format_cost,
 )
 from _lib.trace import (
@@ -1440,12 +1441,12 @@ def derive_experiment_comparison(trials: list[dict[str, Any]]) -> list[dict[str,
     """Derive a per-test-case baseline vs with-skill comparison from trial data.
 
     Pure (no I/O). For each test case, computes the mean headline score, mean
-    billed output tokens, and mean est. cost over its baseline trials and over
-    its with-skill trials, plus signed deltas (with-skill relative to baseline).
+    uncached/cached input, billed output, and worker cost over baseline and
+    with-skill trials, plus signed deltas. Worker cost excludes semantic judges.
     A config with no trials yields ``None`` for that side and ``"n/a"`` deltas.
     Score/pass are higher-is-better; tokens and cost are lower-is-better.
     """
-    from _lib.pricing import format_delta
+    from _lib.pricing import format_cost_delta
 
     by_case: dict[str, dict[str, list[dict[str, Any]]]] = {}
     order: list[str] = []
@@ -1462,17 +1463,25 @@ def derive_experiment_comparison(trials: list[dict[str, Any]]) -> list[dict[str,
         if not group:
             return None
         scores = [s for s in (_trial_headline_score(t) for t in group) if s is not None]
-        billed = [
-            t["token_usage"]["billed_output_tokens"]
-            for t in group
-            if t.get("token_usage")
-        ]
+        worker_tokens = [t.get("worker_tokens") or t.get("token_usage") or {} for t in group]
+        has_worker_tokens = any(t.get("worker_tokens") or t.get("token_usage") for t in group)
+        uncached = [tokens.get("uncached_input_tokens", 0) for tokens in worker_tokens]
+        cached = [tokens.get("cached_input_tokens", 0) for tokens in worker_tokens]
+        billed = [tokens.get("billed_output_tokens", 0) for tokens in worker_tokens]
         costs = [t["est_cost"] for t in group if t.get("est_cost") is not None]
+        worker_costs = [trial.get("worker_est_cost") for trial in group]
         return {
             "n": len(group),
             "mean_score": _mean(scores),
-            "mean_billed_output": _mean([float(b) for b in billed]),
+            "mean_uncached_input": _mean([float(v) for v in uncached]) if has_worker_tokens else None,
+            "mean_cached_input": _mean([float(v) for v in cached]) if has_worker_tokens else None,
+            "mean_billed_output": _mean([float(v) for v in billed]) if has_worker_tokens else None,
             "mean_cost": round(sum(costs) / len(costs), 6) if costs and len(costs) == len(group) else None,
+            "mean_worker_cost": (
+                round(sum(worker_costs) / len(group), 6)
+                if all(cost is not None for cost in worker_costs)
+                else None
+            ),
         }
 
     comparison: list[dict[str, Any]] = []
@@ -1485,11 +1494,23 @@ def derive_experiment_comparison(trials: list[dict[str, Any]]) -> list[dict[str,
             n = skill.get(key) if skill else None
             if o is None or n is None:
                 return "n/a", "unknown"
-            return format_delta(o, n), _axis_verdict_local(o, n, higher_is_better)
+            difference = n - o
+            if float(difference).is_integer():
+                amount = f"{difference:+,.0f}"
+            else:
+                amount = f"{difference:+,.1f}"
+            percent = f" ({difference / o * 100:+.1f}%)" if o else ""
+            return amount + percent, _axis_verdict_local(o, n, higher_is_better)
 
         score_delta, score_verdict = _delta("mean_score", True)
+        uncached_delta, uncached_verdict = _delta("mean_uncached_input", False)
+        cached_delta, cached_verdict = _delta("mean_cached_input", False)
         billed_delta, billed_verdict = _delta("mean_billed_output", False)
-        cost_delta, cost_verdict = _delta("mean_cost", False)
+        cost_delta, cost_verdict = _delta("mean_worker_cost", False)
+        if base and skill:
+            cost_delta = format_cost_delta(
+                base.get("mean_worker_cost"), skill.get("mean_worker_cost")
+            )
         comparison.append(
             {
                 "test_case": case,
@@ -1497,6 +1518,10 @@ def derive_experiment_comparison(trials: list[dict[str, Any]]) -> list[dict[str,
                 "with_skill": skill,
                 "score_delta": score_delta,
                 "score_verdict": score_verdict,
+                "uncached_input_delta": uncached_delta,
+                "uncached_input_verdict": uncached_verdict,
+                "cached_input_delta": cached_delta,
+                "cached_input_verdict": cached_verdict,
                 "billed_output_delta": billed_delta,
                 "billed_output_verdict": billed_verdict,
                 "cost_delta": cost_delta,
@@ -1627,6 +1652,39 @@ def _inject_captured_subagents(
             linked.append(child_tid)
 
 
+def _safe_turn_aggregate_cost(
+    trace: Path, model: str | None, tokens: dict[str, Any]
+) -> float | None:
+    """Price one turn aggregate only when every request must be short-context.
+
+    Codex exec judge traces expose aggregate `turn.completed` usage rather than
+    per-response records. If the whole turn's input is below the long-context
+    threshold, every constituent request is necessarily below it too, so the
+    linear short-context rates give the same total cost. Above that threshold,
+    request boundaries are required and this returns unavailable.
+    """
+    if not model or int(tokens.get("input_tokens") or 0) >= LONG_CONTEXT_THRESHOLD:
+        return None
+    usages: list[dict[str, Any]] = []
+    if not trace.is_file():
+        return None
+    for line in trace.read_text(encoding="utf-8", errors="replace").splitlines():
+        if not line.strip():
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if event.get("type") == "turn.completed" and isinstance(event.get("usage"), dict):
+            usages.append(observation_tokens(event["usage"]))
+    if len(usages) != 1:
+        return None
+    usage = usages[0]
+    if int(usage.get("input_tokens") or 0) >= LONG_CONTEXT_THRESHOLD:
+        return None
+    return estimate_api_cost(usage, model)
+
+
 def _collect_harness_eval_usage(
     by_tid: dict[str, dict[str, Any]],
     children_by_parent: dict[str, list[str]],
@@ -1723,11 +1781,19 @@ def _collect_harness_eval_usage(
             trial_dir_str = str(trial_dir)
             run_meta = read_json(trial_dir / "run.json")
             parsed_judge = parse_session_rollout(judge_trace)
-            j_model = parsed_judge.get("model")
+            j_model = parsed_judge.get("model") or (
+                run_meta.get("resolved_model") if isinstance(run_meta, dict) else None
+            )
             j_effort = parsed_judge.get("reasoning_effort")
             j_started = parsed_judge.get("started_at")
             j_tokens = dict(parsed_judge.get("token_usage") or _empty_token_usage())
             j_cost = record_accounting(parsed_judge)["est_cost"]
+            aggregate_j_cost = None
+            if j_cost is None:
+                aggregate_j_cost = _safe_turn_aggregate_cost(
+                    judge_trace, j_model, j_tokens
+                )
+                j_cost = aggregate_j_cost
             if trial_dir_str not in seen_trial_dirs:
                 missing = parse_session_rollout(trial_dir / "worker" / "trace.jsonl")
                 missing.update({"thread_id": trial_dir_str, "cwd": str(trial_dir / "workspace"),
@@ -1745,6 +1811,7 @@ def _collect_harness_eval_usage(
                     "turn_count": int(parsed_judge.get("turn_count", 1) or 1),
                     "token_usage": j_tokens,
                     "est_cost": j_cost,
+                    "turn_aggregate_est_cost": aggregate_j_cost,
                 }
             )
 
@@ -1820,6 +1887,8 @@ def _collect_harness_eval_usage(
                 "with_skill_trials": 0,
                 "subagent_spawns": 0,
                 "judge_calls": 0,
+                "judge_aggregate_priced_calls": 0,
+                "judge_cost_unavailable_calls": 0,
                 "worker_tokens": _empty_token_usage(),
                 "judge_tokens": _empty_token_usage(),
                 "tokens": _empty_token_usage(),
@@ -2004,6 +2073,12 @@ def _collect_harness_eval_usage(
             es["with_skill_trials"] += 1
         es["subagent_spawns"] += spawns
         es["judge_calls"] += len(trial_judges)
+        es["judge_aggregate_priced_calls"] += sum(
+            j.get("turn_aggregate_est_cost") is not None for j in trial_judges
+        )
+        es["judge_cost_unavailable_calls"] += sum(
+            j.get("est_cost") is None for j in trial_judges
+        )
         es["worker_tokens"] = _add_token_dicts(
             es["worker_tokens"], trial_worker_tokens
         )
@@ -2159,6 +2234,8 @@ def _collect_harness_eval_usage(
                 "with_skill_trials": sk_entry["with_skill_trials"],
                 "subagent_spawns": sk_entry["subagent_spawns"],
                 "judge_calls": sk_entry["judge_calls"],
+                "judge_aggregate_priced_calls": sk_entry["judge_aggregate_priced_calls"],
+                "judge_cost_unavailable_calls": sk_entry["judge_cost_unavailable_calls"],
                 "worker_tokens": sk_entry["worker_tokens"],
                 "judge_tokens": sk_entry["judge_tokens"],
                 "tokens": sk_entry["tokens"],

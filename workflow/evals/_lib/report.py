@@ -11,7 +11,7 @@ from _lib.common import _fmt, markdown_metadata, markdown_cell, read_json, write
 from _lib.paths import trial_directory
 from _lib.grading import score_band
 from _lib.timing import format_seconds, timing_summary, worker_seconds
-from _lib.accounting import record_accounting, combine_accounting, observation_tokens
+from _lib.accounting import combine_accounting, observation_tokens, unavailable_accounting
 from _lib.pricing import (
     PRICING_AS_OF,
     format_cost,
@@ -65,6 +65,16 @@ def _finding_text(reason: str, run_dir: Path | None, root: Path) -> str:
     return "".join(parts)
 
 
+def _worker_accounting(result: dict) -> dict:
+    accounting = result.get("worker_accounting")
+    if isinstance(accounting, dict):
+        return accounting
+    return unavailable_accounting(
+        observation_tokens(result.get("tokens") or {}),
+        "worker-only accounting not captured",
+    )
+
+
 def aggregate(results: list[dict]) -> dict:
     """Summarize repeated trials and baseline-versus-skill differences."""
     cells: dict[str, dict[str, dict]] = {}
@@ -85,7 +95,7 @@ def aggregate(results: list[dict]) -> dict:
             },
         )
         cell["total_trials"] += 1
-        cell["accounting_samples"].append(record_accounting(result))
+        cell["accounting_samples"].append(_worker_accounting(result))
         # Timing includes failed and abstained trials, unlike score means.
         cell["timing_samples"].append(result)
         tokens = result.get("tokens")
@@ -126,6 +136,11 @@ def aggregate(results: list[dict]) -> dict:
             accounting = combine_accounting(cell.pop("accounting_samples"))
             cell["accounting"] = accounting
             cell["mean_est_cost"] = (accounting["est_cost"] / cell["total_trials"] if accounting["est_cost"] is not None else None)
+            cell["mean_known_cost"] = (
+                accounting["known_cost"] / cell["total_trials"]
+                if accounting["known_cost"] is not None
+                else None
+            )
             samples = cell.pop("token_samples")
             mean_tokens: dict[str, float] = {}
             for field in TOKEN_FIELDS:
@@ -193,8 +208,9 @@ def write_report(
         else f"# Evaluation report: {experiment['skill']}"
     )
 
-    total_accounting = combine_accounting([record_accounting(r) for r in results])
+    total_accounting = combine_accounting([_worker_accounting(r) for r in results])
     total_cost = total_accounting["est_cost"]
+    total_known_cost = total_accounting["known_cost"]
 
     lines = [
         title,
@@ -208,13 +224,13 @@ def write_report(
         "",
         "## Result",
         "",
-        "| Outcome | Mean score | Passed | Needs review | Completed | Est. total cost |",
-        "|:---:|---:|---:|---:|---:|---:|",
+        "| Outcome | Mean score | Passed | Needs review | Completed | Known worker cost subtotal | Complete worker cost |",
+        "|:---:|---:|---:|---:|---:|---:|---:|",
         f"| **{outcome}** | {score_text} | "
         f"{experiment.get('passed_trials', 0)}/{len(results)} | "
         f"{experiment.get('needs_review_trials', 0)}/{len(results)} | "
         f"{len(results)}/{experiment['worker_trials']} | "
-        f"{format_cost(total_cost)} |",
+        f"{format_cost(total_known_cost)} | {format_cost(total_cost)} |",
         "",
     ]
     lines.extend([
@@ -411,7 +427,7 @@ def write_report(
                 "## Token usage",
                 "",
                 "| Test case | Config | Uncached input | Cached input | "
-                "Output | Reasoning | Billed output | Est. cost |",
+                "Output | Reasoning | Billed output | Worker cost / trial |",
                 "|---|---|---:|---:|---:|---:|---:|---:|",
             ]
         )
@@ -420,7 +436,7 @@ def write_report(
                 mt = cells.get(name, {}).get(config, {}).get("mean_tokens")
                 if not isinstance(mt, dict):
                     continue
-                cost = cells.get(name, {}).get(config, {}).get("mean_est_cost")
+                cost = cells.get(name, {}).get(config, {}).get("mean_known_cost")
                 lines.append(
                     f"| {markdown_cell(name)} | {config} | "
                     f"{_fmt(mt.get('uncached_input_tokens', 0))} | "
@@ -445,8 +461,8 @@ def write_report(
                     format_delta(base_mt.get(f, 0), skill_mt.get(f, 0)) for f in fields
                 )
                 cost_delta = format_cost_delta(
-                    cells.get(name, {}).get("baseline", {}).get("mean_est_cost"),
-                    cells.get(name, {}).get("with-skill", {}).get("mean_est_cost"),
+                    cells.get(name, {}).get("baseline", {}).get("mean_known_cost"),
+                    cells.get(name, {}).get("with-skill", {}).get("mean_known_cost"),
                 )
                 lines.append(
                     f"| {markdown_cell(name)} | **delta** | {cell_text} | {cost_delta} |"
@@ -461,25 +477,27 @@ def write_report(
             lines.append(
                 f"| **Total ({len(token_trials)} trials)** | — | "
                 f"**{sum_uncached}** | **{sum_cached}** | **{sum_output}** | "
-                f"**{sum_reasoning}** | **{sum_billed}** | **{format_cost(total_cost)}** |"
+                f"**{sum_reasoning}** | **{sum_billed}** | **{format_cost(total_known_cost)}** |"
             )
         lines.extend(
             [
                 "",
                 f"_Per-case rows are trial means (comparable only on the same model and "
-                f"reasoning effort); `Billed output` = output (including reasoning). `Est. cost` is "
+                f"reasoning effort); `Billed output` = output (including reasoning). `Worker cost / trial` "
+                f"includes worker subagents and excludes semantic judge calls. Incomplete worker pricing "
+                f"coverage is shown separately above. Cost is "
                 f"an **API-equivalent estimate only** (public API list prices as of "
                 f"{PRICING_AS_OF}) — NOT your actual subscription or credit spend._",
             ]
         )
 
     coverage = total_accounting["coverage"]
-    lines.extend(["", "## Request pricing coverage", "",
+    lines.extend(["", "## Worker request pricing coverage", "",
                   f"{coverage['status']}: {coverage['priced_count']} / {coverage['request_count']} requests priced; "
                   f"{coverage['unavailable_count']} unavailable observations. "
                   f"Known subtotal: {format_cost(total_accounting['known_cost'])}. "
                   f"Unknown models: {', '.join(markdown_metadata(model) for model in coverage['unknown_models']) or 'none'}.",
-                  "Cumulative-only legacy usage preserves tokens; request pricing is unavailable."])
+                  "Semantic-judge calls are excluded from worker cost and do not affect this comparison."])
     report = experiment_root / "report.md"
     report.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return report
