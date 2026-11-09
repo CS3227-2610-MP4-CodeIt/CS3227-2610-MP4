@@ -1,0 +1,8 @@
+{
+  "project_skills": {
+    "code-quality-review": "ef7a25ccfaf33983e91eddc244a7814d59795d74370b5817b7463ff502b74f60",
+    "spec-contract-review": "d075a10a24b6f33ad77a3da2efa3c554d8601618a87c0e0c5aaf79be3707861e",
+    "security-boundary-review": "cc6f4f0acee0c6ed613c429eb21b7b95d2da86c71880c38cf14e359061b6d67d",
+    "verification-review": "e0fcdf544cb1b843dae3653f05b07ba7893de9055a7986648b965231e1824199"
+  }
+}
