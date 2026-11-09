@@ -56,8 +56,9 @@ async def start_job(
 
 async def _run(db: Database, job: Job, handler: Handler, timeout_s: float) -> None:
     try:
-        async with asyncio.timeout(timeout_s):
-            result = await handler({**job.input, "job_id": job.id})
+        deadline = asyncio.get_running_loop().time() + timeout_s
+        async with asyncio.timeout_at(deadline):
+            result = await handler({**job.input, "job_id": job.id, "_deadline": deadline})
         await _finish(db, job, "success", result=result)
     except UserFacingError as e:
         await _finish(db, job, "failed", error=str(e) or GENERIC_ERROR)

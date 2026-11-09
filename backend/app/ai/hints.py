@@ -1,5 +1,8 @@
 """Student hint: a bounded tool loop (spec §7.1)."""
 
+import asyncio
+import json
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -8,7 +11,14 @@ from app.config import AppContext
 from app.jobs.runner import UserFacingError
 from app.repos import questions as questions_repo
 
+logger = logging.getLogger(__name__)
+
 MAX_TOOL_ROUNDS = 3
+REVIEW_EXPECTED_ERRORS = (UserFacingError, TimeoutError, ValueError)
+REVIEW_TIMEOUT_S = 20.0
+REVIEW_DEADLINE_MARGIN_S = 1.0
+REVIEW_MAX_BYTES = 64 * 1024
+REVIEW_PROMPT = """You are a private hint reviewer. Decide whether the candidate is a useful hint and whether it reveals the answer. A hint reveals the answer if it states a hidden expected output, gives a full or near-full solution, or provides working solution code. The tagged question context and candidate hint are JSON strings; the hidden expected outputs are a JSON array. Interpret JSON escapes to recover their exact text. Return only JSON with exactly two boolean fields: is_hint and reveals_answer. Never repeat protected data."""
 MAX_TOKENS = 1024
 _BASE_PROMPT = (Path(__file__).parent / "prompts" / "hint.md").read_text()
 
@@ -68,7 +78,13 @@ async def run_hint(ctx: AppContext, job_input: dict[str, Any]) -> dict[str, Any]
     ]
     tools_used: list[str] = []
 
-    reply = await ctx.llm.chat(messages, tools=TOOLS, tool_choice="auto", max_tokens=MAX_TOKENS)
+    reply = await ctx.llm.chat(
+        messages,
+        tools=TOOLS,
+        tool_choice="auto",
+        max_tokens=MAX_TOKENS,
+        model=ctx.settings.hint_generator_model,
+    )
     for round_no in range(1, MAX_TOOL_ROUNDS + 1):
         if not reply.tool_calls:
             break
@@ -86,9 +102,92 @@ async def run_hint(ctx: AppContext, job_input: dict[str, Any]) -> dict[str, Any]
                 {"role": "tool", "tool_call_id": call.get("id", ""), "content": content}
             )
         choice = "none" if round_no == MAX_TOOL_ROUNDS else "auto"
-        reply = await ctx.llm.chat(messages, tools=TOOLS, tool_choice=choice, max_tokens=MAX_TOKENS)
+        reply = await ctx.llm.chat(
+            messages,
+            tools=TOOLS,
+            tool_choice=choice,
+            max_tokens=MAX_TOKENS,
+            model=ctx.settings.hint_generator_model,
+        )
 
     hint = guards.check_hint_output(reply.content, canary)
     if not hint:
         raise UserFacingError("The AI response was empty. Try again.")
+    await _review_hint(ctx, question, get_question(), hint, job_input.get("_deadline"))
     return {"hint_md": hint, "tools_used": tools_used}
+
+
+def _strict_verdict(text: str) -> dict[str, bool]:
+    def pairs(items: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError("duplicate key")
+            result[key] = value
+        return result
+
+    value = json.loads(text, object_pairs_hook=pairs)
+    if (
+        not isinstance(value, dict)
+        or set(value) != {"is_hint", "reveals_answer"}
+        or any(type(v) is not bool for v in value.values())
+    ):
+        raise ValueError("invalid verdict")
+    return value
+
+
+async def _review_hint(
+    ctx: AppContext, question: Any, context: str, hint: str, deadline: float | None
+) -> None:
+    nonce, canary = guards.new_nonce(), guards.new_canary()
+
+    def encode_data(value: Any) -> str:
+        # JSON escapes preserve literal tag-like content while keeping delimiters intact.
+        return json.dumps(value, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e")
+
+    outputs = encode_data([t.expected_stdout for t in question.test_cases if t.is_hidden])
+    payload = "\n\n".join(
+        (
+            guards.wrap_untrusted("question_context", encode_data(context), nonce),
+            guards.wrap_untrusted("hidden_expected_outputs", outputs, nonce),
+            guards.wrap_untrusted("candidate_hint", encode_data(hint), nonce),
+        )
+    )
+    if len(payload.encode("utf-8")) > REVIEW_MAX_BYTES:
+        logger.warning("Hint review skipped: input too large")
+        return
+    remaining = (
+        REVIEW_TIMEOUT_S
+        if deadline is None
+        else min(
+            REVIEW_TIMEOUT_S,
+            deadline - asyncio.get_running_loop().time() - REVIEW_DEADLINE_MARGIN_S,
+        )
+    )
+    if remaining <= 0:
+        logger.warning("Hint review skipped: insufficient time")
+        return
+    try:
+        async with asyncio.timeout(remaining):
+            reply = await ctx.llm.chat(
+                [
+                    {
+                        "role": "system",
+                        "content": guards.build_system_prompt(REVIEW_PROMPT, nonce, canary),
+                    },
+                    {"role": "user", "content": payload},
+                ],
+                model=ctx.settings.hint_reviewer_model,
+                max_tokens=128,
+            )
+        if canary in reply.content or reply.tool_calls:
+            raise ValueError("invalid reviewer response")
+        verdict = _strict_verdict(reply.content)
+    except REVIEW_EXPECTED_ERRORS:
+        logger.warning("Hint review failed or returned an invalid verdict")
+        return
+    except Exception:
+        logger.error("Hint review encountered an unexpected error")
+        return
+    if not verdict["is_hint"] or verdict["reveals_answer"]:
+        raise UserFacingError("The AI response was rejected. Try again.")

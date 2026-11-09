@@ -11,6 +11,7 @@ from app.jobs.runner import UserFacingError
 UNAVAILABLE = "The AI service is unavailable. Try again later."
 RETRY_STATUSES = (429, 503)
 DEFAULT_RETRY_DELAYS_S = (2.0, 5.0)
+PARSE_ERRORS = (ValueError, KeyError, IndexError, TypeError)
 HTTP_TIMEOUT_S = 30.0  # non-chat calls (GET /v1/models); chat completions use chat_timeout_s
 
 
@@ -71,11 +72,12 @@ class LLMClient:
         response.raise_for_status()
         return [m["id"] for m in response.json().get("data", [])]
 
-    async def check_model(self) -> None:
+    async def check_model(self, model: str | None = None) -> None:
         """Startup: fail fast if LLM_MODEL is not available to this key."""
         models = await self.list_models()
-        if self.model not in models:
-            raise RuntimeError(f"LLM_MODEL {self.model!r} is not in GET /v1/models")
+        selected = model or self.model
+        if selected not in models:
+            raise RuntimeError(f"LLM_MODEL {selected!r} is not in GET /v1/models")
 
     async def chat(
         self,
@@ -85,10 +87,11 @@ class LLMClient:
         tool_choice: str | None = None,
         max_tokens: int | None = None,
         temperature: float | None = None,
+        model: str | None = None,
     ) -> ChatReply:
         """One non-streaming chat completion. Retries 429/503 (2 s, 5 s); other errors and
         network failures raise UserFacingError."""
-        body: dict[str, Any] = {"model": self.model, "messages": messages}
+        body: dict[str, Any] = {"model": model or self.model, "messages": messages}
         if tools is not None:
             body["tools"] = tools
         if tool_choice is not None:
@@ -119,7 +122,7 @@ def _parse(response: httpx.Response) -> ChatReply:
         data = response.json()
         choice = data["choices"][0]
         message = choice.get("message") or {}
-    except ValueError, KeyError, IndexError, TypeError:
+    except PARSE_ERRORS:
         raise UserFacingError(UNAVAILABLE) from None
     return ChatReply(
         content=(message.get("content") or "").strip(),
