@@ -2289,6 +2289,66 @@ def _collect_harness_eval_usage(
     }
 
 
+def _load_scope_ledger() -> Any | None:
+    """Load the agent-scope policy, importing the guard tool by file path.
+
+    The guard lives at workflow/agent-scope/guard.py, outside this package.
+    Returns None (and the caller skips the scope check) if the tool or policy
+    is unavailable, so a missing scope setup never breaks the usage report.
+    """
+    try:
+        import importlib.util
+        import sys as _sys
+
+        here = Path(__file__).resolve()
+        guard_path = here.parents[2] / "agent-scope" / "guard.py"
+        if not guard_path.is_file():
+            return None
+        spec = importlib.util.spec_from_file_location("agent_scope_guard", guard_path)
+        if spec is None or spec.loader is None:
+            return None
+        module = importlib.util.module_from_spec(spec)
+        # Register before exec: dataclasses in the module resolve their owning
+        # module via sys.modules during class creation, which fails otherwise.
+        _sys.modules["agent_scope_guard"] = module
+        spec.loader.exec_module(module)
+        return module, module.ScopeLedger.load()
+    except Exception:  # noqa: BLE001 - scope check is best-effort telemetry
+        return None
+
+
+def _session_scope_findings(
+    scope: Any | None,
+    root: dict[str, Any],
+    root_tid: str,
+    subagent_records: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Per-role out-of-lane writes across the root session and its subagents.
+
+    Reuses the guard's path-extraction and policy logic against the normalized
+    event timelines the harness already parsed. Returns a list of finding dicts
+    suitable for the usage report and renderers.
+    """
+    if scope is None:
+        return []
+    guard, ledger = scope
+    actors: list[tuple[str, str | None, list[dict[str, Any]]]] = [
+        (root_tid, root.get("agent_role"), root.get("events") or [])
+    ]
+    for sub in subagent_records:
+        actors.append(
+            (sub.get("thread_id") or "", sub.get("agent_role"), sub.get("events") or [])
+        )
+    try:
+        findings = guard.audit_rollout_actors(actors, ledger)
+    except Exception:  # noqa: BLE001 - never let a scope error break telemetry
+        return []
+    return [
+        {"role": f.role, "path": f.path, "tool": f.tool, "session_id": f.session_id}
+        for f in findings
+    ]
+
+
 def build_project_usage(
     rollouts_by_path: dict[str, dict[str, Any]],
     project_root: Path,
@@ -2390,6 +2450,9 @@ def build_project_usage(
 
     model_stats: dict[str, dict[str, Any]] = {}
     daily_stats: dict[str, dict[str, Any]] = {}
+
+    scope = _load_scope_ledger()
+    all_scope_findings: list[dict[str, Any]] = []
 
     for root in root_sessions:
         root_tid = root.get("thread_id") or root["rollout_path"]
@@ -2555,6 +2618,9 @@ def build_project_usage(
             subagents=subagent_records,
         )
 
+        scope_findings = _session_scope_findings(scope, root, root_tid, subagent_records)
+        all_scope_findings.extend(scope_findings)
+
         sessions_summary.append(
             {
                 "thread_id": root_tid,
@@ -2569,6 +2635,7 @@ def build_project_usage(
                 "final_status": root.get("final_status"),
                 "parse_errors": int(root.get("parse_errors", 0) or 0),
                 "observations": online_observations,
+                "scope_findings": scope_findings,
                 "commands": root.get("commands") or [],
                 "activity_tree": {
                     "thread_id": root_tid,
@@ -2634,6 +2701,7 @@ def build_project_usage(
         "project_name": project_root.name,
         "project_root": str(project_root),
         "generated_at": now(),
+        "scope_findings": all_scope_findings,
         "totals": {
             "session_count": len(sessions_summary),
             "turn_count": total_turns,

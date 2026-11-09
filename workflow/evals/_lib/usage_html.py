@@ -348,6 +348,78 @@ def _online_observation_summary(sessions: list[dict[str, Any]]) -> str:
     )
 
 
+def _scope_summary(summary: dict[str, Any]) -> str:
+    """Top-level scope card for the overview, mirroring the observation summary."""
+    findings = summary.get("scope_findings") or []
+    by_role: dict[str, int] = defaultdict(int)
+    for finding in findings:
+        by_role[str(finding.get("role") or "unknown")] += 1
+    if findings:
+        count_html = "".join(
+            f"<div class='observation-count'><b>{count}</b><span>{_esc(role)}</span></div>"
+            for role, count in sorted(by_role.items(), key=lambda pair: (-pair[1], pair[0]))
+        )
+        badge = f"<span class='badge badge-amber'>{len(findings)} out of lane</span>"
+        footnote = (
+            "Each finding is a write a delegated role made outside the boundary "
+            "authored in workflow/agent-scope/scope.toml."
+        )
+    else:
+        count_html = (
+            "<p class='muted'>No delegated role wrote outside its authored scope "
+            "in the captured sessions.</p>"
+        )
+        badge = "<span class='badge badge-green'>in scope</span>"
+        footnote = (
+            "Every delegated write stayed within the per-role boundary "
+            "(workflow/agent-scope/scope.toml)."
+        )
+    return (
+        "<section class='observation-summary card'><div class='card-header'><div>"
+        "<div class='card-title'>Agent write scope</div>"
+        "<div class='card-subtitle'>Per-role write boundaries · human-authored policy, checked from traces</div>"
+        f"</div>{badge}</div>"
+        f"<div class='observation-counts'>{count_html}</div>"
+        f"<p class='observation-footnote'>{_esc(footnote)}</p>"
+        "</section>"
+    )
+
+
+def _session_scope_panel(session: dict[str, Any]) -> str:
+    """Per-session scope panel, styled like the session observation panel."""
+    findings = session.get("scope_findings") or []
+    if not findings:
+        return (
+            "<section class='session-observations card'>"
+            "<details class='obs-details'>"
+            "<summary class='obs-summary'>"
+            "<span class='obs-summary-title'>Agent write scope</span>"
+            "<span class='badge badge-green'>in scope</span></summary>"
+            "<div class='card-subtitle'>Every delegated write stayed within its authored boundary.</div>"
+            "</details></section>"
+        )
+    cards: list[str] = []
+    for finding in findings:
+        cards.append(
+            "<article class='observation-item'><div class='observation-item-head'>"
+            f"<b>{_esc(finding.get('role'))}</b>"
+            "<span class='badge badge-amber'>out of lane</span>"
+            f"<span class='badge badge-slate'>{_esc(finding.get('tool'))}</span></div>"
+            f"<p>Wrote <code>{_esc(finding.get('path'))}</code>, outside the paths "
+            "this role may write in workflow/agent-scope/scope.toml.</p>"
+            "</article>"
+        )
+    return (
+        "<section class='session-observations card'>"
+        "<details class='obs-details'>"
+        "<summary class='obs-summary'>"
+        "<span class='obs-summary-title'>Agent write scope</span>"
+        f"<span class='badge badge-amber'>{len(findings)} out of lane</span></summary>"
+        "<div class='card-subtitle'>Writes a delegated role made outside its authored boundary.</div>"
+        f"<div class='observation-list'>{''.join(cards)}</div></details></section>"
+    )
+
+
 def _session_observation_panel(session: dict[str, Any], detail_id: str) -> str:
     findings = session.get("observations") or []
     if not findings:
@@ -1186,6 +1258,7 @@ def _real_session_details(summary: dict[str, Any]) -> str:
             f"{_kpi('Turns', str(sess['turn_count']), turns_sub)}"
             "</div>"
             f"{_session_observation_panel(sess, detail_id)}"
+            f"{_session_scope_panel(sess)}"
             f"{_accounting_tables(sess, detail_id)}"
         )
         timeline = _timeline_component(sess.get("activity_tree"), f"{detail_id}-timeline")
@@ -2039,6 +2112,7 @@ def render_usage_html(summary: dict[str, Any]) -> str:
       </div>
       {_coverage_panel(totals)}
       {_online_observation_summary(summary['sessions'])}
+      {_scope_summary(summary)}
       <div class="card">
         <div class="card-header"><div>
           <div class="card-title">Cost &amp; Health by Skill</div>
