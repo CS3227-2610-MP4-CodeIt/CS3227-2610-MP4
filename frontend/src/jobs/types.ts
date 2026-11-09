@@ -2,6 +2,7 @@ export const JOB_KINDS = [
   "run",
   "submit",
   "hint",
+  "complexity",
   "question_gen",
   "assignment_summary",
 ] as const;

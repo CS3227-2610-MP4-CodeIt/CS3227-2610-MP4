@@ -505,6 +505,74 @@ function SubmissionCode({
       <pre className="max-h-96 overflow-auto rounded bg-slate-900 p-3 font-mono text-xs text-slate-100">
         {s.code}
       </pre>
+      <ComplexityPanel key={sid} aid={aid} qid={qid} sid={sid} />
     </div>
+  );
+}
+
+type ComplexityResult = {
+  time_complexity: string;
+  space_complexity: string;
+  explanation: string;
+  assumptions: string;
+};
+
+function ComplexityPanel({
+  aid,
+  qid,
+  sid,
+}: {
+  aid: number;
+  qid: number;
+  sid: number;
+}) {
+  const key = targetKey.submission(aid, qid, sid);
+  const query = useJob<ComplexityResult>("complexity", key);
+  const start = useStartJob<undefined, ComplexityResult>("complexity", key);
+  return (
+    <section
+      className="space-y-2 rounded border border-slate-200 p-3"
+      aria-label="Complexity analysis"
+    >
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="font-medium">Complexity analysis</h3>
+        <button
+          type="button"
+          className="btn"
+          disabled={start.isPending || query.data?.job?.status === "in_process"}
+          onClick={() => start.mutate(undefined)}
+        >
+          Analyze
+        </button>
+      </div>
+      <p className="text-xs text-slate-500">
+        Best-effort estimate for this submission; results depend on assumptions.
+      </p>
+      <ErrorText error={start.error} />
+      <JobPanel
+        query={query}
+        empty="No analysis yet."
+        runningLabel="Analyzing…"
+      >
+        {(result) => (
+          <div className="space-y-2 text-sm">
+            <div className="flex flex-wrap gap-8">
+              <p>
+                Time
+                <br />
+                <strong>{result.time_complexity}</strong>
+              </p>
+              <p>
+                Auxiliary space
+                <br />
+                <strong>{result.space_complexity}</strong>
+              </p>
+            </div>
+            <p>{result.explanation}</p>
+            <p>Assumptions and caveats: {result.assumptions}</p>
+          </div>
+        )}
+      </JobPanel>
+    </section>
   );
 }

@@ -3,6 +3,8 @@ import type { JobKind } from "./types";
 // The backend's own target keys (backend §6.1).
 export const targetKey = {
   question: (aid: number, qid: number) => `a${aid}:q${qid}`,
+  submission: (aid: number, qid: number, sid: number) =>
+    `a${aid}:q${qid}:s${sid}`,
   assignment: (aid: number) => `a${aid}`,
   none: "-",
 } as const;
@@ -28,6 +30,11 @@ export function jobUrl(kind: JobKind, key: string): string {
       const q = parseQuestionKey(key);
       if (!q) throw new Error(`bad target key for ${kind}: ${key}`);
       return `/student/assignments/${q.aid}/questions/${q.qid}/${kind}`;
+    }
+    case "complexity": {
+      const m = /^a(\d+):q(\d+):s(\d+)$/.exec(key);
+      if (!m) throw new Error(`bad target key for ${kind}: ${key}`);
+      return `/student/assignments/${m[1]}/questions/${m[2]}/submissions/${m[3]}/complexity`;
     }
     case "question_gen":
       return "/teacher/question-generations";
