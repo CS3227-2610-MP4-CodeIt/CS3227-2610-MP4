@@ -227,3 +227,19 @@ def test_guard_ignores_non_write_spawn_tool():
         "tool_input": {"task_name": "x", "message": "go"},
     }
     assert run_guard_with(payload) == 0
+
+def test_heredoc_body_not_scanned_for_redirects():
+    # A python heredoc whose BODY contains '>' must not yield a target from the
+    # body (regression: 'max_output_tokens > 5000' produced the path '5000').
+    cmd = "python3 - <<'PY'\nx = 1 if a > 5000 else 0\nopen('p','w')\nPY"
+    assert guard._targets_in_bash(cmd) == []
+
+def test_heredoc_with_leading_redirect_still_caught():
+    # `cat > file <<EOF` redirects to file THEN reads a here-doc; the file
+    # target precedes '<<' so it is still captured.
+    cmd = "cat > workflow/reviews/r.md <<'EOF'\nhello\nEOF"
+    assert guard._targets_in_bash(cmd) == ["workflow/reviews/r.md"]
+
+def test_append_heredoc_target_caught():
+    cmd = "cat >> backend/tests/test_x.py <<'EOF'\nbody\nEOF"
+    assert guard._targets_in_bash(cmd) == ["backend/tests/test_x.py"]

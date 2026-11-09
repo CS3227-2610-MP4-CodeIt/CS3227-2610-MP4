@@ -136,7 +136,18 @@ def _targets_in_bash(command: str) -> list[str]:
     Covers redirections, a handful of file-moving verbs, and in-place editors.
     Reading is never reported. Unparseable input yields an empty list, which the
     caller treats as "cannot classify" and lets through.
+
+    A here-document body (``cmd <<'EOF' ... EOF``) is data, not shell, so the
+    command is truncated at the first ``<<`` operator before scanning. The
+    redirect target of the here-doc line itself is still captured when the line
+    both redirects to a file and reads a here-doc (``cat > f <<EOF``), because
+    that redirect precedes the ``<<``.
     """
+    heredoc_cut = re.search(r"<<-?\s*", command)
+    if heredoc_cut:
+        # Keep everything up to the here-doc operator; the body after it is the
+        # document content, not shell tokens to scan for redirects.
+        command = command[: heredoc_cut.start()]
     try:
         words = shlex.split(command)
     except ValueError:
