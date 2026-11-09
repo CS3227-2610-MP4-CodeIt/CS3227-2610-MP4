@@ -561,3 +561,696 @@ Your code uses nested loops, which is $O(N^2)$. With $N=200{,}000$, this will ti
 You can store each number in a set as you read them. For every element `x`, check if `-x` is already in your set. This approach runs in $O(N)$ or $O(N \log N)$.
 ```
 
+## `qwen3.6:35b`
+
+### off-by-one-range (5.7s, tools=get_question,get_code, 538 chars)
+
+```markdown
+Your sum is too small because of how `range(n)` works.
+
+`range(n)` generates numbers from `0` to `n-1`, **excluding** `n`. So when you do `for i in range(n)`, you're summing `0 + 1 + ... + (n-1)`, which misses the last term `n`.
+
+**Hint:** Change your loop to include `n`. You can either:
+- Use `range(1, n + 1)` to get `1` through `n`, or
+- Use `range(n + 1)` to get `0` through `n` (the `0` doesn't affect the sum).
+
+For example, if `n = 5`:
+- `range(5)` → `[0, 1, 2, 3, 4]` → sum = 10 ❌
+- `range(1, 6)` → `[1, 2, 3, 4, 5]` → sum = 15 ✅
+```
+
+### off-by-one-range (4.69s, tools=get_question,get_code, 509 chars)
+
+```markdown
+Your loop uses `range(n)`, which generates numbers from `0` to `n-1`. This means you’re summing `0 + 1 + ... + (n-1)`, which misses the final number `n`.
+
+For example, if `n = 5`, `range(5)` gives `0, 1, 2, 3, 4`, so your sum is `10` instead of `15`.
+
+**Fix:** Change `range(n)` to `range(1, n + 1)` to include all integers from `1` to `n`.
+
+```python
+for i in range(1, n + 1):
+    total += i
+```
+
+Alternatively, use the formula `n * (n + 1) // 2` for an O(1) solution:
+
+```python
+total = n * (n + 1) // 2
+```
+```
+
+### wrong-comparison (3.55s, tools=get_question,get_code, 388 chars)
+
+```markdown
+Look closely at your `if` statement logic.
+
+When `a > b` is `True`, you print `b`, but `b` is the *smaller* value. You want to print the *larger* one.
+
+Try swapping the print statements inside the `if` and `else` blocks. When `a > b`, print `a`. Otherwise, print `b`.
+
+```python
+if a > b:
+    print(a)
+else:
+    print(b)
+```
+
+This ensures you always output the maximum of the two numbers.
+```
+
+### wrong-comparison (3.35s, tools=get_question,get_code, 387 chars) [OVER_CODE(7)]
+
+```markdown
+It looks like you have a small logic error in your `if` statement.
+
+When `a > b`, you want to print `a` (the larger one), but your code currently prints `b`.
+
+Fix line 3 to print `a` instead:
+
+```python
+if a > b:
+    print(a)
+else:
+    print(b)
+```
+
+You can also simplify this by using Python's built-in `max()` function:
+
+```python
+a = int(input())
+b = int(input())
+print(max(a, b))
+```
+```
+
+### missing-empty-edge (3.73s, tools=get_question,get_code, 541 chars)
+
+```markdown
+The issue is with **edge cases**: your code crashes with an `IndexError` when the input line is empty.
+
+Here's why:
+- `line.split()` on an empty string returns an empty list `[]`.
+- `words[0]` then tries to access the first element of an empty list, which causes a crash.
+
+**Fix:** Check if the list of words is empty before accessing `words[0]`. If it's empty, print `'EMPTY'` instead.
+
+For example:
+```python
+if len(words) == 0:
+    print("EMPTY")
+else:
+    print(words[0])
+```
+
+Test your code with an empty line input to confirm it works!
+```
+
+### missing-empty-edge (3.53s, tools=get_question,get_code, 474 chars)
+
+```markdown
+Your code crashes because it doesn’t handle the empty input case. If the line is empty, `split()` returns an empty list, and `words[0]` raises an `IndexError`.
+
+**Hint:** Check if the `words` list is empty before accessing the first element. If it is empty, print `'EMPTY'` instead.
+
+_[code removed — hints don't include full solutions]_
+
+Make sure to handle both visible cases and the empty string case. Try testing with an empty line (just press Enter) to verify it works.
+```
+
+### int-vs-str (3.03s, tools=get_code, 339 chars)
+
+```markdown
+The issue is that `input()` returns strings, so `a + b` concatenates them as `"2" + "3" = "23"` instead of adding them numerically.
+
+To fix this, convert the inputs to integers using `int()`:
+
+```python
+a = int(input())
+b = int(input())
+print(a + b)
+```
+
+This ensures you're performing arithmetic addition rather than string concatenation.
+```
+
+### int-vs-str (2.73s, tools=get_code, 358 chars)
+
+```markdown
+The issue is that `input()` reads values as **strings**, not numbers. When you use `+` on strings, it concatenates them (e.g., `"2" + "3"` becomes `"23"`).
+
+To fix this, convert the inputs to integers using `int()` before adding:
+
+```python
+a = int(input())
+b = int(input())
+print(a + b)
+```
+
+This ensures arithmetic addition instead of string concatenation.
+```
+
+### tle-quadratic (2.54s, tools=get_question,get_code, 484 chars)
+
+```markdown
+Your nested loop runs in $O(N^2)$ time, which is too slow for $N = 200,000$. You need an $O(N)$ or $O(N \log N)$ approach.
+
+**Hint:** Use a `set` to store the numbers you've seen so far. As you iterate through the list, check if the negation of the current number (`-x`) is already in the set. If it is, you've found a pair that sums to zero. Add the current number to the set and continue.
+
+This reduces the lookup from $O(N)$ to $O(1)$ on average, bringing the total time to $O(N)$.
+```
+
+### tle-quadratic (3.37s, tools=get_question,get_code, 630 chars)
+
+```markdown
+Your solution uses nested loops, checking every pair of elements. This is **O(n²)** complexity. With $N$ up to 200,000, that’s roughly $4 \times 10^{10}$ operations, which will definitely time out.
+
+**Hint:** You don’t need to check every pair. For each number `x`, you only need to check if its complement `-x` exists in the list.
+
+Use a **set** to store the numbers you’ve seen so far. Iterate through the list once:
+1. For each `x`, check if `-x` is already in the set.
+2. If yes, print `'YES'` and exit.
+3. If no, add `x` to the set.
+
+This reduces the time complexity to **O(n)**, which will pass easily within the time limit.
+```
+
+## `qwen3.8:27b`
+
+### off-by-one-range (26.04s, tools=get_question,get_code, 373 chars)
+
+```markdown
+Your loop is summing the wrong range. `range(n)` iterates `0, 1, ..., n-1` — so for `n = 5` you compute `0+1+2+3+4 = 10`, never actually adding `N` itself.
+
+That's exactly why the result is consistently a bit too small: you're missing the last term.
+
+Try adjusting the loop so it covers `1` through `N` inclusive (e.g. think about what end value makes `range` stop at `N`).
+```
+
+### off-by-one-range (50.23s, tools=get_question,get_code, 436 chars)
+
+```markdown
+Great question — and the answer is in your loop range.
+
+`range(n)` yields `0, 1, ..., n-1`. So your loop adds `0 + 1 + ... + (n-1)`, which is missing `n` itself (and adding the `0` doesn't hurt). That's exactly why your sum is short by `n`.
+
+Try:
+
+```python
+for i in range(1, n+1):
+```
+
+This iterates from `1` up to and including `n`, which is what "Sum 1..N" needs. Give it a run on the visible tests (N=5 → 15) and you should be good.
+```
+
+### wrong-comparison — ERROR UserFacingError (79.79s)
+
+### wrong-comparison (22.53s, tools=get_question,get_code, 438 chars)
+
+```markdown
+## Hint: check which value you print when `a > b`
+
+Your condition `if a > b:` correctly identifies that `a` is the larger number, but in that branch you print `b` — the smaller one. As it stands, the code prints the **minimum**, not the maximum.
+
+Think about it: if `a` is bigger, which variable should go to the `print` in that branch? (You could also just use Python's built-in `max(a, b)`.)
+
+Give it a fix and re-run the visible tests.
+```
+
+### missing-empty-edge (49.6s, tools=get_question,get_code, 502 chars)
+
+```markdown
+## Hint: the empty-line case
+
+Your crash happens when there are **no words** — `line.split()` on an empty line gives `[]`, and `words[0]` on an empty list raises an `IndexError`.
+
+The statement says the line *may be empty*, and in that case you must print `'EMPTY'`. Guard your index access first:
+
+```python
+if not words:
+    print("EMPTY")
+else:
+    print(words[0])
+```
+
+Also double-check: the visible tests don't include an empty input, so your code passes them but still fails the hidden edge case.
+```
+
+### missing-empty-edge (48.04s, tools=get_question,get_code, 379 chars)
+
+```markdown
+Great instinct to suspect edge cases! Look at the problem statement again — it says **"the line may be empty"**.
+
+When the input line is empty, `line.split()` returns an empty list `[]`, so `words[0]` raises an `IndexError`.
+
+Try feeding your program a blank line and you should see the crash. Then think: how can you check whether the list has any words before indexing into it?
+```
+
+### int-vs-str (12.83s, tools=get_question,get_code, 331 chars)
+
+```markdown
+Good question — that's a classic bug!
+
+Your `input()` calls return **strings**, not numbers. So `a + b` is doing string concatenation: `"2" + "3"` → `"23"`, not numeric addition.
+
+**Hint:** Convert each input to an integer before adding:
+
+```python
+a = int(input())
+b = int(input())
+```
+
+Then `a + b` will give you `5` as expected.
+```
+
+### int-vs-str (14.48s, tools=get_question,get_code, 419 chars)
+
+```markdown
+Great question! The issue is that `input()` returns a **string**, not a number. So when you write `a + b`, Python is concatenating the strings `"2"` and `"3"` into `"23"` instead of adding the numbers 2 + 3.
+
+**Hint:** convert each input to an integer before adding. Wrap your input calls like this:
+
+```python
+a = int(input())
+b = int(input())
+```
+
+Now `a + b` will do arithmetic addition and print `5`. Give it a try!
+```
+
+### tle-quadratic — ERROR UserFacingError (72.31s)
+
+### tle-quadratic — ERROR UserFacingError (77.88s)
+
+## `qwen3-coder-next`
+
+### off-by-one-range (2.81s, tools=get_question,get_code, 496 chars)
+
+```markdown
+I see the issue. Your loop uses `range(n)`, which generates numbers from 0 to n-1, but you need to sum from 1 to n inclusive.
+
+The problem is that `range(n)` starts at 0 and stops before n, so you're missing the number n and including 0 (which doesn't affect the sum but indicates the wrong range).
+
+A hint to fix this: Adjust your loop to include n by changing the range, or use the formula for the sum of first n natural numbers.
+
+Would you like to try fixing it yourself, or need another hint?
+```
+
+### off-by-one-range (2.38s, tools=get_question,get_code, 328 chars)
+
+```markdown
+The issue is that `range(n)` generates numbers from `0` to `n-1`, so your loop skips `n` and includes `0`. Since `0` doesn't affect the sum, the problem is that you're missing the term `n`.
+
+To fix this, adjust the range to include `n`. You can use `range(1, n+1)` or simply compute the sum using the formula `n * (n + 1) // 2`.
+```
+
+### wrong-comparison (3.0s, tools=get_question,get_code, 287 chars)
+
+```markdown
+I can see the issue. Your code is printing the smaller number instead of the larger one.
+
+In your if statement, when `a > b` is true, you're printing `b`, and when it's false, you're printing `a`. This gives you the minimum, not the maximum.
+
+Try reversing what you print in each branch.
+```
+
+### wrong-comparison (2.15s, tools=get_question,get_code, 229 chars)
+
+```markdown
+Your code prints the smaller number instead of the larger one. Check your `if` condition — you’re printing `b` when `a > b`, which is the opposite of what you want.
+
+Hint: When `a > b`, you should print `a`; otherwise, print `b`.
+```
+
+### missing-empty-edge (2.37s, tools=get_question,get_code, 270 chars)
+
+```markdown
+Your code crashes when the input line is empty because `line.split()` returns an empty list, and accessing `words[0]` raises an `IndexError`. You need to handle the case where there are no words by checking if the list is empty first and printing `'EMPTY'` in that case.
+```
+
+### missing-empty-edge (2.01s, tools=get_question,get_code, 257 chars)
+
+```markdown
+Your code fails when the input line is empty because `line.split()` returns an empty list, and accessing `words[0]` raises an `IndexError`. You need to handle the case where there are no words — check if the list is empty before accessing the first element.
+```
+
+### int-vs-str (1.62s, tools=get_question,get_code, 209 chars)
+
+```markdown
+The issue is that `input()` reads strings, so `a + b` concatenates them instead of adding numerically. Convert the inputs to integers before adding.
+
+Hint: Use `int()` to convert the input strings to integers.
+```
+
+### int-vs-str (2.37s, tools=get_question,get_code, 129 chars)
+
+```markdown
+The `input()` function returns strings, so `a + b` concatenates them. Convert the inputs to integers using `int()` before adding.
+```
+
+### tle-quadratic (2.61s, tools=get_question,get_code, 462 chars)
+
+```markdown
+The issue is that your current solution uses a nested loop approach with O(n²) time complexity, which is too slow for N up to 200,000.
+
+Instead of checking all pairs explicitly, you can use a set to achieve O(n) time complexity. As you read each number, check if its negation already exists in the set. If yes, you found a pair that sums to zero.
+
+Hint: Use a set to track numbers you've seen so far, and for each new number x, check if -x is already in the set.
+```
+
+### tle-quadratic (1.35s, tools=get_question,get_code, 355 chars)
+
+```markdown
+Your current solution uses a nested loop (O(n²) time), which is too slow for N up to 200,000.
+
+**Hint:** Use a set to store numbers you've seen so far. For each number `x`, check if `-x` is already in the set — this gives O(n) time overall.
+
+Start by initializing an empty set, then iterate through the list once, checking for the complement at each step.
+```
+
+## `x-test-1`
+
+### off-by-one-range — ERROR UserFacingError (61.29s)
+
+### off-by-one-range — ERROR UserFacingError (60.49s)
+
+### wrong-comparison — ERROR UserFacingError (61.29s)
+
+### wrong-comparison — ERROR UserFacingError (61.37s)
+
+### missing-empty-edge — ERROR UserFacingError (61.43s)
+
+### missing-empty-edge — ERROR UserFacingError (61.34s)
+
+### int-vs-str — ERROR UserFacingError (61.85s)
+
+### int-vs-str — ERROR UserFacingError (60.26s)
+
+### tle-quadratic — ERROR UserFacingError (60.17s)
+
+### tle-quadratic — ERROR UserFacingError (61.07s)
+
+## `x-test-2`
+
+### off-by-one-range (11.95s, tools=get_question,get_code, 300 chars)
+
+```markdown
+Your loop never adds `n` itself. `range(n)` yields `0, 1, ..., n-1`, so you're computing `0 + 1 + ... + (n-1)` — which is exactly `n` short of the answer.
+
+Check what the last value of `i` is for `n = 5`: it's `4`, not `5`. Shifting the range to `range(1, n + 1)` (or adding `n` at the end) fixes it.
+```
+
+### off-by-one-range (13.24s, tools=get_question,get_code, 563 chars)
+
+```markdown
+Look at what values `range(n)` actually produces: it goes from `0` up to `n-1`, never including `n`. So your loop is computing `0 + 1 + ... + (n-1)` — exactly `n` short of the answer you want.
+
+Check your loop bounds against the loop you actually wrote for `n = 5`:
+
+```python
+for i in range(n):   # 0,1,2,3,4 — where is 5?
+```
+
+Ask yourself which upper bound you need so that the largest value added is `N` itself. (For extra thought: `range` also accepts a start value, so you could begin at `1` instead of `0` — but the endpoint still needs fixing either way.)
+```
+
+### wrong-comparison (9.39s, tools=get_question,get_code, 351 chars)
+
+```markdown
+Look closely at which value each branch prints: when `a > b`, you print `b` — that's the *smaller* one. Your two `print` calls are swapped relative to the condition.
+
+Also worth thinking about the tie case (`a == b`): which branch handles it, and does it still print the right value? Trace your code on Test 1 (`3`, `5`) and Test 2 by hand to confirm.
+```
+
+### wrong-comparison (12.24s, tools=get_question,get_code, 474 chars)
+
+```markdown
+Your `if`/`else` branches are swapped: when `a > b` you print `b` (the smaller one).
+
+Also note `print(a)` in the `else` branch is only correct if ties go to `a` — with `a > b` as the test, equal values fall into `else`, which is fine here since both are equal.
+
+The fix is just swapping what each branch prints (or changing the comparison). Try tracing Test 1 by hand: `a=3, b=5`, so `a > b` is false → `else` prints `a = 3`, but expected is `5`. That mismatch is your bug.
+```
+
+### missing-empty-edge (11.9s, tools=get_question,get_code, 349 chars)
+
+```markdown
+Your code assumes `split()` always returns something. When the line is empty (or only spaces), `line.split()` gives an empty list, so `words[0]` raises `IndexError` — that's the crash.
+
+Think about how to branch on `len(words)` (or just use `if words:`) and what to print in the empty case. The statement tells you exactly which word to print there.
+```
+
+### missing-empty-edge (11.33s, tools=get_question,get_code, 318 chars)
+
+```markdown
+Your code crashes when `line.split()` gives an empty list — that happens for an empty line (and for a line of only spaces). Then `words[0]` raises `IndexError`.
+
+So before indexing, test whether there are any words at all, and print `'EMPTY'` in that case. One way:
+
+```python
+print(words[0] if words else 'EMPTY')
+```
+```
+
+### int-vs-str (10.73s, tools=get_code,get_question, 205 chars)
+
+```markdown
+`input()` returns a **string**, so `a + b` concatenates text: `"2" + "3"` → `"23"`.
+
+Convert to integers first, e.g.:
+
+```python
+a = int(input())
+```
+
+(the same for `b`). Then `+` will be numeric addition.
+```
+
+### int-vs-str (11.44s, tools=get_question,get_code, 231 chars)
+
+```markdown
+Your code is doing string concatenation, not addition: `input()` returns a **string**, so `"2" + "3"` gives `"23"`.
+
+The fix is to convert each value to an integer before adding, e.g.:
+
+```python
+a = int(input())
+```
+
+Same for `b`.
+```
+
+### tle-quadratic (8.13s, tools=get_question,get_code, 588 chars)
+
+```markdown
+Your logic is correct — the problem is that the double loop is O(N²), which is ~4×10¹⁰ operations for N = 200000. You need O(N log N) or O(N).
+
+Hint: instead of searching for a partner for each element by scanning, put the elements in a structure that answers "is `-x` present?" quickly — a `set` gives that in O(1):
+
+```python
+seen = set(xs)
+found = any(-x in seen for x in xs)
+```
+
+One edge case to watch: a single `0` in the array would match with itself this way. Make sure you only count *distinct positions* — think about when `x == -x` and whether `xs` contains `0` more than once.
+```
+
+### tle-quadratic (8.19s, tools=get_question,get_code, 602 chars)
+
+```markdown
+Your nested loop is O(N²) — with N up to 200000 that's ~4·10¹⁰ operations, hence the timeout.
+
+The idea you're missing: you don't need to pair every element with every other. Process the array once, keeping the values you've *already seen* in a `set`, and for each new value `x` ask whether `-x` is in that set. That's O(N) expected.
+
+Watch one edge case: `0` is its own negation, so you need **two** distinct zeros to say `YES` — so check membership *before* inserting `x` into the set.
+
+Sketch (fill in yourself):
+```python
+seen = set()
+for x in xs:
+    if -x in seen:
+        ...
+    seen.add(x)
+```
+```
+
+## `x-test-3`
+
+### off-by-one-range (8.54s, tools=get_question,get_code, 734 chars)
+
+```markdown
+**Your loop is off by one at the top end.**
+
+`range(n)` produces `0, 1, 2, ..., n-1` — it stops *before* `n`. So you're adding 0 (harmless) but never adding `n` itself, which is exactly how much "too small" your answer is. For `n = 5` you compute `0+1+2+3+4 = 10` instead of `15`.
+
+Two common fixes — pick one:
+
+```python
+for i in range(1, n + 1):   # start at 1, stop after n
+    total += i
+```
+
+or keep `range(n)` and shift the term you add:
+
+```python
+total += i + 1
+```
+
+Rule of thumb: to loop over `1..N` inclusive in Python, write `range(1, N + 1)`, since the upper bound is exclusive.
+
+Check it against your visible case: `n = 5` should now print `15`, and `n = 1` should print `1` (with the original code, `n = 1` prints `0`).
+```
+
+### off-by-one-range (8.94s, tools=get_question,get_code, 652 chars)
+
+```markdown
+Your loop is one short — that's the whole bug.
+
+`range(n)` produces `0, 1, ..., n-1`, so you're adding `0+1+...+(n-1)` instead of `1+2+...+n`. The missing piece is exactly `n` each time (check `n=5`: you get 10, not 15).
+
+Two ways to fix it:
+
+```python
+for i in range(1, n + 1):   # stops BEFORE n+1, so n is included
+    total += i
+```
+
+or keep your loop and start counting at 1 differently — note that adding `0` does nothing, so the range must simply include `n`.
+
+A useful habit: before running, trace the loop on the smallest sample by hand (`n=1`). If your code prints 0 there but the expected answer is 1, you know the range's end is off by one.
+```
+
+### wrong-comparison (4.62s, tools=get_question,get_code, 520 chars)
+
+```markdown
+Your logic is inverted — you're printing the *smaller* value.
+
+Look at the branches: when `a > b` is true, the larger value is `a`, but you `print(b)`. Same swap in the `else`.
+
+A quick way to check yourself: trace test 1 (`a=3, b=5`). Is `3 > 5`? No → so you go to `else` and print `a`, which is `3`, but the expected output is `5`.
+
+Also worth remembering: Python's `max(a, b)` does exactly this in one line, including when `a == b` (which your current code handles correctly, so keep that property if you rewrite it).
+```
+
+### wrong-comparison (4.95s, tools=get_question,get_code, 514 chars)
+
+```markdown
+Look at your two `print` branches — they're swapped. Your condition `a > b` is fine, but in that branch you print `b` (the smaller one), and in the `else` you print `a`.
+
+Trace test 1 mentally: `a=3, b=5`. Is `a > b`? No → the `else` branch runs, so it prints `3`, but the expected output is `5`.
+
+So either print the other variable in each branch, or keep the body and flip the comparison to `a < b`. Also worth noting: when `a == b` your `else` path runs — that's still correct output here, since both are equal.
+```
+
+### missing-empty-edge (9.88s, tools=get_question,get_code, 483 chars)
+
+```markdown
+Your crash is an `IndexError`: `line.split()` returns an **empty list** when the line has no words — that happens for a truly empty line, but also for a line that is only spaces (e.g. `"   "`). Then `words[0]` doesn't exist.
+
+Before indexing, check the length (or truthiness) of the list and print the fallback instead:
+
+```python
+if words:
+    print(words[0])
+else:
+    print("EMPTY")
+```
+
+Try feeding your program a line containing only spaces to confirm the same crash disappears.
+```
+
+### missing-empty-edge (9.25s, tools=get_question,get_code, 650 chars)
+
+```markdown
+**Which input crashes it?** An empty line (or one with only spaces). `"".split()` returns `[]` — an *empty list*, not a list containing an empty string — so `words[0]` raises `IndexError`.
+
+That's exactly the case the statement calls out ("the line may be empty" → print `EMPTY`).
+
+Hint: test `len(words)` (or `if words:`) *before* indexing, and only then reach for element 0.
+
+```python
+words = line.split()
+if len(words) == 0:
+    print("EMPTY")
+else:
+    print(words[0])
+```
+
+Note that `split()` with no arguments already collapses runs of spaces and strips leading/trailing whitespace, so you don't need extra cleanup — just the empty-list guard.
+```
+
+### int-vs-str (10.86s, tools=get_question,get_code, 503 chars)
+
+```markdown
+`input()` gives you a **string**, so `a + b` is string concatenation: `"2" + "3"` → `"23"`. You need to convert each line to an integer before adding.
+
+```python
+a = int(input())
+b = int(input())
+print(a + b)
+```
+
+Quick way to spot this yourself: `print(type(input()))` shows `<class 'str'>`, and `2 + 3` vs `"2" + "3"` behave very differently.
+
+Also note that reading both lines separately (one `input()` per line) matches the "one per line" input format here — that part of your code is already right.
+```
+
+### int-vs-str (5.57s, tools=get_question,get_code, 410 chars)
+
+```markdown
+`input()` hands you back a **string**, not a number — so `a + b` is string concatenation: `"2" + "3"` → `"23"`.
+
+You need to convert each line to an integer before adding:
+
+```python
+a = int(input())
+b = int(input())
+print(a + b)
+```
+
+Quick check on the second sample: `"10" + "20"` gives `"1020"`, but `10 + 20` gives `30`. If you're ever unsure what type you have, `print(type(a))` will show `<class 'str'>`.
+```
+
+### tle-quadratic (8.83s, tools=get_question,get_code, 763 chars)
+
+```markdown
+Your double loop is O(N²) — with N = 200 000 that's ~4×10¹⁰ operations, far past the 1 s limit.
+
+The key idea: you don't need to compare every pair. Walk through the list once and, for each value `x`, just ask "have I already seen `-x`?" A `set` answers that in O(1), giving O(N) total.
+
+```python
+seen = set()
+for x in xs:
+    if -x in seen:
+        ...   # found a pair
+    seen.add(x)
+```
+
+Note the order above: check membership **before** adding `x`. That automatically handles the tricky case of `0` — a lone `0` pairs with nothing, but a second `0` will match the first one in `seen`.
+
+One more practical tip: with 200 000 numbers the input may be split across several lines, so read it robustly, e.g. `xs = list(map(int, sys.stdin.buffer.read().split()))`.
+```
+
+### tle-quadratic (9.01s, tools=get_question,get_code, 869 chars)
+
+```markdown
+Your double loop is O(N²) — with N = 200 000 that's ~4×10¹⁰ operations, far past the 1 s limit. You only need to look at each element once.
+
+Key idea: while scanning left to right, remember the values you've already seen. For the current value `x`, a partner exists iff `-x` is in that remembered collection. A `set` gives O(1) membership checks, so the whole scan is O(N).
+
+```python
+seen = set()
+for x in xs:
+    if -x in seen:
+        ...  # found
+    seen.add(x)
+```
+
+Two things to watch:
+
+- **Order matters:** check `-x in seen` *before* adding `x`, otherwise a lone `0` would match itself (the problem demands two *distinct* elements, so a single zero must print NO, but two zeros must print YES).
+- Also `break` out of the loop as soon as you find a pair — no need to keep reading work you don't need.
+
+That drops you from quadratic to linear, which easily fits.
+```
+
