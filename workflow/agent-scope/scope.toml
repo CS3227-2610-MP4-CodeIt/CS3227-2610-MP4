@@ -27,6 +27,7 @@ allow = [
   "code-execution/**",
   "specs/**",
   "docs/**",
+  "workflow/implementations/**",
 ]
 block = [
   "**/.env",

@@ -129,13 +129,18 @@ def test_patch_add_and_delete_targets():
         "*** Delete File: backend/app/old.py\n"
         "*** End Patch"
     )
-    assert guard._targets_in_patch(body) == ["frontend/src/new.tsx", "backend/app/old.py"]
+    assert guard._targets_in_patch(body) == [
+        "frontend/src/new.tsx",
+        "backend/app/old.py",
+    ]
 
 
 def test_patch_absolute_path_normalized_and_checked():
     # The real captured payload: a reviewer editing .env via apply_patch.
     abs_env = str((guard.REPO / ".env").resolve())
-    body = f"*** Begin Patch\n*** Update File: {abs_env}\n@@\n-hi\n+hello\n*** End Patch"
+    body = (
+        f"*** Begin Patch\n*** Update File: {abs_env}\n@@\n-hi\n+hello\n*** End Patch"
+    )
     rel = guard._repo_relative(guard._targets_in_patch(body)[0])
     assert rel == ".env"
     reviewer = guard.ScopeLedger.load().by_role["code_quality_reviewer"]
@@ -143,7 +148,9 @@ def test_patch_absolute_path_normalized_and_checked():
 
 
 def test_written_targets_dispatches_by_tool():
-    assert guard._written_targets("apply_patch", {"command": "*** Update File: a.py\n"}) == ["a.py"]
+    assert guard._written_targets(
+        "apply_patch", {"command": "*** Update File: a.py\n"}
+    ) == ["a.py"]
     assert guard._written_targets("Bash", {"command": "echo x > a.py"}) == ["a.py"]
     assert guard._written_targets("collaborationspawn_agent", {"message": "go"}) == []
 
@@ -228,11 +235,207 @@ def test_guard_ignores_non_write_spawn_tool():
     }
     assert run_guard_with(payload) == 0
 
+
+# --- session-audit: rollout-based post-check -------------------------------
+
+
+def _rollout_line(**payload):
+    return json.dumps({"type": "response_item", "payload": payload})
+
+
+def _meta_line(role=None):
+    payload = {"type": "session_meta"}
+    if role is not None:
+        payload["agent_type"] = role
+    return json.dumps({"type": "session_meta", "payload": payload})
+
+
+def _exec_call(cmd):
+    """A custom_tool_call 'exec' wrapping a shell command, as Codex records it."""
+    wrapped = (
+        "const r = await tools.exec_command({cmd:"
+        + json.dumps(cmd)
+        + ',workdir:"/x"}); text(r)'
+    )
+    return _rollout_line(type="custom_tool_call", name="exec", input=wrapped)
+
+
+def test_unwrap_exec_command_extracts_cmd():
+    raw = 'const r = await tools.exec_command({cmd:"cat > a.py",workdir:"/x"}); text(r)'
+    assert guard._unwrap_exec_command(raw) == "cat > a.py"
+
+
+def test_unwrap_exec_command_decodes_escapes():
+    raw = 'const r = await tools.exec_command({cmd:"cat > a.py <<\\u0027EOF\\u0027\\nhi\\nEOF"})'
+    out = guard._unwrap_exec_command(raw)
+    assert out is not None and out.startswith("cat > a.py")
+
+
+def test_unwrap_exec_command_ignores_non_exec():
+    assert guard._unwrap_exec_command("not an exec wrapper") is None
+
+
+def test_audit_actors_flags_out_of_lane_write():
+    ledger = guard.ScopeLedger.load()
+    actors = [
+        (
+            "s1",
+            "code_quality_reviewer",
+            [
+                {"kind": "cmd", "command": "cat > backend/app/sneaky.py"},
+                {"kind": "cmd", "command": "cat > workflow/reviews/ok.md"},
+            ],
+        )
+    ]
+    findings = guard.audit_rollout_actors(actors, ledger)
+    assert [f.path for f in findings] == ["backend/app/sneaky.py"]
+    assert findings[0].role == "code_quality_reviewer"
+
+
+def test_audit_actors_allows_in_lane_only():
+    ledger = guard.ScopeLedger.load()
+    actors = [
+        (
+            "s1",
+            "code_quality_reviewer",
+            [{"kind": "cmd", "command": "cat > workflow/reviews/x.md"}],
+        )
+    ]
+    assert guard.audit_rollout_actors(actors, ledger) == []
+
+
+def test_audit_actors_unscoped_role_is_unrestricted():
+    ledger = guard.ScopeLedger.load()
+    # No role (orchestrator / main session) -> no policy -> no findings.
+    actors = [
+        ("s1", None, [{"kind": "cmd", "command": "cat > backend/app/anything.py"}])
+    ]
+    assert guard.audit_rollout_actors(actors, ledger) == []
+
+
+def test_audit_actors_apply_patch_event():
+    ledger = guard.ScopeLedger.load()
+    patch = "*** Begin Patch\n*** Add File: backend/app/x.py\n+print(1)\n*** End Patch"
+    actors = [
+        (
+            "s1",
+            "code_quality_reviewer",
+            [{"kind": "tool", "tool": "apply_patch", "command": patch}],
+        )
+    ]
+    findings = guard.audit_rollout_actors(actors, ledger)
+    assert [f.path for f in findings] == ["backend/app/x.py"]
+
+
+def test_actors_from_rollout_reads_role_and_exec_writes(tmp_path):
+    rollout = tmp_path / "rollout-x.jsonl"
+    rollout.write_text(
+        "\n".join(
+            [
+                _meta_line("code_quality_reviewer"),
+                _exec_call("cat .agents/skills/x.md"),
+                _exec_call("cat > backend/app/sneaky.py"),
+                _exec_call("cat > workflow/reviews/ok.md"),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    actors = guard._actors_from_rollout(rollout)
+    assert len(actors) == 1
+    session_id, role, events = actors[0]
+    assert role == "code_quality_reviewer"
+    assert [e["command"] for e in events] == [
+        "cat .agents/skills/x.md",
+        "cat > backend/app/sneaky.py",
+        "cat > workflow/reviews/ok.md",
+    ]
+
+
+def test_run_session_audit_violation_exits_1_and_logs(tmp_path):
+    rollout = tmp_path / "rollout-viol.jsonl"
+    rollout.write_text(
+        "\n".join(
+            [
+                _meta_line("code_quality_reviewer"),
+                _exec_call("cat > backend/app/sneaky.py"),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    log = tmp_path / "audit-log.tsv"
+    rc = guard.run_session_audit(str(rollout), str(log))
+    assert rc == 1
+    body = log.read_text(encoding="utf-8")
+    assert "BLOCKED" in body and "backend/app/sneaky.py" in body
+    assert "code_quality_reviewer" in body
+
+
+def test_run_session_audit_clean_exits_0_and_logs_clean(tmp_path):
+    rollout = tmp_path / "rollout-clean.jsonl"
+    rollout.write_text(
+        "\n".join(
+            [
+                _meta_line("code_quality_reviewer"),
+                _exec_call("cat > workflow/reviews/ok.md"),
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    log = tmp_path / "audit-log.tsv"
+    rc = guard.run_session_audit(str(rollout), str(log))
+    assert rc == 0
+    assert "CLEAN" in log.read_text(encoding="utf-8")
+
+
+def test_run_session_audit_missing_rollout_is_quiet(tmp_path):
+    rc = guard.run_session_audit(
+        str(tmp_path / "does-not-exist.jsonl"), str(tmp_path / "log.tsv")
+    )
+    assert rc == 0  # never fails the turn
+
+
+def test_tool_event_exec_wrapper_is_not_parsed_as_bash():
+    # A `tool`-kind event carrying the exec JS wrapper must NOT be parsed for
+    # paths (the parallel `cmd`-kind event carries the real shell command).
+    # Guards against false positives like `max_output_tokens:5000` -> "5000".
+    ev = {
+        "kind": "tool",
+        "tool": "exec",
+        "command": 'const r = await tools.exec_command({cmd:"cat x",max_output_tokens:5000})',
+    }
+    assert guard._tool_and_input_from_event(ev) is None
+
+
+def test_tool_event_apply_patch_is_parsed():
+    ev = {
+        "kind": "tool",
+        "tool": "apply_patch",
+        "command": "*** Begin Patch\n*** Add File: backend/app/x.py\n+x\n*** End Patch",
+    }
+    mapped = guard._tool_and_input_from_event(ev)
+    assert mapped is not None and mapped[0] == "apply_patch"
+
+
+def test_implementer_may_write_implementation_log():
+    # The implement-task skill writes workflow/implementations/<id>.md; policy
+    # must permit it.
+    ledger = guard.ScopeLedger.load()
+    policy = ledger.policy_for("task_implementer")
+    assert policy.permits("workflow/implementations/task-7-run-1.md")
+    # but still not review artifacts or task briefs
+    assert not policy.permits("workflow/reviews/x.md")
+    assert not policy.permits("workflow/tasks/x.md")
+
+
 def test_heredoc_body_not_scanned_for_redirects():
     # A python heredoc whose BODY contains '>' must not yield a target from the
     # body (regression: 'max_output_tokens > 5000' produced the path '5000').
     cmd = "python3 - <<'PY'\nx = 1 if a > 5000 else 0\nopen('p','w')\nPY"
     assert guard._targets_in_bash(cmd) == []
+
 
 def test_heredoc_with_leading_redirect_still_caught():
     # `cat > file <<EOF` redirects to file THEN reads a here-doc; the file
@@ -240,6 +443,34 @@ def test_heredoc_with_leading_redirect_still_caught():
     cmd = "cat > workflow/reviews/r.md <<'EOF'\nhello\nEOF"
     assert guard._targets_in_bash(cmd) == ["workflow/reviews/r.md"]
 
+
 def test_append_heredoc_target_caught():
     cmd = "cat >> backend/tests/test_x.py <<'EOF'\nbody\nEOF"
     assert guard._targets_in_bash(cmd) == ["backend/tests/test_x.py"]
+
+
+def test_subdir_relative_path_not_flagged_without_cwd():
+    # `cat >> tests/test_student.py` run from backend/ is really
+    # backend/tests/test_student.py (in lane). The post-check has no cwd, and
+    # `tests` is not a top-level repo entry, so it must NOT be flagged.
+    ledger = guard.ScopeLedger.load()
+    actors = [("s1", "task_implementer", [{"kind": "cmd", "command": "cat >> tests/test_student.py"}])]
+    assert guard.audit_rollout_actors(actors, ledger) == []
+
+
+def test_repo_rooted_violation_still_flagged():
+    # A repo-rooted path (first segment is a real top-level dir) is unambiguous
+    # and a genuine out-of-lane write must still be caught.
+    ledger = guard.ScopeLedger.load()
+    actors = [
+        ("s1", "code_quality_reviewer", [{"kind": "cmd", "command": "cat > backend/app/sneaky.py"}])
+    ]
+    findings = guard.audit_rollout_actors(actors, ledger)
+    assert [f.path for f in findings] == ["backend/app/sneaky.py"]
+
+
+def test_confidently_repo_rooted_classification():
+    assert guard._confidently_repo_rooted("backend/app/x.py")  # real top-level dir
+    assert guard._confidently_repo_rooted("workflow/reviews/x.md")
+    assert not guard._confidently_repo_rooted("tests/x.py")  # no top-level 'tests'
+    assert not guard._confidently_repo_rooted("src/x.ts")  # no top-level 'src'

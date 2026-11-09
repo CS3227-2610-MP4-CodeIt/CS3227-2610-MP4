@@ -272,7 +272,9 @@ def run_audit(role: str, baseline: str | None) -> int:
 
 
 def _fingerprint(root: Path = REPO) -> dict:
-    listing = _run_git("ls-files", "--cached", "--others", "--exclude-standard", root=root)
+    listing = _run_git(
+        "ls-files", "--cached", "--others", "--exclude-standard", root=root
+    )
     digests: dict[str, str] = {}
     for name in sorted(filter(None, listing.splitlines())):
         blob = root / name
@@ -313,6 +315,269 @@ def run_verify(manifest: str) -> int:
     return 0
 
 
+# --- session-audit: rollout-based post-check -------------------------------
+#
+# The live guard only sees a write as Codex dispatches it, and only in a client
+# that runs PreToolUse hooks. This mode instead reads a finished Codex session
+# rollout (the transcript Codex writes under ~/.codex/sessions) and attributes
+# every write to the role that made it, independent of client or transport. It
+# is the authoritative per-role post-check: a human can read its log and see
+# where each role stayed in or stepped outside its lane.
+
+
+@dataclass(frozen=True)
+class ScopeFinding:
+    """One out-of-lane write discovered in a rollout."""
+
+    role: str
+    path: str
+    tool: str
+    session_id: str
+
+
+def _tool_and_input_from_event(event: dict) -> tuple[str, dict] | None:
+    """Map a rollout timeline event to guard's (tool_name, tool_input) contract.
+
+    Returns None for events that are not write-capable tool calls. A shell
+    command maps to Bash; a custom tool call to its tool name (apply_patch is
+    the one that yields paths). Anything else is left for the caller to skip.
+    """
+    kind = event.get("kind")
+    if kind == "cmd":
+        command = event.get("command")
+        if not isinstance(command, str):
+            return None
+        return "Bash", {"command": command}
+    if kind == "tool":
+        tool = event.get("tool")
+        command = event.get("command")
+        if not isinstance(tool, str) or not isinstance(command, str):
+            return None
+        # Only apply_patch is a write we can parse from a tool event. Other tool
+        # calls (notably the `exec`/`unified_exec` JS wrapper
+        # `const r = await tools.exec_command({cmd:"..."})`) are duplicated by a
+        # normalized `cmd`-kind event in the same timeline, so processing the raw
+        # wrapper here would both double-count and mis-parse stray tokens such as
+        # `max_output_tokens:5000`. Skip them; the `cmd` event carries the shell.
+        if tool != "apply_patch":
+            return None
+        return tool, {"command": command}
+    return None
+
+
+def _top_level_repo_entries(root: Path = REPO) -> set[str]:
+    """Names of the repository's top-level entries, used to tell a repo-rooted
+    path (``backend/app/x.py``) from a subdirectory-relative one (``tests/x.py``
+    run from ``backend/``)."""
+    try:
+        return {p.name for p in root.iterdir()}
+    except OSError:
+        return set()
+
+
+def _confidently_repo_rooted(target: str, root: Path = REPO) -> bool:
+    """True when a path can be trusted as repo-relative without knowing the cwd.
+
+    The post-check sees commands without a reliable working directory, so a bare
+    relative path like ``tests/x.py`` is ambiguous: it may be ``backend/tests/x.py``
+    written from ``backend/``. Treat a relative path as repo-rooted only when its
+    first segment is an actual top-level repo entry (``backend/...`` is safe;
+    ``tests/...`` is not, since this repo has no top-level ``tests``). Absolute
+    paths inside the repo are always trusted. Unclassifiable paths are skipped
+    rather than flagged, to avoid accusing a correctly-placed write.
+    """
+    if Path(target).is_absolute():
+        return True
+    first = Path(target).parts[0] if Path(target).parts else ""
+    return first in _top_level_repo_entries(root)
+
+
+def _findings_for_actor(
+    ledger: ScopeLedger,
+    role: str | None,
+    events: list[dict],
+    session_id: str,
+) -> list[ScopeFinding]:
+    """Out-of-lane writes an actor made, by replaying its timeline events."""
+    policy = ledger.policy_for(role)
+    if policy is None:
+        return []  # orchestrator or an unscoped built-in agent
+    findings: list[ScopeFinding] = []
+    for event in events:
+        mapped = _tool_and_input_from_event(event)
+        if mapped is None:
+            continue
+        tool_name, tool_input = mapped
+        for target in _written_targets(tool_name, tool_input):
+            if not _confidently_repo_rooted(target):
+                continue  # cwd unknown and path not repo-rooted; can't classify
+            rel = _repo_relative(target)
+            if rel is None:
+                continue  # outside the repository; not ours to police
+            if not policy.permits(rel):
+                findings.append(ScopeFinding(role or "", rel, tool_name, session_id))
+    return findings
+
+
+def audit_rollout_actors(
+    actors: list[tuple[str, str | None, list[dict]]],
+    ledger: ScopeLedger | None = None,
+) -> list[ScopeFinding]:
+    """Scope-check a list of (session_id, role, events) actors.
+
+    This is the reusable seam for the eval harness: it already parses rollouts
+    into per-actor role + normalized events, so it can hand that structure here
+    and surface the findings in its usage report without re-reading the file.
+    """
+    if ledger is None:
+        ledger = ScopeLedger.load()
+    findings: list[ScopeFinding] = []
+    for session_id, role, events in actors:
+        findings.extend(_findings_for_actor(ledger, role, events, session_id))
+    return findings
+
+
+_EXEC_CMD = re.compile(r'tools\.exec_command\(\s*\{\s*cmd\s*:\s*"((?:[^"\\]|\\.)*)"')
+
+
+def _unwrap_exec_command(raw: str) -> str | None:
+    """Pull the shell command out of a `tools.exec_command({cmd:"..."})` call.
+
+    Codex's unified-exec tool arrives as a JS wrapper in the rollout, with the
+    real shell command as the quoted `cmd:` value. Returns the decoded command,
+    or None if the input is not an exec wrapper.
+    """
+    match = _EXEC_CMD.search(raw or "")
+    if match is None:
+        return None
+    # The captured group is a JS string literal; decode its escapes.
+    try:
+        return json.loads(f'"{match.group(1)}"')
+    except ValueError:
+        return match.group(1)
+
+
+def _actors_from_rollout(rollout: Path) -> list[tuple[str, str | None, list[dict]]]:
+    """Parse one rollout file into (session_id, role, events) standalone.
+
+    A minimal, dependency-free reader so this mode works without the eval
+    harness. Each line is a JSON record; we recover the session's role from the
+    session_meta payload and the write events from function/custom tool calls.
+    Codex encodes shell writes as a `custom_tool_call` named ``exec`` whose
+    input wraps the real command in ``tools.exec_command({cmd:"..."})``; those
+    are unwrapped to a Bash command. A bare ``apply_patch`` tool call is passed
+    through as a patch body.
+    """
+    session_id = rollout.stem
+    role: str | None = None
+    events: list[dict] = []
+    for line in rollout.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            record = json.loads(line)
+        except ValueError:
+            continue
+        payload = record.get("payload", record)
+        if not isinstance(payload, dict):
+            continue
+        rtype = record.get("type") or payload.get("type")
+        if rtype == "session_meta":
+            role = role or payload.get("agent_role") or payload.get("agent_type")
+            source = payload.get("source")
+            if role is None and isinstance(source, dict):
+                spec = source.get("subagent", {}).get("thread_spawn", {})
+                role = spec.get("agent_role") or spec.get("agent_type")
+            continue
+        ptype = payload.get("type")
+        if ptype == "custom_tool_call":
+            name = payload.get("name")
+            raw_input = payload.get("input")
+            if not isinstance(raw_input, str):
+                continue
+            if name == "exec":
+                command = _unwrap_exec_command(raw_input)
+                if command is not None:
+                    events.append({"kind": "cmd", "command": command})
+            elif name == "apply_patch":
+                events.append(
+                    {"kind": "tool", "tool": "apply_patch", "command": raw_input}
+                )
+        elif ptype in ("local_shell_call", "function_call") and payload.get("name") in (
+            "shell",
+            "exec",
+            "bash",
+        ):
+            args = payload.get("arguments") or payload.get("action") or ""
+            command = _unwrap_exec_command(args) if isinstance(args, str) else None
+            if command is None and isinstance(args, str):
+                command = args
+            if command:
+                events.append({"kind": "cmd", "command": command})
+    return [(session_id, role, events)]
+
+
+def run_session_audit(rollout_path: str | None, log_path: str | None) -> int:
+    """Scope-check a rollout and record the result.
+
+    Always appends a one-line outcome to the audit log (so a clean run leaves
+    positive evidence it ran), and writes a detailed record per violation.
+    Exits 1 when any out-of-lane write is found, else 0. Never fails the turn:
+    an unreadable rollout is reported and exits 0 so a Stop hook stays quiet.
+    """
+    import datetime
+
+    log = Path(log_path) if log_path else (HERE / "audit-log.tsv")
+    stamp = datetime.datetime.now().isoformat(timespec="seconds")
+
+    if rollout_path:
+        rollout = Path(rollout_path)
+    else:
+        rollout = _latest_rollout()
+    if rollout is None or not rollout.is_file():
+        print("agent-scope: no rollout to audit", file=sys.stderr)
+        return 0
+
+    try:
+        actors = _actors_from_rollout(rollout)
+        findings = audit_rollout_actors(actors)
+    except (OSError, ValueError) as err:
+        print(f"agent-scope: cannot audit rollout: {err}", file=sys.stderr)
+        return 0
+
+    try:
+        with log.open("a", encoding="utf-8") as fh:
+            if findings:
+                for f in findings:
+                    fh.write(
+                        f"{stamp}\t{f.session_id}\t{f.role}\tBLOCKED\t{f.tool}\t{f.path}\n"
+                    )
+            else:
+                fh.write(f"{stamp}\t{rollout.stem}\t-\tCLEAN\t-\t-\n")
+    except OSError:
+        pass
+
+    if findings:
+        print(f"agent-scope: {len(findings)} out-of-lane write(s) in {rollout.name}:")
+        for f in findings:
+            print(f"  {f.role} wrote {f.path} ({f.tool})")
+        return 1
+    print(f"agent-scope: every write in {rollout.name} stayed within role scope.")
+    return 0
+
+
+def _latest_rollout() -> Path | None:
+    """Most-recently-modified Codex rollout under ~/.codex/sessions."""
+    root = Path.home() / ".codex" / "sessions"
+    if not root.is_dir():
+        return None
+    rollouts = list(root.rglob("rollout-*.jsonl"))
+    if not rollouts:
+        return None
+    return max(rollouts, key=lambda p: p.stat().st_mtime)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__.split("\n", 1)[0])
     modes = parser.add_subparsers(dest="mode", required=True)
@@ -320,10 +585,17 @@ def build_parser() -> argparse.ArgumentParser:
     a = modes.add_parser("audit", help="authoritative diff check for a role")
     a.add_argument("role")
     a.add_argument("--baseline", help="commit recorded before the role ran")
-    modes.add_parser("pin", help="record a steady-candidate manifest").add_argument("manifest")
-    modes.add_parser("verify", help="confirm a candidate against its manifest").add_argument(
+    sa = modes.add_parser("session-audit", help="rollout-based per-role post-check")
+    sa.add_argument("rollout", nargs="?", help="rollout .jsonl (default: newest)")
+    sa.add_argument(
+        "--log", help="audit log path (default: audit-log.tsv beside this tool)"
+    )
+    modes.add_parser("pin", help="record a steady-candidate manifest").add_argument(
         "manifest"
     )
+    modes.add_parser(
+        "verify", help="confirm a candidate against its manifest"
+    ).add_argument("manifest")
     return parser
 
 
@@ -333,6 +605,8 @@ def main(argv: list[str]) -> int:
         return run_guard()
     if args.mode == "audit":
         return run_audit(args.role, args.baseline)
+    if args.mode == "session-audit":
+        return run_session_audit(args.rollout, args.log)
     if args.mode == "pin":
         return run_pin(args.manifest)
     if args.mode == "verify":
