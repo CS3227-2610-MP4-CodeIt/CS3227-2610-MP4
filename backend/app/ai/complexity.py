@@ -65,7 +65,9 @@ async def run_complexity(ctx: AppContext, job_input: dict[str, Any]) -> dict[str
 
         try:
             async with asyncio.timeout(attempt_timeout):
-                reply = await ctx.llm.chat(messages, max_tokens=1500)
+                reply = await ctx.llm.chat(
+                    messages, max_tokens=1500, model=ctx.settings.complexity_model
+                )
         except TimeoutError:
             continue
         except Exception:

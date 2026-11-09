@@ -472,6 +472,7 @@ async def test_complexity_uses_completed_submission_only(
     job = await wait_for_job(response.json()["job"]["id"])
     assert job.status == "success" and job.result == result
     payload = request_json(llm_route.calls[0])
+    assert payload["model"] == "qwen3.6:35b"
     assert "for x in xs" in json.dumps(payload)
     assert "tools" not in payload and "40 2" not in json.dumps(payload)
     assert (await client.get(route, headers=student.headers)).json()["job"]["id"] == job.id
