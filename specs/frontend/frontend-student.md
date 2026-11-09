@@ -17,6 +17,9 @@ it. Drafts stay on that browser only.
 - **Save:** on every edit, debounced by 1 s, and once more when leaving the page.
 - **Value:** the code string. If `localStorage` is full or unavailable, skip saving and keep
   working; drafts are a convenience, not a guarantee.
+- The editor shows `Saving draft…` while the debounced write is pending, `Draft saved on this device`
+  after a successful local write, or `Draft could not be saved on this device` when storage is
+  unavailable. This status describes browser-local storage only, not a server save.
 - Drafts are **not** cleared on submit or logout; the draft is always the latest thing typed.
 
 ### 1.2 Loading the editor
@@ -67,6 +70,11 @@ Two columns on wide screens (statement left, editor + panels right), stacked on 
   (stdin / expected stdout, each with a copy button).
 - **Editor** (§1) with three buttons: Run, Submit, Get hint.
 - **Panels** (tabs): Run result, Submit result, Hint, Submissions.
+- A question-mark help control beside the editor actions reveals the input/output guidance and
+  concise descriptions of Run, Submit, and Get hint on hover, keyboard focus, or activation.
+- At narrow widths, provide in-page Problem, Editor, and Results shortcuts to the corresponding
+  sections. These shortcuts are hidden at wide widths and do not navigate between assignment
+  questions.
 
 The three jobs share one target key (backend §6.1) and are independent, so a hint and a run can be
 in progress at the same time:

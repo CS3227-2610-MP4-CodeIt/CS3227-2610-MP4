@@ -92,7 +92,8 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
     );
     if (init !== null) setCode(init);
   }
-  const scheduleSave = useDraftSaver(storageKey);
+  const { schedule: scheduleSave, status: draftStatus } =
+    useDraftSaver(storageKey);
   const edit = (value: string) => {
     setCode(value);
     scheduleSave(value);
@@ -128,12 +129,45 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
               </span>
             )}
           </div>
+          <nav
+            aria-label="Question sections"
+            className="flex flex-wrap gap-2 lg:hidden"
+          >
+            <a
+              className="rounded border border-slate-300 bg-white px-2 py-1 text-sm text-blue-700"
+              href="#problem"
+            >
+              Problem
+            </a>
+            <a
+              className="rounded border border-slate-300 bg-white px-2 py-1 text-sm text-blue-700"
+              href="#editor-card"
+            >
+              Editor
+            </a>
+            <a
+              className="rounded border border-slate-300 bg-white px-2 py-1 text-sm text-blue-700"
+              href="#results-card"
+            >
+              Results
+            </a>
+          </nav>
           <SplitPane
             label="Resize statement and editor"
-            left={<Statement question={q} />}
+            left={
+              <div id="problem" className="scroll-mt-4">
+                <Statement question={q} />
+              </div>
+            }
             right={
               <div className="min-w-0 space-y-4">
-                <div className="card space-y-3">
+                <div id="editor-card" className="card scroll-mt-4 space-y-3">
+                  <div className="flex min-h-6 items-center justify-between gap-3">
+                    <DraftStatus
+                      status={draftStatus ?? (draft !== null ? "saved" : null)}
+                    />
+                    <ActionHelp />
+                  </div>
                   {code === null ? (
                     <Spinner label="Loading your code…" />
                   ) : (
@@ -223,7 +257,7 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
                   <ErrorText error={startSubmit.error} />
                   <ErrorText error={startHint.error} />
                 </div>
-                <div className="card space-y-3">
+                <div id="results-card" className="card scroll-mt-4 space-y-3">
                   <div
                     className="flex flex-wrap gap-1 border-b border-slate-200 pb-2"
                     role="tablist"
@@ -298,6 +332,57 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
         </div>
       )}
     </QueryView>
+  );
+}
+
+function DraftStatus({
+  status,
+}: {
+  status: ReturnType<typeof useDraftSaver>["status"];
+}) {
+  if (!status) return null;
+  const labels = {
+    saving: "Saving draft…",
+    saved: "Draft saved on this device",
+    unavailable: "Draft could not be saved on this device",
+  };
+  return (
+    <p
+      className={`text-xs ${status === "unavailable" ? "text-red-700" : "text-slate-500"}`}
+    >
+      {labels[status]}
+    </p>
+  );
+}
+
+function ActionHelp() {
+  return (
+    <details className="action-help relative ml-auto">
+      <summary
+        aria-label="Help with input, output, and actions"
+        className="flex h-6 w-6 cursor-pointer list-none items-center justify-center rounded-full border border-slate-300 text-xs font-semibold text-slate-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 [&::-webkit-details-marker]:hidden"
+      >
+        ?
+      </summary>
+      <div className="action-help-panel absolute right-0 top-8 z-20 w-[min(19rem,calc(100vw-3rem))] space-y-2 rounded border border-slate-300 bg-white p-3 text-xs leading-relaxed text-slate-700 shadow-lg">
+        <p>
+          <strong>Input and output</strong>
+          <br />
+          Read input from standard input using <code>input()</code>, and write
+          output using <code>print()</code>. Follow the format in the problem
+          statement.
+        </p>
+        <p>
+          <strong>Run</strong> checks visible tests.
+        </p>
+        <p>
+          <strong>Submit</strong> checks all tests and records your submission.
+        </p>
+        <p>
+          <strong>Get hint</strong> offers an instructional nudge.
+        </p>
+      </div>
+    </details>
   );
 }
 
