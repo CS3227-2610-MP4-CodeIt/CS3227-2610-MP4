@@ -30,8 +30,12 @@ describe("drafts", () => {
 
   it("skips saving when storage is full", () => {
     full = true;
-    expect(() => saveDraft(draftKey(1, 2, 3), "x")).not.toThrow();
+    expect(saveDraft(draftKey(1, 2, 3), "x")).toBe(false);
     expect(loadDraft(draftKey(1, 2, 3))).toBeNull();
+  });
+
+  it("reports a successful local save", () => {
+    expect(saveDraft(draftKey(1, 2, 3), "x")).toBe(true);
   });
 
   it("keeps an empty draft as a draft", () => {

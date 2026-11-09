@@ -12,11 +12,13 @@ export function loadDraft(key: string): string | null {
   }
 }
 
-export function saveDraft(key: string, code: string) {
+export function saveDraft(key: string, code: string): boolean {
   try {
     localStorage.setItem(key, code);
+    return true;
   } catch {
     // full or unavailable storage: skip saving
+    return false;
   }
 }
 

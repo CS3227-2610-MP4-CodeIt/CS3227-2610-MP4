@@ -92,7 +92,8 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
     );
     if (init !== null) setCode(init);
   }
-  const scheduleSave = useDraftSaver(storageKey);
+  const { schedule: scheduleSave, status: draftStatus } =
+    useDraftSaver(storageKey);
   const edit = (value: string) => {
     setCode(value);
     scheduleSave(value);
@@ -135,6 +136,9 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
               <div className="min-w-0 space-y-4">
                 <div className="card space-y-3">
                   <div className="flex min-h-6 items-center justify-between gap-3">
+                    <DraftStatus
+                      status={draftStatus ?? (draft !== null ? "saved" : null)}
+                    />
                     <ActionHelp />
                   </div>
                   {code === null ? (
@@ -301,6 +305,26 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
         </div>
       )}
     </QueryView>
+  );
+}
+
+function DraftStatus({
+  status,
+}: {
+  status: ReturnType<typeof useDraftSaver>["status"];
+}) {
+  if (!status) return null;
+  const labels = {
+    saving: "Saving draft…",
+    saved: "Draft saved on this device",
+    unavailable: "Draft could not be saved on this device",
+  };
+  return (
+    <p
+      className={`text-xs ${status === "unavailable" ? "text-red-700" : "text-slate-500"}`}
+    >
+      {labels[status]}
+    </p>
   );
 }
 
