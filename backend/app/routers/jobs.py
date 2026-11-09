@@ -1,3 +1,5 @@
+import re
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth import current_user
@@ -17,4 +19,11 @@ async def get_job(
     job = await jobs_repo.get(ctx.db, job_id)
     if job is None or job.user_id != user.id:
         raise HTTPException(status_code=404, detail="job not found")
+    if job.kind == "complexity":
+        from app.routers.student import _complexity_submission
+
+        match = re.fullmatch(r"a(\d+):q(\d+):s(\d+)", job.target_key)
+        if user.role != "student" or match is None:
+            raise HTTPException(status_code=404, detail="job not found")
+        await _complexity_submission(ctx, user, *(int(value) for value in match.groups()))
     return job_out(job)
