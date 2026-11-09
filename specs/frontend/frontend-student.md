@@ -72,6 +72,9 @@ Two columns on wide screens (statement left, editor + panels right), stacked on 
 - **Panels** (tabs): Run result, Submit result, Hint, Submissions.
 - A question-mark help control beside the editor actions reveals the input/output guidance and
   concise descriptions of Run, Submit, and Get hint on hover, keyboard focus, or activation.
+- At narrow widths, provide in-page Problem, Editor, and Results shortcuts to the corresponding
+  sections. These shortcuts are hidden at wide widths and do not navigate between assignment
+  questions.
 
 The three jobs share one target key (backend §6.1) and are independent, so a hint and a run can be
 in progress at the same time:

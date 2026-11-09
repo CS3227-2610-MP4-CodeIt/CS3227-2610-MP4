@@ -129,12 +129,39 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
               </span>
             )}
           </div>
+          <nav
+            aria-label="Question sections"
+            className="flex flex-wrap gap-2 lg:hidden"
+          >
+            <a
+              className="rounded border border-slate-300 bg-white px-2 py-1 text-sm text-blue-700"
+              href="#problem"
+            >
+              Problem
+            </a>
+            <a
+              className="rounded border border-slate-300 bg-white px-2 py-1 text-sm text-blue-700"
+              href="#editor-card"
+            >
+              Editor
+            </a>
+            <a
+              className="rounded border border-slate-300 bg-white px-2 py-1 text-sm text-blue-700"
+              href="#results-card"
+            >
+              Results
+            </a>
+          </nav>
           <SplitPane
             label="Resize statement and editor"
-            left={<Statement question={q} />}
+            left={
+              <div id="problem" className="scroll-mt-4">
+                <Statement question={q} />
+              </div>
+            }
             right={
               <div className="min-w-0 space-y-4">
-                <div className="card space-y-3">
+                <div id="editor-card" className="card scroll-mt-4 space-y-3">
                   <div className="flex min-h-6 items-center justify-between gap-3">
                     <DraftStatus
                       status={draftStatus ?? (draft !== null ? "saved" : null)}
@@ -230,7 +257,7 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
                   <ErrorText error={startSubmit.error} />
                   <ErrorText error={startHint.error} />
                 </div>
-                <div className="card space-y-3">
+                <div id="results-card" className="card scroll-mt-4 space-y-3">
                   <div
                     className="flex flex-wrap gap-1 border-b border-slate-200 pb-2"
                     role="tablist"
