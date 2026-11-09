@@ -19,7 +19,7 @@ MAX_IO_BYTES = 1024 * 1024
 Role = Literal["admin", "teacher", "student"]
 MemberRole = Literal["teacher", "student"]
 Difficulty = Literal["easy", "medium", "hard"]
-JobKind = Literal["run", "submit", "hint", "question_gen", "assignment_summary"]
+JobKind = Literal["run", "submit", "hint", "complexity", "question_gen", "assignment_summary"]
 JobStatus = Literal["in_process", "success", "failed"]
 Verdict = Literal[
     "ACCEPTED", "WRONG_ANSWER", "TIME_LIMIT_EXCEEDED", "MEMORY_LIMIT_EXCEEDED", "RUNTIME_ERROR"

@@ -132,7 +132,7 @@ CREATE TABLE jobs (
     id          INTEGER PRIMARY KEY,
     user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     kind        TEXT    NOT NULL
-                        CHECK (kind IN ('run', 'submit', 'hint', 'question_gen', 'assignment_summary')),
+                        CHECK (kind IN ('run', 'submit', 'hint', 'complexity', 'question_gen', 'assignment_summary')),
     -- What the job is about, e.g. 'a12:q7' (assignment 12, question 7), 'a12', or '-'.
     target_key  TEXT    NOT NULL,
     status      TEXT    NOT NULL DEFAULT 'in_process'

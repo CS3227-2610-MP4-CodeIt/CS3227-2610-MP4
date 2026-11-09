@@ -232,6 +232,8 @@ automatically, so `allow_credentials` stays `False` (it can't be combined with `
 | `GET` | `/student/assignments/{aid}/questions/{qid}/submit` | **Check** latest submit job |
 | `GET` | `/student/assignments/{aid}/questions/{qid}/submissions` | Own submission history, newest first (no code bodies) |
 | `GET` | `/student/assignments/{aid}/questions/{qid}/submissions/{sid}` | One own submission, **with** `code`. Another student's, or not for this `{aid}`/`{qid}` → `404` |
+| `POST` | `/student/assignments/{aid}/questions/{qid}/submissions/{sid}/complexity` | **New** complexity job for this completed own submission (§7.5) |
+| `GET` | `/student/assignments/{aid}/questions/{qid}/submissions/{sid}/complexity` | **Check** latest complexity job for this submission |
 | `POST` | `/student/assignments/{aid}/questions/{qid}/hint` | **New** hint job: `{code, question?}` (§7.1) |
 | `GET` | `/student/assignments/{aid}/questions/{qid}/hint` | **Check** latest hint job |
 
@@ -243,7 +245,7 @@ treated as absent.
 
 | Method | Path | Notes |
 |---|---|---|
-| `GET` | `/jobs/{id}` | Any job owned by the caller (e.g. an earlier question draft) |
+| `GET` | `/jobs/{id}` | A job owned by the caller (e.g. an earlier question draft); complexity jobs also require current membership and submission ownership |
 | `GET` | `/events` | SSE stream of job notifications for the caller only (§6.6). Any role |
 | `GET` | `/health` | No auth. `{"status": "ok"}` |
 | `GET` | `/health/ready` | No auth. `{"status": "ok"}` when the backend can reach the code executor; otherwise `503`. Used by the frontend to select its backup API. |
@@ -273,6 +275,7 @@ Jobs are keyed by **(user_id, kind, target_key)**:
 | `run` | `a{aid}:q{qid}` | student |
 | `submit` | `a{aid}:q{qid}` | student |
 | `hint` | `a{aid}:q{qid}` | student |
+| `complexity` | `a{aid}:q{qid}:s{sid}` | student |
 | `question_gen` | `-` (one stream per teacher) | teacher |
 | `assignment_summary` | `a{aid}` | admin |
 
@@ -626,11 +629,25 @@ Handler (`app/judging.py`):
 A judged wrong answer is a **successful** job (`status = success`, `verdict = WRONG_ANSWER`);
 `failed` means the judge itself could not run.
 
+### 7.5 Student submission complexity analysis (`kind = complexity`)
+
+`POST /student/assignments/{aid}/questions/{qid}/submissions/{sid}/complexity` starts
+an owner-scoped `complexity` job; `GET` on the same route checks the latest job.
+Both require student role, current membership, question admission and ownership of the
+completed submission. The target key is `a{aid}:q{qid}:s{sid}` and in-progress requests
+for the same student and snapshot deduplicate. The stored submission code (up to 64 KiB)
+is scanned and wrapped as untrusted data; it is the only question/submission content
+sent to the model. No tests, solutions or tools are supplied and code is never executed.
+The bounded, canary-checked JSON result contains nonempty `time_complexity`,
+`space_complexity` (auxiliary space), `explanation`, and `assumptions` strings.
+Estimates are best effort, with assumptions and uncertainty for ambiguous Python;
+they are not grading outcomes. Invalid or oversized output fails the job.
+
 ---
 
 ## 8. Prompt-injection guards (`app/ai/guards.py`)
 
-Untrusted text reaching an LLM: student code (hints), question statements (hints; teacher-written,
+Untrusted text reaching an LLM: student code (hints and complexity analysis), question statements (hints; teacher-written,
 and possibly AI-written), teacher prompts and feedback (generation), assignment / question titles
 (summary). Guards are layered so no single one has to be perfect:
 
@@ -813,4 +830,4 @@ files are git-ignored.
 - Self sign-up, password reset by email, OAuth.
 - Teacher views of individual student submissions; grading or scores beyond solved / not solved.
 - Languages other than Python; custom checkers.
-- DB migrations (recreate the dev DB when the schema changes).
+- General DB migrations (recreate the dev DB for other schema changes). The jobs kind constraint has a narrow in-place upgrade for complexity jobs.

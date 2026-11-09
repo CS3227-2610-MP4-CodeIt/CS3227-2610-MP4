@@ -119,3 +119,12 @@ Submit specifics:
 - Table from `studentSubmissions(aid, qid)`: time, verdict, passed / total, newest first.
 - Clicking a row opens its code read-only (`studentSubmission(aid, qid, sid)`, `staleTime:
   Infinity` since submissions never change) with "Load into editor" (§1.3).
+
+### Submission complexity analysis
+
+Below the selected submission's read-only code, the Complexity analysis section can
+start or retry a `complexity` job for that submission ID. It shows empty, in-progress,
+failed and successful states, with time and auxiliary-space estimates, explanation,
+and assumptions/caveats. Results are estimates, not proofs. The current editor draft
+is never sent for analysis; selecting another submission uses its own job key. Existing
+workspace tabs and Load into editor remain available.

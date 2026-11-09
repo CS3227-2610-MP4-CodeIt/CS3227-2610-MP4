@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 
 from app import judging
-from app.ai import guards, hints
+from app.ai import complexity, guards, hints
 from app.auth import require_student
 from app.clients import executor
 from app.config import AppContext, get_ctx
@@ -242,3 +242,56 @@ async def check_hint(
 ) -> JobCheckOut:
     await _get_assignment(ctx, user, aid, qid)
     return check_job_response(await latest_job(ctx.db, user.id, "hint", f"a{aid}:q{qid}"))
+
+
+async def _complexity_submission(ctx: AppContext, user: User, aid: int, qid: int, sid: int) -> str:
+    await _get_assignment(ctx, user, aid, qid)
+    submission = await submissions_repo.get(ctx.db, sid)
+    if (
+        submission is None
+        or submission.user_id != user.id
+        or submission.assignment_id != aid
+        or submission.question_id != qid
+        or submission.code is None
+    ):
+        raise HTTPException(status_code=404, detail="Not found")
+    return submission.code
+
+
+@router.post("/assignments/{aid}/questions/{qid}/submissions/{sid}/complexity")
+async def request_complexity(
+    aid: int,
+    qid: int,
+    sid: int,
+    user: User = Depends(require_student),
+    ctx: AppContext = Depends(get_ctx),
+) -> JSONResponse:
+    code = await _complexity_submission(ctx, user, aid, qid, sid)
+    CodeIn(code=code)
+    guards.reject_injection(code)
+    job, created = await start_job(
+        ctx.db,
+        user.id,
+        "complexity",
+        f"a{aid}:q{qid}:s{sid}",
+        {"code": code},
+        functools.partial(complexity.run_complexity, ctx),
+        ctx.settings.llm_job_timeout_s,
+    )
+    return new_job_response(job, created)
+
+
+@router.get(
+    "/assignments/{aid}/questions/{qid}/submissions/{sid}/complexity", response_model=JobCheckOut
+)
+async def check_complexity(
+    aid: int,
+    qid: int,
+    sid: int,
+    user: User = Depends(require_student),
+    ctx: AppContext = Depends(get_ctx),
+) -> JobCheckOut:
+    await _complexity_submission(ctx, user, aid, qid, sid)
+    return check_job_response(
+        await latest_job(ctx.db, user.id, "complexity", f"a{aid}:q{qid}:s{sid}")
+    )
