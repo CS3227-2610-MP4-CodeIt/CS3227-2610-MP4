@@ -134,6 +134,9 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
             right={
               <div className="min-w-0 space-y-4">
                 <div className="card space-y-3">
+                  <div className="flex min-h-6 items-center justify-between gap-3">
+                    <ActionHelp />
+                  </div>
                   {code === null ? (
                     <Spinner label="Loading your code…" />
                   ) : (
@@ -298,6 +301,37 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
         </div>
       )}
     </QueryView>
+  );
+}
+
+function ActionHelp() {
+  return (
+    <details className="action-help relative ml-auto">
+      <summary
+        aria-label="Help with input, output, and actions"
+        className="flex h-6 w-6 cursor-pointer list-none items-center justify-center rounded-full border border-slate-300 text-xs font-semibold text-slate-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 [&::-webkit-details-marker]:hidden"
+      >
+        ?
+      </summary>
+      <div className="action-help-panel absolute right-0 top-8 z-20 w-[min(19rem,calc(100vw-3rem))] space-y-2 rounded border border-slate-300 bg-white p-3 text-xs leading-relaxed text-slate-700 shadow-lg">
+        <p>
+          <strong>Input and output</strong>
+          <br />
+          Read input from standard input using <code>input()</code>, and write
+          output using <code>print()</code>. Follow the format in the problem
+          statement.
+        </p>
+        <p>
+          <strong>Run</strong> checks visible tests.
+        </p>
+        <p>
+          <strong>Submit</strong> checks all tests and records your submission.
+        </p>
+        <p>
+          <strong>Get hint</strong> offers an instructional nudge.
+        </p>
+      </div>
+    </details>
   );
 }
 

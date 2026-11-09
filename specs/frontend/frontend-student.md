@@ -128,3 +128,5 @@ failed and successful states, with time and auxiliary-space estimates, explanati
 and assumptions/caveats. Results are estimates, not proofs. The current editor draft
 is never sent for analysis; selecting another submission uses its own job key. Existing
 workspace tabs and Load into editor remain available.
+- A question-mark help control beside the editor actions reveals the input/output guidance and
+  concise descriptions of Run, Submit, and Get hint on hover, keyboard focus, or activation.

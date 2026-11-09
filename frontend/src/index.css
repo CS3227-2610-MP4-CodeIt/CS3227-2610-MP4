@@ -37,3 +37,13 @@
 body {
   @apply bg-slate-50 text-slate-900;
 }
+
+.action-help-panel {
+  display: none;
+}
+
+.action-help:hover .action-help-panel,
+.action-help:focus-within .action-help-panel,
+.action-help[open] .action-help-panel {
+  display: block;
+}
