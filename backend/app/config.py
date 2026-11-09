@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     soclaas_base_url: str
     soclaas_api_key: str
     llm_model: str = "coder"
+    hint_generator_model: str = "qwen3-coder-next"
+    hint_reviewer_model: str = "nemotron3.5:30b"
     llm_job_timeout_s: float = 300
     code_execution_server: str
     executor_token: str

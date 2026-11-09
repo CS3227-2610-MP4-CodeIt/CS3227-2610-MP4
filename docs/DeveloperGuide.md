@@ -85,7 +85,7 @@ cp -n backend/.env.example backend/.env
 cp -n code-execution/.env.example code-execution/.env
 ```
 
-Edit these files locally; do not commit secrets. Set a valid `SOCLAAS_API_KEY`, select an available tool-capable `LLM_MODEL`, and replace `EXECUTOR_TOKEN` with the same private value in both files. The backend checks model availability through `/v1/models` during startup, so even local Docker startup needs a reachable SoCLaaS service and a valid key. The example selects `x-test-4`; the Python settings fallback is `coder`. Availability alone does not establish tool-call support: verify that separately for student hints.
+Edit these files locally; do not commit secrets. Set a valid `SOCLAAS_API_KEY`, select available `LLM_MODEL` and tool-capable `HINT_GENERATOR_MODEL` values, and replace `EXECUTOR_TOKEN` with the same private value in both files. The backend checks the global and hint generator model availability through `/v1/models` during startup, so even local Docker startup needs a reachable SoCLaaS service and a valid key. The example selects `x-test-4`; the Python settings fallback is `coder`. The hint reviewer uses `HINT_REVIEWER_MODEL`; an unavailable reviewer does not block startup and review failures return the guarded hint. Availability alone does not establish tool-call support or reviewer quality: verify both separately with synthetic data.
 
 Keep `APP_ENV=dev` for this local stack. Choose the bootstrap admin password explicitly. The example has `BOOTSTRAP_ADMIN_USERNAME=admin` and `BOOTSTRAP_ADMIN_PASSWORD=change-me`; bootstrap runs before demo seeding, so that admin uses the configured password rather than `demo1234`.
 
@@ -138,7 +138,9 @@ Direct execution is useful for debugging; it does not provide the container/netw
 | `SESSION_TTL_HOURS` | Session lifetime; default 12 hours. |
 | `BOOTSTRAP_ADMIN_USERNAME`, `BOOTSTRAP_ADMIN_PASSWORD` | Create an initial admin if none exists; changing these does not reset an existing admin. |
 | `SOCLAAS_BASE_URL`, `SOCLAAS_API_KEY` | Server-side gateway configuration; the client tolerates a trailing `/v1`. |
-| `LLM_MODEL` | One model shared by the three AI features; must support hint tool calls. |
+| `LLM_MODEL` | Model for non-hint AI features; settings default `coder`. |
+| `HINT_GENERATOR_MODEL` | Tool-capable hint generator; default `qwen3-coder-next`, checked at startup. |
+| `HINT_REVIEWER_MODEL` | Private hint reviewer; default `nemotron3.5:30b`, unavailability fails open. |
 | `LLM_JOB_TIMEOUT_S` | Overall AI job deadline and chat HTTP timeout; default 300 seconds. |
 | `CODE_EXECUTION_SERVER`, `EXECUTOR_TOKEN` | Executor endpoint and shared bearer secret. |
 | `MAX_CONCURRENT_JOBS`, `QUEUE_TIMEOUT_S` | Executor concurrency and slot wait; defaults 100 and 30 seconds. |
@@ -151,7 +153,7 @@ Additional executor limits are defined in [config.py](../code-execution/app/conf
 
 | Feature | Context and boundaries | Work budget before HTTP retries |
 | --- | --- | --- |
-| Student hint | Starts with title and optional student question; model may retrieve current code and question/visible tests through two allowlisted tools. No hidden tests. | Initial completion plus at most three tool rounds; final round uses `tool_choice=none`; 1,024 output tokens per completion |
+| Student hint | Generator starts with title and optional student question and may retrieve code and question/visible tests via two allowlisted tools; hidden tests remain excluded. A separate private reviewer receives question context, hidden expected outputs and the guarded candidate; hidden inputs are excluded. | Generator: initial completion plus at most three tool rounds, final `tool_choice=none`, 1,024 tokens per completion. Reviewer: one tool-free call, at most 128 tokens, 64 KiB input and 20 seconds, with a one-second job deadline margin. Oversize, timeout and invalid reviews fail open with content-free logging |
 | Teacher generation | Difficulty, topics, teacher prompt; revision includes the selected parent draft and feedback. JSON is validated as `QuestionDraft`. | Up to two completions, with one repair attempt for invalid output; 16,384 output tokens per completion |
 | Admin summary | Database-derived aggregate statistics for current class students; no student names or source code | One completion; 512 output tokens |
 

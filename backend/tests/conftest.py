@@ -161,7 +161,13 @@ def mock_http() -> Iterator[respx.MockRouter]:
     Named routes: "models", "llm" (chat completions), "executor" (/v1/execute)."""
     with respx.mock(assert_all_called=False, assert_all_mocked=True) as router:
         router.get(f"{SOCLAAS_URL}/v1/models", name="models").respond(
-            json={"object": "list", "data": [{"id": LLM_MODEL, "object": "model"}]}
+            json={
+                "object": "list",
+                "data": [
+                    {"id": LLM_MODEL, "object": "model"},
+                    {"id": "qwen3-coder-next", "object": "model"},
+                ],
+            }
         )
         router.post(f"{SOCLAAS_URL}/v1/chat/completions", name="llm").respond(
             json=chat_completion("OK")

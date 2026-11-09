@@ -45,6 +45,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         executor = ExecutorClient(s.code_execution_server, s.executor_token, s.executor_ca_file)
         try:
             await llm.check_model()
+            await llm.check_model(s.hint_generator_model)
             app.state.ctx = AppContext(settings=s, db=db, llm=llm, executor=executor)
             yield
             await runner.shutdown(db)
