@@ -471,6 +471,50 @@ async def test_complexity_uses_completed_submission_only(
     ).status_code == 404
 
 
+async def test_complexity_retries_invalid_format_with_fresh_guards(
+    client,
+    teacher,
+    student,
+    make_class,
+    make_question,
+    make_assignment,
+    executor_route,
+    llm_route,
+    wait_for_job,
+):
+    import re
+
+    _, _, url = await setup(teacher, student, make_class, make_question, make_assignment)
+    executor_route.respond(json=execute_response(["ACCEPTED", "ACCEPTED"]))
+    response = await client.post(
+        f"{url}/submit", json={"code": "print(1)"}, headers=student.headers
+    )
+    await wait_for_job(response.json()["job"]["id"])
+    sid = (await client.get(f"{url}/submissions", headers=student.headers)).json()[0]["id"]
+    result = {
+        "time_complexity": "O(1)",
+        "space_complexity": "O(1)",
+        "explanation": "One print call.",
+        "assumptions": "Printing has constant cost.",
+    }
+    llm_route.side_effect = [
+        httpx.Response(200, json=chat_completion("```json\n{}\n```")),
+        httpx.Response(200, json=chat_completion(json.dumps(result))),
+    ]
+
+    response = await client.post(f"{url}/submissions/{sid}/complexity", headers=student.headers)
+    job = await wait_for_job(response.json()["job"]["id"])
+
+    assert job.status == "success" and job.result == result
+    assert len(llm_route.calls) == 2
+    systems = [request_json(call)["messages"][0]["content"] for call in llm_route.calls]
+    nonces = [re.search(r"untrusted-([0-9a-f]+)", system).group(1) for system in systems]
+    canaries = [re.search(r"CANARY-[0-9a-f]+", system).group() for system in systems]
+    assert len(set(nonces)) == len(set(canaries)) == 2
+    assert "single raw JSON object" in systems[0]
+    assert '"assumptions": "stack is a non-empty sequence' in systems[0]
+
+
 async def test_complexity_rejects_unsafe_input_and_other_student(
     client,
     teacher,
@@ -541,10 +585,12 @@ async def test_complexity_invalid_model_outputs_fail(
         ),
         '{"time_complexity": "O(1)"}',
     ):
+        previous_calls = len(llm_route.calls)
         llm_route.respond(json=chat_completion(output))
         response = await client.post(route, headers=student.headers)
         job = await wait_for_job(response.json()["job"]["id"])
         assert job.status == "failed" and job.result is None
+        assert len(llm_route.calls) - previous_calls == 3
 
 
 async def test_complexity_canary_leak_fails(
@@ -590,6 +636,7 @@ async def test_complexity_canary_leak_fails(
     response = await client.post(f"{url}/submissions/{sid}/complexity", headers=student.headers)
     job = await wait_for_job(response.json()["job"]["id"])
     assert job.status == "failed" and job.result is None
+    assert len(llm_route.calls) == 1
 
 
 async def test_complexity_concurrent_requests_share_work(
