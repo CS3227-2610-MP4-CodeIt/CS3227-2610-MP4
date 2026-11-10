@@ -9,6 +9,8 @@ services:
         # Baked in at build time; the browser calls the backend through the host port.
         VITE_API_BASE_URL: http://localhost:8000
         VITE_API_FALLBACK_URL: ${VITE_API_FALLBACK_URL:-}
+        # Local stack talks to the backend over plain HTTP; the production HTTPS check would reject it.
+        NODE_ENV: development
     ports:
       - "5173:80"
     depends_on:

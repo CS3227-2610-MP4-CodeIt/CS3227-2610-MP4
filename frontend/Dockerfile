@@ -11,7 +11,9 @@ RUN npm ci
 COPY . .
 ARG VITE_API_BASE_URL
 ARG VITE_API_FALLBACK_URL
-RUN npm run build
+# development makes import.meta.env.PROD false, so an http://localhost backend is accepted.
+ARG NODE_ENV=production
+RUN NODE_ENV=$NODE_ENV npm run build
 
 FROM nginx:1.29-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
