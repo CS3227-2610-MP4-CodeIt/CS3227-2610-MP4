@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router";
 import type { SummaryResult, SummaryStats, Verdict } from "../../api/types";
+import { useAuth } from "../../auth/AuthProvider";
 import { formatDate } from "../../components/dates";
 import { ErrorText } from "../../components/ErrorText";
 import { JobStatusBadge } from "../../components/JobStatusBadge";
@@ -8,6 +10,7 @@ import { NotFound } from "../../components/NotFound";
 import { QueryView } from "../../components/QueryView";
 import { Spinner } from "../../components/Spinner";
 import { targetKey } from "../../jobs/endpoints";
+import type { Job } from "../../jobs/types";
 import { useJob } from "../../jobs/useJob";
 import { useStartJob } from "../../jobs/useStartJob";
 import { useClass } from "./api";
@@ -21,6 +24,7 @@ const VERDICTS: { key: Verdict; label: string }[] = [
 ];
 
 export function SummaryPage() {
+  const { auth } = useAuth();
   const params = useParams();
   const cid = Number(params.cid);
   const aid = Number(params.aid);
@@ -44,7 +48,7 @@ export function SummaryPage() {
                   : "No due date"}
               </span>
             </div>
-            <SummaryPanel aid={aid} />
+            {auth && <SummaryPanel key={`${auth.user.id}:${aid}`} aid={aid} />}
           </div>
         );
       }}
@@ -61,6 +65,34 @@ function SummaryPanel({ aid }: { aid: number }) {
   );
   const job = check.data?.job ?? null;
   const running = job?.status === "in_process";
+  const [lastSuccess, setLastSuccess] = useState<Job<SummaryResult> | null>(
+    null,
+  );
+  const [regeneratedFrom, setRegeneratedFrom] = useState<number | null>(null);
+  // Keep the last observed success in this keyed panel only, independently of
+  // the current attempt. A guarded render update avoids an effect's stale frame.
+  if (
+    job?.status === "success" &&
+    job.result &&
+    (!lastSuccess || job.id > lastSuccess.id)
+  ) {
+    setLastSuccess(job);
+  }
+  const displayed =
+    job?.status === "success" &&
+    job.result &&
+    (!lastSuccess || job.id >= lastSuccess.id)
+      ? job
+      : lastSuccess;
+  // An old request error must not label a later SSE-delivered success as old.
+  const requestFailed = start.isError && displayed?.id === regeneratedFrom;
+  const previous =
+    !!displayed &&
+    (start.isPending ||
+      requestFailed ||
+      check.isError ||
+      job?.id !== displayed.id ||
+      job?.status !== "success");
 
   return (
     <div className="space-y-4">
@@ -69,7 +101,10 @@ function SummaryPanel({ aid }: { aid: number }) {
           type="button"
           className="btn btn-primary"
           disabled={start.isPending || running || check.isPending}
-          onClick={() => start.mutate({})}
+          onClick={() => {
+            setRegeneratedFrom(displayed?.id ?? null);
+            start.mutate({});
+          }}
         >
           {job ? "Regenerate summary" : "Generate summary"}
         </button>
@@ -77,26 +112,39 @@ function SummaryPanel({ aid }: { aid: number }) {
       </div>
       {start.data?.created === false && (
         <p className="text-sm text-slate-600">
-          A summary is already being generated — showing it.
+          A summary is already being generated.
         </p>
       )}
       <ErrorText error={start.error} />
-      {check.isPending ? (
-        <Spinner />
-      ) : check.isError ? (
+      {check.isError && (
         <ErrorText error={check.error} onRetry={() => void check.refetch()} />
-      ) : !job ? (
-        <p className="text-sm text-slate-500">No summary yet.</p>
-      ) : job.status === "success" && job.result ? (
+      )}
+      {previous && displayed && (
+        <div className="text-sm text-slate-600">
+          <p>
+            Previous successful result — generated{" "}
+            {formatDate(displayed.finished_at ?? displayed.created_at)}.{" "}
+            Statistics reflect that generation.
+          </p>
+          {(job?.status === "failed" || requestFailed) && (
+            <p>Regeneration failed. Showing the previous successful result.</p>
+          )}
+        </div>
+      )}
+      {displayed?.result ? (
         <div className="grid gap-6 lg:grid-cols-2">
-          <StatsTable stats={job.result.stats} />
+          <StatsTable stats={displayed.result.stats} />
           <div className="card">
             <h2 className="mb-2 font-medium">
               AI summary — check against the numbers
             </h2>
-            <Markdown>{job.result.summary_md}</Markdown>
+            <Markdown>{displayed.result.summary_md}</Markdown>
           </div>
         </div>
+      ) : check.isPending ? (
+        <Spinner />
+      ) : check.isError ? null : !job ? (
+        <p className="text-sm text-slate-500">No summary yet.</p>
       ) : null}
     </div>
   );

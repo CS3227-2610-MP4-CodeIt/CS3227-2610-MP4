@@ -1,4 +1,5 @@
 import json
+import logging
 from pathlib import Path
 
 from app.ai import guards
@@ -7,18 +8,40 @@ from app.config import AppContext
 from app.jobs.runner import UserFacingError
 from app.repos import submissions as submissions_repo
 
-SUMMARY_MAX_TOKENS = 512
-_SUMMARY_MAX_WORDS = 150
+SUMMARY_MAX_TOKENS = 768
+_SUMMARY_MAX_WORDS = 250
 _SUMMARY_REJECTED = "The AI summary response was rejected. Try again."
 _PROMPT = Path(__file__).parent / "prompts" / "summary.md"
+logger = logging.getLogger(__name__)
 
 
 def _validate_summary_reply(reply: ChatReply, canary: str) -> str:
-    guards.check_canary(reply.content, canary)
-    if reply.finish_reason != "stop" or reply.tool_calls:
+    try:
+        guards.check_canary(reply.content, canary)
+    except UserFacingError:
+        logger.warning("Admin summary validation rejected: canary_detected")
+        raise
+    # Fixed literals only: never log response text, tool arguments or provider metadata.
+    if reply.finish_reason != "stop":
+        if reply.finish_reason == "length":
+            logger.warning("Admin summary validation rejected: finish_length")
+        elif reply.finish_reason is None:
+            logger.warning("Admin summary validation rejected: finish_missing")
+        else:
+            logger.warning("Admin summary validation rejected: finish_other")
+        raise UserFacingError(_SUMMARY_REJECTED)
+    if reply.tool_calls:
+        logger.warning("Admin summary validation rejected: unexpected_tools")
         raise UserFacingError(_SUMMARY_REJECTED)
     text = reply.content.strip()
-    if not text or len(text.split()) > _SUMMARY_MAX_WORDS or len(text) > guards.MAX_SUMMARY_CHARS:
+    if not text:
+        logger.warning("Admin summary validation rejected: empty")
+        raise UserFacingError(_SUMMARY_REJECTED)
+    if len(text.split()) > _SUMMARY_MAX_WORDS:
+        logger.warning("Admin summary validation rejected: word_limit")
+        raise UserFacingError(_SUMMARY_REJECTED)
+    if len(text) > guards.MAX_SUMMARY_CHARS:
+        logger.warning("Admin summary validation rejected: character_limit")
         raise UserFacingError(_SUMMARY_REJECTED)
     return text
 
