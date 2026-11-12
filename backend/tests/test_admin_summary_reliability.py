@@ -1,4 +1,4 @@
-"""Task 1 acceptance probes: intentionally red until response validation is approved.
+"""Admin acceptance probes, revised for the 250-word policy on 2026-11-13.
 
 Uses existing strict respx mocks and temporary databases; never contacts SoCLaaS.
 No xfail markers: retain actual failures as baseline evidence.
@@ -12,6 +12,7 @@ from tests.conftest import chat_completion, request_json, tool_call
 
 CASES = [
     ("valid", "success"),
+    ("above_preferred_words", "success"),
     ("word_boundary", "success"),
     ("character_boundary", "success"),
     ("empty", "failed"),
@@ -36,13 +37,14 @@ def response_fixture(case: str, canary: str) -> dict:
     """Synthetic provider envelopes; usage numbers from builder are not real usage."""
     contents = {
         "valid": "No students have attempted this assignment yet.",
-        "word_boundary": " ".join(["progress"] * 150),
+        "above_preferred_words": " ".join(["word"] * 151),
+        "word_boundary": " ".join(["word"] * 250),
         "character_boundary": "x" * 2000,
         "empty": "",
         "whitespace": " \n\t ",
         "null_content": None,
         "truncated": "Students have attempted the assignment, but",
-        "overlong_words": " ".join(["progress"] * 151),
+        "overlong_words": " ".join(["word"] * 251),
         "overlong_characters": "x" * 2001,
         "canary": f"Rejected marker: {canary}",
         "canary_after_limit": "x" * 2001 + canary,
@@ -100,7 +102,7 @@ async def test_summary_response_contract(
     persisted = (await client.get(url, headers=admin.headers)).json()["job"]
     sent = request_json(llm_route.calls[0])
     assert len(llm_route.calls) == 1
-    assert sent["max_tokens"] == 512
+    assert sent["max_tokens"] == 768
     assert "tools" not in sent
     print(
         f"BASELINE case={case} expected={expected_status} actual={job.status} "
