@@ -54,13 +54,22 @@ const start = useStartJob<{}>("assignment_summary", targetKey.assignment(aid));
 
 - Button "Generate summary" (or "Regenerate" when a job exists) → `start.mutate({})`. Disabled while
   the job is `in_process` (`frontend-spec.md` §4.5).
-- `in_process` → spinner "Summarising…". The admin can leave the page; the result is there when
-  they come back (check on mount).
+- `in_process` → spinner "Summarising…". Keep the most recently observed successful statistics
+  and summary visible while this panel remains mounted. Label both panels:
+  "Previous successful result — generated [original timestamp]. Statistics reflect that generation."
 - `success` → two parts side by side (stacked on narrow screens), as backend §7.3 requires:
   - **Stats table** from `result.stats`: header line with students in class / attempted any /
     solved all; one row per question: position, title, difficulty, attempted, correct, total
     submissions, and the verdict counts.
   - **Summary** from `result.summary_md` via `Markdown`, labelled "AI summary — check against the
     numbers".
-- `failed` → `error` text and the button.
+- `failed` → `error` text and the button. If a successful result was observed in this panel,
+  retain it and also show "Regeneration failed. Showing the previous successful result."
+- A newer success replaces both retained panels. Older successes cannot replace newer ones.
+  Job-check and regeneration request errors appear alongside retained content.
+- Retention is component-local, scoped to the authenticated Admin and assignment. Changing
+  either resets it. Nothing is persisted in browser storage or a separate shared result cache.
+  Leaving/unmounting the page or refreshing loses retained content; the check on mount returns
+  only the latest job. If that job failed or is running, an older stored success is not restored.
+  With no retained success, preserve the usual loading, error and "No summary yet" states.
 - The summary is not refreshed automatically when new submissions arrive; the admin regenerates it.
