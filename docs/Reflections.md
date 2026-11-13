@@ -205,93 +205,132 @@ This project changed my approach from seeking agreement among agents to asking w
 
 ---
 
-## Reflections on Multi-Agent SE, Context Engineering and Resource-aware Use by Neo Jun Hao
+## Reflections on Multi-Agent SE, Context Engineering and Resource-aware Use by Ng Jun Hao
 
-My work covered the Student role's AI features (submission complexity analysis, and the hint generator–reviewer pair) plus team tooling: the skill-evaluation and telemetry harness (`workflow/evals/`), the agent write-scope guard (`workflow/agent-scope/`), the live-AI probes (`workflow/live-ai/`) and the Pi staging deployment. Every number below comes from a committed report. The eval runs used one trial (n = 1) to three trials per cell, so small differences are indicative, not significant.
+### Introduction
 
-### 1. Coordination pattern and what four review rounds revealed
+My MP4 contribution focused on the student hint and complexity-analysis features, along with the agent workflow used to build and review them. I expected subagents to keep each task's context focused and let independent work happen in parallel. Through the project, I learned to look at the actual handoffs, delays, and resource use before deciding whether that coordination helped. I also learned that model output needs checks around it: a helpful-sounding answer can still reveal too much, and a passing test suite can still leave important behavior unverified.
 
-The complexity feature followed the same pattern teokj describes: a planner brief, one `task_implementer`, four specialist reviewers and an aggregator. It needed **four** review runs before reaching an acceptable verdict:
+### 1. Multi-Agent SE
 
-| Run | Aggregate | What blocked it |
+#### Coordinating independent reviews
+
+I designed our development workflow around an orchestrator and specialist subagents. The main agent prepared a task brief, selected the work to delegate, and passed a fixed target and relevant evidence to specialists. In code review, I separated the work into the four [review axes](../.agents/skills/code-review/references/review-axes.md):
+
+| Review axis | Question |
+| --- | --- |
+| Code quality | Is the change maintainable and consistent with the surrounding code? |
+| Specification and contracts | Does it meet the approved requirements and preserve the relevant contracts? |
+| Security boundaries | Does it protect data and enforce access and trust boundaries? |
+| Verification and evidence | Do the tests and other checks support the claims about the change? |
+
+```mermaid
+flowchart LR
+    T[Fixed target and task brief] --> P[Main agent]
+    P --> CQ[Code-quality reviewer]
+    P --> SC[Specification reviewer]
+    P --> SB[Security reviewer]
+    P --> VR[Verification reviewer]
+    CQ --> F[Separate review reports]
+    SC --> F
+    SB --> F
+    VR --> F
+    F --> A[Aggregator]
+    A --> O[Verdict and findings]
+    O --> P
+```
+
+I chose review for parallel work because each axis asks a different question about the same fixed change. The reviewers mainly read the code, requirements, and evidence; they write their findings to separate report paths rather than editing the implementation. That makes their work easier to coordinate and reduces the risk of agents overwriting each other's changes. The workflow also pauses writers during review so the panel can assess a stable target. Verification can still involve shared resources such as test services and build caches, so read-heavy work does not remove every possible conflict.
+
+After the reviewers finish, the aggregator reads their reports and returns a compact verdict and findings to the main agent. This keeps the raw reports out of the main context while leaving them available for inspection. My reasoning was similar to parallel programming: divide work into independent tasks, give each task clear ownership, and combine the results after they finish. Lecture 8's orchestrator–subagent pattern helped me understand why this works best when subtasks have few dependencies. I expected the parallel reviews to be faster, although the project did not include a matched single-agent run to measure that benefit.
+
+I also separated implementation from review to give the reviewers a fresh look at the change. Each reviewer started with a fresh conversation and received the task, target, and relevant evidence, rather than the implementer's full conversation. I hoped this would reduce the chance of accepting the implementer's assumptions without checking them. [Jhaveri et al.](https://arxiv.org/abs/2604.02485) found confirmation bias in language-model hypothesis testing, while [Alexopoulos et al.](https://arxiv.org/abs/2603.18740) found that the framing of information could influence automated security code reviews. Those studies reinforced my reason for asking reviewers to check the code against the brief and evidence. They did not test our workflow, and separate contexts do not guarantee independent judgments: reviewers can still share model weaknesses or rely on the same incomplete information. I therefore treated their findings as prompts for verification and my own judgment.
+
+#### What happened during the complexity feature review
+
+The traces let me check what happened beyond the workflow description. They show the prompts sent to agents, their tool activity and replies, waits by the main agent, and the reports passed to the aggregator. The complexity-analysis review went through four rounds:
+
+| Round | Verdict | What the review recorded |
 | --- | --- | --- |
-| 1 | FAIL | Semgrep failed (`ca-certs: empty trust anchors`); offline backend build lacked cached `setuptools`; real findings on migration serialization and missing focused guard tests |
-| 2 | FAIL | Verification still blocked (sandbox denied uv cache); one Medium spec-reference finding |
-| 3 | FAIL | Verification blocked: browser acceptance and reproducible packaging |
-| 4 | WARN | No open findings; live-provider and revocation-timing evidence incomplete |
+| [1](../workflow/reviews/student-complexity-run-1.md) | FAIL | Migration serialization and focused guard-test findings; the security scan and backend packaging were blocked. |
+| [2](../workflow/reviews/student-complexity-run-2.md) | FAIL | One specification-reference finding remained; browser acceptance and packaging evidence were incomplete. |
+| [3](../workflow/reviews/student-complexity-run-3.md) | FAIL | No open findings, but browser acceptance and reproducible backend packaging were still blocked. |
+| [4](../workflow/reviews/student-complexity-run-4.md) | WARN | No open findings or blocked axis; live-provider and access-revocation timing evidence remained incomplete. |
 
-Only run 1 produced code defects. Runs 2 and 3 failed because reviewers in a sandbox could not reproduce what the implementer had done outside it. That waiting was structural: the reviewers were idle on evidence, the same pattern teokj hit. In hindsight, I should have resolved the sandbox, cache and certificate problems before dispatching the panel. Two of the four rounds were spent on the environment, not the change.
+The reviewers found issues worth fixing, while later rounds also spent time establishing whether the implementation evidence could be reproduced. I came to see that a well-separated review design still depends on a reliable shared environment and concise, usable handoffs. Next time I would prepare the scanner, build cache, and acceptance environment before dispatching the panel.
 
-Multi-agent review did catch real issues (migration serialization, stale spec references, a missing guard test). For the follow-up "few-shot prompt plus three format retries" change, I deliberately worked **single-agent with self-review**. It was a small, coupled change to one function, already covered by tests and backed by a live A/B result. A five-agent round for it would have been mostly overhead.
+One finding helped me understand the value of a separate review. The code-quality reviewer noticed that the database migration checked the existing schema before acquiring its write lock. Two initializers could therefore make the same decision from an old schema and perform a redundant rebuild. The reviewer recommended checking again inside the lock and adding a concurrent-initialization test. This was a more specific concern than whether the new complexity feature worked in the ordinary path, and it gave the implementer a concrete correction to make. The [first review](../workflow/reviews/student-complexity-run-1.md) records the finding and its expected test.
 
-### 2. Prompt boundaries are requests; I built an enforced one
+The rounds also showed me how to handle a disagreement about evidence. The implementation handoff reported that packaging had passed outside the sandbox, while the verification reviewer could not reproduce it inside the sandbox because its cache was inaccessible. I treated the handoff as useful evidence from the implementer and kept the verification axis blocked until the reviewer could build the package independently. In the fourth round, the reviewer recorded a successful offline build. This distinction helped me avoid turning one agent's report into a claim that another agent had verified it.
 
-Role prompts said "reviewers write only under `workflow/reviews/`" and "never touch `.env`". Theodore's log shows a foundation agent reading `.env` despite such an instruction. So I made the boundary a policy file plus an enforcer:
+The approved [task brief](../workflow/tasks/student-code-complexity-analysis.md) helped the reviewers assess the same product decisions. I scoped the feature to best-effort time and auxiliary-space estimates for a student's completed submission, with assumptions stated. I excluded draft code, hidden tests, execution, and grading decisions. The implementation checkpoint included backend and frontend suites and a browser flow with a fake AI provider. Seeing the final review's remaining warnings helped me distinguish those checks from live-provider and revocation evidence that we still needed.
 
-- `scope.toml` is a human-authored allow/block list per role (block wins; reviewers can write nothing outside their reports).
-- `guard.py guard` is a live `PreToolUse(Bash)` hook that exits 2 on an out-of-scope shell write.
-- `guard.py audit <role> --baseline <commit>` is the **authoritative** check, run against the diff after a role returns.
+#### Coordination overhead and waiting
 
-The design came from a limitation I found while building it: Codex's `PreToolUse` hook sees Bash commands but **not** `apply_patch` edits. A live hook alone would therefore give a false sense of security. The diff audit catches writes made by any route. The guard also produced a false positive: it flagged text inside here-doc bodies as write targets. I fixed that (commit `87bb23b`) and added a test. After integrating the audit with the telemetry, the report states that no delegated role wrote outside its scope in the captured sessions. That is a measured property of those sessions, not a guarantee for future ones.
+The [telemetry](../workflow/evals/Jun%20Hao%20telemetry%20and%20eval%20report.html) made the overhead visible. The hint-reviewer session recorded 16 subagent spawns, and the initial complexity-analysis session recorded 27. Those are session counts, not counts of agents working at the same time or a direct measure of added cost. Still, the timelines show multiple handoffs, waits, and review activity around features with bounded scope. For work at our project's scale, I found that amount of coordination too heavy as a default. I would reserve parallel specialists for independent questions where a missed issue matters, especially security or contract boundaries. For a small, tightly connected change, I would keep one implementer and use a focused review. I chose that approach for the later complexity prompt and format-retry change.
 
-### 3. Context engineering experiments
+I also learned to consider the workflow's **critical path**: steps that must finish before the whole task can move on. The reviewers can examine the change in parallel, but they first need an implementation to review, and the aggregator waits for their results. A blocked reviewer can therefore delay the verdict even if the others finish quickly. A concurrency limit can also force agents to wait for an available slot; my teammate recorded that happening to the verification reviewer in the admin-summary work. I also wondered whether shared service capacity could limit the benefit of running more agents at once. That remains a hypothesis: my development-session traces do not establish service throttling or measure the capacity available to each agent. In my complexity work, the recorded environment and verification blockers give me concrete reasons for delays.
 
-I built `workflow/evals/` so that skills and prompts could be compared on fixed cases, with deterministic checks plus three semantic judges. Four experiments bear directly on the brief's questions.
+In one complexity implementation span, the worker timeline lasted about 49 minutes while the main agent issued wait calls roughly a minute apart. That showed the parent waiting for the implementation; the worker's elapsed span alone could not tell me how much of its own time was idle. Another long waiting bar initially looked like an agent had been stuck for hours, but the events showed a completed response followed by a pause before my next message. I learned to inspect the sequence behind the chart before calling a delay blocked work or an unnecessary retry.
 
-**(a) Does extra context make an agent less effective?** (`implement-task` experiment-008: same task, fresh workspace versus a "crowded" workspace full of unrelated material)
+The trade-off is still a judgment. The reviews caught concrete problems and gave me separate evidence for security, contracts, quality, and verification. They also required dispatch, repeated review rounds, and follow-up. I did not run a matched single-agent implementation of the same feature, so I cannot calculate how much time or token use the panel added. Given the small scope of many of our changes, I would use one agent for routine work and bring in independent specialists when the change crosses a sensitive boundary or needs genuinely separate checks.
 
-| Case | Score | Worker time | Uncached input | Cached input | Reasoning | Cost |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| fresh | 94 | 1m 38s | 40,628 | 341,504 | 495 | $0.0096 |
-| crowded | 94 | 5m 47s | 162,937 | 3,038,848 | 3,196 | $0.0534 |
+### 2. Context Engineering and Resource-aware Use
 
-Quality was unchanged, but the crowded run took **3.5× the time and 5.6× the cost**, with about 9× more cached input and 6.5× more reasoning. In this case, extra context did not show up as a quality drop. It showed up as resource cost, and that cost would go unnoticed unless measured. The signal was the cached-input count and wall time, not the score.
+#### Agent profiles, skills and boundaries
 
-**(b) Does instruction position matter?** (experiment-010: one key requirement placed at the beginning, middle or end of a long brief, plus a short brief.) All four scored 100, at $0.0068–$0.0076 each. At this brief length, I found no lost-in-the-middle effect. The cheaper lever was length, not position.
+I used agent profiles to give each subagent a clear role and starting point. For example, the [security reviewer profile](../.codex/agents/security_boundary_reviewer.toml) directs the agent to its review skill, limits its work to the security axis, and specifies the artifact it should return. The skill supplies the detailed review procedure; the task brief and evidence identify the particular change to examine. Keeping those instructions in separate files helped me give a fresh reviewer the context for its own job without copying the whole implementation conversation.
 
-**(c) Structured versus flexible task briefs.** Flexible briefs looked better in isolation. In `plan-task`, the flexible-brief version improved 4 of 7 cases and was generally cheaper. But when an implementer continued from those briefs (experiment-007, 18 trials each), structured briefs scored **95.6** against **89.6** for flexible, at near-identical cost. In experiment-006, one flexible-brief trial implemented code despite "Plan only; do not implement". I therefore reverted to structured briefs (`3b78ea7`). The lesson: evaluate a handoff document by how well the **next** agent performs, not by how good the document looks.
+I also wanted the roles' write boundaries to have a check outside the prompt. I built a [role-based scope policy](../workflow/agent-scope/scope.toml) and [guard](../workflow/agent-scope/agent-scope.md), with a person responsible for deciding which paths each role may write. This follows the principle in AWS's [AGENTSEC03-BP03: Implement least privilege with dynamic boundaries](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentsec03-bp03.html): give an agent the access it needs for its role. In a recorded CLI probe, a pre-tool hook blocked a tested out-of-scope write. A later check uses recorded activity to surface possible scope violations, and the Stop hook refreshes the usage report. These records also connect to [AGENTOPS05-BP01: Establish end-to-end tracing and telemetry for agent operations](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentops05-bp01.html). Together, they gave me an attempted action that could be blocked and a record I could inspect after work had run.
 
-**(d) Inlining a skill's referenced files.** In `code-review` (experiment-002 → 003), I embedded the skill's referenced files so the agent did not open them one by one:
+Building and probing the guard taught me to give each role a clear boundary and check how the workflow behaves in practice. I also saw why a person needs to decide the permitted paths and review exceptions: those decisions depend on the task and the project's structure.
 
-| Case | Score | Time | Uncached input | Reasoning | Cost |
-| --- | --- | ---: | ---: | ---: | ---: |
-| authorization | 99 → 100 | −36.6% | −2.1% | −49.1% | −17.4% |
-| validation | 99.67 → 100 | −32.3% | −46.2% | −55.9% | −38.0% |
+#### Task briefs and handoffs
 
-For a skill whose references are always needed, supplying them upfront beat retrieving them as needed, cutting time by about a third and reasoning by about half. That only holds when the references are always needed; experiment (a) shows the cost of supplying context that is not.
+Before MP4, I tended to treat more context and more reviewers as ways to improve an agent's work. I now pay more attention to what a task actually needs. Our task briefs gave agents the goal, approved decisions, exclusions, relevant files, and expected evidence. The implementer and reviewers could then retrieve the specifications, source, and tests relevant to their assignments. This helped keep each task focused, while stale historical paths in the repository reminded me to check that retrieved context was current.
 
-One evaluation caveat: experiment-006 first reported 13/36 passes. Most "failures" were judges that never produced a JSON verdict. Regrading the same worker outputs (experiment-007) gave 35/36. Evaluation infrastructure needs verifying as much as the agents do. Otherwise a broken judge looks like a regression.
+For a handoff, I found the most useful information was the approved scope, the target revision or changed files, checks performed, their results, and unresolved issues. This gives the next agent a starting point and lets me trace a claim back to evidence. The aggregator's compact return served the same purpose: it carried the verdict and important findings to the main agent while keeping the full reports available for inspection.
 
-### 4. Measured resource use, cache behaviour and reasoning share
+#### How much context should I provide?
 
-The telemetry hook captured my real Codex sessions (API-equivalent estimates, not actual spend):
+I tried experimenting with progressive disclosure in my skill design.
+I organized the skills as linked files so the agent could follow only the instructions for its role and workflow. For example, [code-review's `SKILL.md`](../.agents/skills/code-review/SKILL.md) routes to either `DEFAULT.md` for a single-agent review or `SUBAGENTS.md` for a delegated review. Those files then link to the [review axes](../.agents/skills/code-review/references/review-axes.md), report contract, and specialist skills needed for that path. The security review skill, in turn, links to project standards and the Semgrep guidance. I expected this structure to keep each agent's context focused and save tokens by leaving unrelated instructions unread. [Anthropic](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) and [OpenAI](https://developers.openai.com/blog/skills-agents-sdk) describe this staged loading of skill instructions as progressive disclosure.
 
-- **10 sessions, 86 subagents, $23.73 estimated.** One session, porting the MP3 workflow setup with 36 subagents, accounted for **$22.56 (95%)**. The 45 ad-hoc built-in subagents cost $7.87, against $1.6 for all 33 offline eval experiments (278 trials) combined. Broad, loosely scoped fan-out was by far the largest cost; focused, configured roles were cheap.
-- **96.9% cache hit** (177.1M cached versus 5.6M uncached input tokens). Every session starts with the same `AGENTS.md` prefix, and skills are loaded as stable blocks, so most input was a cache hit. The remaining waste was uncached exploration, which experiment (a) shows grows with workspace clutter.
-- **Reasoning share** (reasoning ÷ billed output): 9.2% in experiment-010, 20.8% in experiment-008 (and 23.7% for the crowded case alone), and 9–19% in code-review. Reasoning grew with ambiguity and clutter, not with task size. Persisting decisions into briefs and handoffs (the structured-brief result) is the practical form of "persisted reasoning": the next agent reads a conclusion instead of re-deriving it.
-- **Per-skill cost** (attributed from single-skill turns only, so it is indicative): verification-review $1.32, spec-contract-review $1.06, commit $0.99, code-quality-review $0.98, security-boundary-review $0.65. Review dominated skill cost, which matches Theodore's 42.9% verifier share.
+In the delegated path, the [orchestration instructions](../.agents/skills/code-review/SUBAGENTS.md) tell the main agent to read the review roster for dispatch and leave the specialist skill files to the subagents. Each named profile points its subagent to the skill it should read, while the main agent passes the target, requirements, evidence, and output path. I applied familiar software engineering practices to the skill design: separation of responsibilities, modularity, and reuse. I tried to keep each skill terse and focused on one kind of work, like a small function or component with a clear purpose. Shared instructions, such as the review report contract, live in a referenced file that several skills can use. This made individual procedures easier for me to find and revise, while giving the main agent a way to delegate without loading every specialist's instructions into its own context.
 
-### 5. Resource-aware model choice for the app's AI features
+However, when I tested whether splitting the instructions actually saved resources, the result surprised me. In the [code-review comparison](../workflow/evals/code-review/comparisons/experiment-002-vs-experiment-003.md), I compared my split skill with an experimental version that included the guidance upfront, using two synthetic review tasks and three single-agent trials per condition. Both versions passed every trial:
 
-Model selection was done **per feature** against the live SoCLaaS catalogue, using the real prompts and guards.
+| Review task | Split skill: mean total input | Consolidated skill: mean total input | Mean worker time |
+| --- | ---: | ---: | --- |
+| Authorization | 221,073 | 161,417 | 94.9s → 60.2s |
+| Validation | 246,576 | 176,084 | 102.7s → 69.6s |
 
-- **Our own concurrency looked like model failure.** At concurrency 16, many models showed 0/21 valid responses with errors after about 7 s. That was 429 rate-limiting caused by us. At concurrency 8 the same models recovered (`x-test-2`: 0/21 → 14/21). A separate status probe found 16 of 17 models returning HTTP 200. The app's single `UserFacingError` type hid this distinction, so I had to probe raw statuses.
-- **The global default was unusable for complexity.** `coder` timed out at 45 s on 21/21 calls, so complexity got its own `complexity_model` setting.
-- **Prompt technique mattered more than model.** In a 6-variant A/B, few-shot moved `qwen3.6:35b` from 8/21 to **21/21** valid and correct, and was also the fastest variant. Chain-of-thought and lenient parsing did not help.
-- **Reliability and security pulled in opposite directions.** `ornith1.5:35b` won the reliability ranking (17/21), but it was breached 6/100 times with guards on (19/100 with guards off), while `qwen3.6:35b` with guards on was 0/100. I shipped `qwen3.6:35b` with the few-shot prompt and up to three format retries inside the job timeout. Each retry uses a fresh nonce and canary, and a canary leak fails immediately, so retries cannot be used to probe for the canary.
+Total input includes cached input across requests. The consolidated version started with a larger first request, but its workers made five to six model requests per trial, compared with eight to eleven for the split skill. One possible explanation is that opening several guidance files added steps and model requests that were significant relative to these small review tasks. Each additional model request can also carry accumulated context again. The review procedure needed many of the references in these cases, so splitting them offered little opportunity to skip material. The consolidated version also changed instructions about rereading references, so I cannot attribute the difference to file splitting alone.
 
-For hints: generator `qwen3-coder-next` (fast, 0 full-solution leaks) and reviewer `nemotron3.5:30b` (a different model family, to avoid correlated errors). As a generator, `nemotron3.5:30b` recited its system prompt and canary in 5 of 6 reproductions. As a reviewer, its output is only a `{is_hint, reveals_answer}` verdict, so that weakness is contained.
+I still value the linked structure for organizing and maintaining the skills, especially when different agents need different instructions. The single-agent experiment showed me that this structure does not automatically reduce total resource use. I would provide material that a task consistently needs upfront and use on-demand references for material that is only sometimes relevant. I would measure total requests, tokens, time, and task quality before deciding which arrangement works better.
 
-### 6. Security of the AI features, tested live
+#### Model choice and safeguards for student features
 
-- **Complexity:** nine attacks across five injection types. The keyword scanner blocked exactly 50/100 calls per model. Keyword-free obfuscation and indirect attacks passed it and relied on the model and the output canary.
-- **Hints:** 330 calls over two untrusted channels. **No hidden-test leak in any run**, because `get_question` filters hidden tests before the model sees them. Enforcing at the tool boundary was the most effective control. Payload splitting across the code and question fields evaded the per-field scanner. Nemotron's canary leak was caught by the output canary check, so it became a failed request rather than a disclosure.
-- **Generator–reviewer:** the deterministic 5-line code strip caught 1/9 bad hints. LLM reviewers caught 6–7/9 with 0/7 false positives. A later live probe found a reviewer **false negative** on a complete working solution. The user accepted that risk and deferred mitigation, so the reviewer is documented as a mitigation, not an enforcement guarantee.
+The hint feature taught me to evaluate a model as part of a complete feature. In a [small labelled set](../workflow/live-ai/hint-generator-reviewer.md), the deterministic code-length guard caught one of nine bad hints. The model reviewer caught seven of nine and withheld none of seven good hints. A later [probe](../workflow/live-ai/hint-current-pipeline-2026-11-09.md) found that the reviewer allowed a synthetic complete solution. I therefore treated it as an additional check, not the final safety barrier. Filtering hidden tests before inference and checking generated output gave us controls at the application boundary. I selected `qwen3-coder-next` as the generator based on hint quality, over-answering, leakage signals, errors, and latency in the tested cases. These results came from a small synthetic set and a particular gateway snapshot, so I would test a wider set before relying on the same choice in other conditions.
 
-### 7. Development/production separation
+For complexity analysis, I also compared models and prompt formats against the feature's response requirements. The [prompt experiment](../workflow/live-ai/complexity-prompt-round2.md) recorded that a few-shot prompt improved the tested `qwen3.6:35b` variant from 8/21 to 21/21 valid and correct responses. I added bounded format retries for the feature; each retry can consume another model call, so the limit and job timeout matter. This taught me to consider correctness, latency, security, and retry cost together when choosing a model.
 
-Pushes to `master` deploy automatically to a staging stack on the Raspberry Pi that is isolated from production, with its own database, port and TLS settings in a separate Compose overlay. Production shares only the executor-limit configuration. The frontend fails over from the Pi API to a Render backend when the Pi is unavailable, retrying safe reads only; the Render backend has a separate database. Two deployment fixes became process rules: **promote before post-deploy health checks**, and **leave a failed staging deploy in place for diagnosis** instead of rolling it back automatically, so the evidence survives.
+The [model-selection report](../workflow/live-ai/complexity-model-selection.md) also showed how my test setup could distort that decision. At concurrency 16, several models returned errors on all 21 cases because our requests hit rate limits. When the run was repeated at concurrency 8, `x-test-2` returned valid results for 14/21. I learned to inspect gateway errors and control concurrency before treating a failed run as evidence that a model could not perform the task.
 
-### 8. What I would keep and change
+#### Telemetry, cache and reasoning
 
-Keep: per-feature live model selection; enforced write scope with a diff audit; structured briefs judged by downstream performance; the telemetry hook (it showed that one session was 95% of cost). Change: fix the reviewer sandbox before dispatching a panel (two of four complexity review rounds were spent on environment problems); cap ad-hoc subagent fan-out; record the exact model version and cache statistics for every eval so comparisons stay valid across sessions.
+I built the [evaluation harness](../workflow/evals/README.md) to give me two views of the development workflow. For offline evaluations, it runs a skill on repeatable tasks in disposable workspaces, records the worker's trace and resource use, and grades the result with deterministic checks and, where configured, semantic judges. That let me compare skill designs on the same fixtures, as I did for the progressive-disclosure experiment. “Offline” describes the controlled test setup; the worker can still make live model calls.
+
+For real development sessions, the harness also collects project-scoped telemetry and refreshes a usage report through a Stop hook. I could inspect actual agent activity, subagent handoffs, waits, commands, and available token and cost estimates while building the complexity and hint features. This was useful for seeing how I actually used the workflow, including events I had not anticipated when writing the fixtures. The report provides observations for me to investigate; it does not automatically grade whether the work was correct or whether every repeated command was wasteful.
+
+I found the two views useful together. The controlled experiments helped me compare a specific skill choice; the session traces showed how the workflow behaved on real project work. When a trace suggests a recurring problem, I would turn it into a repeatable test case, evaluate a change, and then watch later sessions for the same issue. This reflects the monitoring and evaluation cycle described in [AWS's agent monitoring guidance](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/omni-monitor-ai-agents.html). AWS uses “online evaluation” for scoring live agent interactions; in my harness, the real-session side is primarily telemetry and inspection, rather than automatic quality scoring of every session.
+
+Telemetry changed how I thought about responsible agent use. The [AWS Well-Architected Agentic AI Lens](https://docs.aws.amazon.com/wellarchitected/latest/agentic-ai-lens/agentic-ai-lens.html) calls for tracing and monitoring agent systems; that principle matched what I learned from examining our runs. To use agents well, I need to know what they are doing and what resources the workflow is using. I also need to interpret those measurements: a session total includes other work and cannot by itself isolate the extra cost of delegation.
+
+The offline evaluations taught me to distinguish a measurement from an explanation. In two answer-validation trials, reasoning tokens averaged about 13% of billed output. That describes those evaluation runs; it does not measure reasoning in my development sessions or show that a handoff reduced token use. The reports record cached and uncached input, output, reasoning, time, and estimated cost, but we did not run a before-and-after cache experiment. I also cannot claim that the multi-agent workflow saved time: I have no matched single-agent run for the same implementation task and quality criteria.
+
+Recording decisions and evidence in a handoff could help a later agent avoid re-deriving them. I would test that idea by comparing the same task with and without a handoff, checking both outcome quality and token use. For caching, I would compare the same workflow before and after changing its repeated context, with provider cache metrics available. Those comparisons would tell me more than a high cache-hit percentage alone.
+
+#### What I would change
+
+My practical rule now is to match the coordination effort to the task. I would split work when the questions are independent and the expected review value justifies the extra handoffs. I would keep small changes with one owner, provide focused context, and use targeted checks. I would also inspect traces and resource measurements before deciding that a workflow is efficient. The main lesson for me is that agent use requires active oversight: clear tasks help, but evidence about activity, results, and resource use is what lets me decide whether the process is working.
