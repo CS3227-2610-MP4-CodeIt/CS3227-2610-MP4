@@ -165,12 +165,12 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
                   className="card scroll-mt-20 space-y-3"
                 >
                   <div className="flex min-h-6 items-center justify-between gap-3">
-                    <DraftStatus
-                      status={draftStatus ?? (draft !== null ? "saved" : null)}
-                    />
+                    <p className="text-sm font-medium">Python editor</p>
                     <ActionHelp />
                   </div>
-                  <p className="text-sm font-medium">Python editor</p>
+                  <DraftStatus
+                    status={draftStatus ?? (draft !== null ? "saved" : null)}
+                  />
                   <DraftGuidance origin={origin} />
                   {code === null ? (
                     <Spinner label="Loading your code…" />

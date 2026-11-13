@@ -54,8 +54,8 @@ contents after a confirm, since it overwrites the draft.
 
 | Path | Shows | Queries |
 |---|---|---|
-| `/student` | Assignments grouped by class: title, due date (and "closed" when past), solved count "2 / 3" | `studentAssignments()` |
-| `/student/assignments/:aid` | Description (`Markdown`), due date, questions with difficulty and a ✓ when `solved` | `studentAssignment(aid)` |
+| `/student` | Assignments grouped by class: title, due date (and "closed" when past), solved and total question counts | `studentAssignments()` |
+| `/student/assignments/:aid` | Class, description (`Markdown`), due date, solved/total progress, and ordered questions with difficulty and explicit solved or not-solved status | `studentAssignment(aid)` |
 | `/student/assignments/:aid/questions/:qid` | Question page (§3) | `studentQuestion(aid, qid)`, `studentSubmissions(aid, qid)`, three `jobCheck`s |
 
 `404` (e.g. removed from the class) → `NotFound`.
