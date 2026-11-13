@@ -33,5 +33,5 @@ the `storage` event.
 
 Drafts in `localStorage` are kept on logout (`frontend-student.md` §1.1).
 
-The login form identifies CodeIt, explains that accounts are provided by the course administrator,
+The centered login page places a pale blue CodeIt course-account panel beside the form on wide screens and stacks them on narrow screens. The login form explains that accounts are provided by the course administrator,
 and exposes pending and error feedback. Pending login shows “Logging in…” and marks the form busy.
