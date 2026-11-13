@@ -136,3 +136,11 @@ failed and successful states, with time and auxiliary-space estimates, explanati
 and assumptions/caveats. Results are estimates, not proofs. The current editor draft
 is never sent for analysis; selecting another submission uses its own job key. Existing
 workspace tabs and Load into editor remain available.
+
+The editor identifies Python and reports the initial code source (device draft, latest submission,
+or empty editor), including loading failure, and identifies a confirmed history load. Draft status
+is announced as device-local. The optional hint question has a persistent visible label and explains
+that it is sent with the hint request. On narrow screens the section shortcuts remain available while
+scrolling, and destinations can receive focus. Result tabs have linked panels and support arrow keys,
+Home and End, with one tab stop in the tab list. Copy controls report success or failure and provide
+manual-copy guidance when clipboard access fails.

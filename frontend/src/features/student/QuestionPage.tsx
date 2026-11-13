@@ -31,19 +31,13 @@ import {
   useSubmission,
   useSubmissions,
 } from "./api";
-import { draftKey, initialCode, loadDraft } from "./drafts";
+import { draftKey, initialEditorContext, loadDraft } from "./drafts";
+import { DraftGuidance, DraftStatus } from "./DraftFeedback";
 import { JudgeResultView } from "./JudgeResultView";
 import { useDraftSaver } from "./useDraftSaver";
 import { isPastDue, VERDICT_CLASS, VERDICT_LABEL } from "./verdict";
 
-type Tab = "run" | "submit" | "hint" | "submissions";
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: "run", label: "Run result" },
-  { id: "submit", label: "Submit result" },
-  { id: "hint", label: "Hint" },
-  { id: "submissions", label: "Submissions" },
-];
+import { ResultTabs, type Tab } from "./ResultTabs";
 
 const EXTENSIONS = [python()];
 
@@ -69,6 +63,7 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
 
   // Editor content is local state, set once from draft / latest submission / empty (§1.2, §1.4).
   const [draft] = useState(() => loadDraft(storageKey));
+  const [origin, setOrigin] = useState<string | null>(null);
   const [code, setCode] = useState<string | null>(null);
   const latestId =
     code === null && draft === null
@@ -76,7 +71,7 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
       : null;
   const latest = useSubmission(aid, qid, latestId);
   if (code === null) {
-    const init = initialCode(
+    const init = initialEditorContext(
       draft,
       submissions.isPending
         ? { status: "pending" }
@@ -90,7 +85,10 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
                 ? { status: "error" }
                 : { status: "loaded", code: latest.data.code },
     );
-    if (init !== null) setCode(init);
+    if (init !== null) {
+      setCode(init.code);
+      setOrigin(init.origin);
+    }
   }
   const { schedule: scheduleSave, status: draftStatus } =
     useDraftSaver(storageKey);
@@ -131,22 +129,22 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
           </div>
           <nav
             aria-label="Question sections"
-            className="flex flex-wrap gap-2 lg:hidden"
+            className="sticky top-0 z-30 flex flex-wrap gap-2 bg-slate-50 py-2 lg:hidden"
           >
             <a
-              className="rounded border border-slate-300 bg-white px-2 py-1 text-sm text-blue-700"
+              className="inline-flex min-h-11 items-center rounded border border-slate-300 bg-white px-3 text-sm text-blue-700"
               href="#problem"
             >
               Problem
             </a>
             <a
-              className="rounded border border-slate-300 bg-white px-2 py-1 text-sm text-blue-700"
+              className="inline-flex min-h-11 items-center rounded border border-slate-300 bg-white px-3 text-sm text-blue-700"
               href="#editor-card"
             >
               Editor
             </a>
             <a
-              className="rounded border border-slate-300 bg-white px-2 py-1 text-sm text-blue-700"
+              className="inline-flex min-h-11 items-center rounded border border-slate-300 bg-white px-3 text-sm text-blue-700"
               href="#results-card"
             >
               Results
@@ -155,19 +153,25 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
           <SplitPane
             label="Resize statement and editor"
             left={
-              <div id="problem" className="scroll-mt-4">
+              <div id="problem" tabIndex={-1} className="scroll-mt-20">
                 <Statement question={q} />
               </div>
             }
             right={
               <div className="min-w-0 space-y-4">
-                <div id="editor-card" className="card scroll-mt-4 space-y-3">
+                <div
+                  id="editor-card"
+                  tabIndex={-1}
+                  className="card scroll-mt-20 space-y-3"
+                >
                   <div className="flex min-h-6 items-center justify-between gap-3">
                     <DraftStatus
                       status={draftStatus ?? (draft !== null ? "saved" : null)}
                     />
                     <ActionHelp />
                   </div>
+                  <p className="text-sm font-medium">Python editor</p>
+                  <DraftGuidance origin={origin} />
                   {code === null ? (
                     <Spinner label="Loading your code…" />
                   ) : (
@@ -183,7 +187,14 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
                       />
                     </div>
                   )}
+                  <label htmlFor="hint-question" className="label">
+                    Question for the hint (optional)
+                  </label>
+                  <p className="text-xs text-slate-600">
+                    Tell us what you are stuck on; this is sent with Get hint.
+                  </p>
                   <input
+                    id="hint-question"
                     className="input"
                     maxLength={500}
                     value={asked}
@@ -257,74 +268,68 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
                   <ErrorText error={startSubmit.error} />
                   <ErrorText error={startHint.error} />
                 </div>
-                <div id="results-card" className="card scroll-mt-4 space-y-3">
-                  <div
-                    className="flex flex-wrap gap-1 border-b border-slate-200 pb-2"
-                    role="tablist"
-                  >
-                    {TABS.map((t) => (
-                      <button
-                        key={t.id}
-                        type="button"
-                        role="tab"
-                        aria-selected={tab === t.id}
-                        onClick={() => setTab(t.id)}
-                        className={`rounded px-2 py-1 text-sm ${tab === t.id ? "bg-slate-200 font-medium" : "text-slate-600 hover:bg-slate-100"}`}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
-                  </div>
-                  {tab === "run" && (
-                    <JobPanel
-                      query={run}
-                      empty="No run yet. Run checks your code on the visible tests."
-                      runningLabel="Running…"
-                    >
-                      {(result, job) => (
-                        <JudgeResultView
-                          result={result}
-                          sentAt={job.created_at}
-                          visibleTests={q.test_cases}
+                <div
+                  id="results-card"
+                  tabIndex={-1}
+                  className="card scroll-mt-20 space-y-3"
+                >
+                  <ResultTabs
+                    selected={tab}
+                    onSelect={setTab}
+                    panels={{
+                      run: (
+                        <JobPanel
+                          query={run}
+                          empty="No run yet. Run checks your code on the visible tests."
+                          runningLabel="Running…"
+                        >
+                          {(result, job) => (
+                            <JudgeResultView
+                              result={result}
+                              sentAt={job.created_at}
+                              visibleTests={q.test_cases}
+                            />
+                          )}
+                        </JobPanel>
+                      ),
+                      submit: (
+                        <JobPanel
+                          query={submit}
+                          empty="No submission yet. Submit judges your code on all tests."
+                          runningLabel="Judging…"
+                        >
+                          {(result, job) => (
+                            <JudgeResultView
+                              result={result}
+                              sentAt={job.created_at}
+                              visibleTests={q.test_cases}
+                            />
+                          )}
+                        </JobPanel>
+                      ),
+                      hint: (
+                        <JobPanel
+                          query={hint}
+                          empty="No hint yet."
+                          runningLabel="Thinking…"
+                        >
+                          {(result) => <HintView result={result} />}
+                        </JobPanel>
+                      ),
+                      submissions: (
+                        <SubmissionsPanel
+                          aid={aid}
+                          qid={qid}
+                          list={submissions}
+                          onLoad={(c) => {
+                            edit(c);
+                            setOrigin("Loaded from submission history.");
+                            setTab("run");
+                          }}
                         />
-                      )}
-                    </JobPanel>
-                  )}
-                  {tab === "submit" && (
-                    <JobPanel
-                      query={submit}
-                      empty="No submission yet. Submit judges your code on all tests."
-                      runningLabel="Judging…"
-                    >
-                      {(result, job) => (
-                        <JudgeResultView
-                          result={result}
-                          sentAt={job.created_at}
-                          visibleTests={q.test_cases}
-                        />
-                      )}
-                    </JobPanel>
-                  )}
-                  {tab === "hint" && (
-                    <JobPanel
-                      query={hint}
-                      empty="No hint yet."
-                      runningLabel="Thinking…"
-                    >
-                      {(result) => <HintView result={result} />}
-                    </JobPanel>
-                  )}
-                  {tab === "submissions" && (
-                    <SubmissionsPanel
-                      aid={aid}
-                      qid={qid}
-                      list={submissions}
-                      onLoad={(c) => {
-                        edit(c);
-                        setTab("run");
-                      }}
-                    />
-                  )}
+                      ),
+                    }}
+                  />
                 </div>
               </div>
             }
@@ -332,26 +337,6 @@ function QuestionWorkspace({ aid, qid }: { aid: number; qid: number }) {
         </div>
       )}
     </QueryView>
-  );
-}
-
-function DraftStatus({
-  status,
-}: {
-  status: ReturnType<typeof useDraftSaver>["status"];
-}) {
-  if (!status) return null;
-  const labels = {
-    saving: "Saving draft…",
-    saved: "Draft saved on this device",
-    unavailable: "Draft could not be saved on this device",
-  };
-  return (
-    <p
-      className={`text-xs ${status === "unavailable" ? "text-red-700" : "text-slate-500"}`}
-    >
-      {labels[status]}
-    </p>
   );
 }
 
@@ -450,7 +435,7 @@ function NotSentNotice({
   )
     return null;
   return (
-    <p className="text-sm text-slate-600">
+    <p role="status" className="text-sm text-slate-600">
       {what} is already in progress — showing it. Your latest code was not sent.
     </p>
   );
