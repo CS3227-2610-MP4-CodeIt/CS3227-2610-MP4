@@ -29,7 +29,10 @@ export function AssignmentsPage() {
       <QueryView query={assignments}>
         {(list) =>
           list.length === 0 ? (
-            <p className="text-sm text-slate-500">No assignments yet.</p>
+            <p className="text-sm text-slate-500">
+              No assignments yet. Check back when your teacher has assigned
+              work.
+            </p>
           ) : (
             byClass(list).map(([classId, g]) => (
               <section key={classId} className="card space-y-2 overflow-x-auto">
@@ -74,7 +77,7 @@ export function AssignmentsPage() {
 }
 
 export function DueDate({ dueAt }: { dueAt: string | null }) {
-  if (!dueAt) return <span className="text-slate-400">none</span>;
+  if (!dueAt) return <span className="text-slate-600">none</span>;
   return (
     <>
       {formatDate(dueAt)}
