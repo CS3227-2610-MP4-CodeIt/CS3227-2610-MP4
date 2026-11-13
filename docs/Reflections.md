@@ -134,15 +134,15 @@ The strongest supported lesson is that clear contracts and independent checks co
 
 ---
 
-# Teo Keng Jer — Individual Reflection
+## Reflections on Multi-Agent SE, Context Engineering and Resource-aware Use by Teo Keng Jer
 
-## 1. My responsibility and the reliability question
+### 1. My responsibility and the reliability question
 
 My primary responsibility was the Admin role, particularly AI assignment performance summaries, reliability improvements and integration testing. My contribution was to investigate how summaries failed, define and test a safer response contract, coordinate verification, and improve recovery when regeneration failed. The [accepted Admin task](../workflow/tasks/admin-summary-response-reliability.md) records the bounded change, while the [retained-result implementation](../workflow/implementations/admin-summary-retained-result-2026-11-13.md) records my subsequent frontend improvement.
 
 The central question became more complicated than whether the model could produce a summary. I needed to establish whether the application accepted useful completed responses, rejected unusable ones safely, and preserved a usable experience when generation failed. My investigation showed that these are separate properties. A validator can correctly enforce a contract while rejecting ordinary model output too often. This distinction shaped what I learned about multi-agent verification, context engineering and resource budgets.
 
-## 2. Experiment: validation exposed eleven contract failures
+### 2. Experiment: validation exposed eleven contract failures
 
 I first treated reliability as an observable contract problem. The original handler could accept blank output, disregard completion metadata and silently shorten oversized responses through a shared guard. I proposed summary-specific validation rather than changing that shared guard, which other AI features used. The [planning contract](../workflow/planning/admin-summary-response-reliability.md) defined acceptance criteria before implementation, and the [contract tests](../backend/tests/test_admin_summary_reliability.py) exercised the backend through mocked provider responses and temporary databases.
 
@@ -159,7 +159,7 @@ The historical validator required a completed `stop` response, no tool calls, no
 
 I interpret 7/18 to 18/18 as improved conformance to a defined response contract. It is not a success-rate estimate for live generations, and the longer post-change duration is not evidence of a performance improvement. These were synthetic provider replies, not sampled model outputs. The experiment also excluded whether the prose interpreted ties, zero submissions or difficulty correctly. The improvement isolated a useful result: eleven contract failures became passing cases without relaxing the original expectations. It did not establish that the contract itself matched useful live output. I now treat choosing the right acceptance policy as a separate engineering decision from implementing it correctly.
 
-## 3. Specialized review improved confidence but added overhead
+### 3. Specialized review improved confidence but added overhead
 
 For this boundary-sensitive change, I used an implementer followed by independent quality, specification, security and verification perspectives, then aggregation. The implementer owned only `summary.py` and supplemental tests. Main retained planning and runner responsibilities. Reviewers received fixed target identities and assigned artifacts after writers stopped. The [task handoff](../workflow/tasks/admin-summary-response-reliability.md) describes these responsibilities, while the [closeout](../workflow/reviews/admin-summary-task1-security-closeout.md) records their contributions and resulting verdict.
 
@@ -171,7 +171,7 @@ Eventually, the recorded container executions supported runtime and quality chec
 
 Coordination was expensive. Four review axes had to fit available concurrency, so verification waited for a slot. Formatting corrections changed target identities; missing compact-return details prompted follow-up; a PowerShell reporting conversion error required recovering actual command results. Build-cache preparation and scanner setup added further work. I have no utilization trace proving idle time or a matched single-agent run proving net acceleration. For this change, I judge the specialist coordination worthwhile because verification and security preserved distinct acceptance gates that the other positive reviews could not satisfy. That is a qualitative judgment about confidence, not a measured productivity gain. I would use multiple agents again when a change crosses security, persistence and provider-contract boundaries. For routine wording or a small component-local edit, I would use one agent with targeted checks, adding a specialist only if a concrete uncertainty remained. More reviewers should answer additional questions, not repeat the same reading.
 
-## 4. Context engineering through bounded packets and handoffs
+### 4. Context engineering through bounded packets and handoffs
 
 The useful context was a precise task packet, not the entire development conversation. I supplied the approved contract, relevant specification sections, baseline evidence, owned files, exact error behavior and exclusions upfront. The implementer could reuse shared clients and guards but could not alter them. Statistical interpretation work was explicitly deferred. That prevented a response-validation investigation from expanding into unrelated architecture or product changes, and made a blocked dependency something to report rather than silently work around.
 
@@ -181,7 +181,7 @@ Fresh contexts also had a cost: agents could not rely on unstated decisions from
 
 Historical records created another context hazard. The task retains earlier pending wording followed by its acceptance addendum; the November 13 policy later supersedes the 150-word threshold. Reading an isolated paragraph could produce the wrong current requirement. I would make the governing decision and superseded policy prominent in future packets and link detailed history underneath. I cannot claim a controlled reduction in tokens from fresh contexts, or prove that context overload caused poorer results. My thinking shifted from supplying more background to making authority easier to find: a short current-decision summary, explicit supersession links and a clearly identified next action would be more useful than another undifferentiated history.
 
-## 5. Live failures changed my understanding of reliability
+### 5. Live failures changed my understanding of reliability
 
 Later real SoCLaaS testing challenged the practical adequacy of the historical contract. As documented in the [November 13 policy record](../workflow/implementations/admin-summary-acceptance-policy-2026-11-13.md), my reported local sequence was: the original prompt failed with `word_limit`; a shorter prompt succeeded once but subsequently failed with `finish_length` at 512 tokens; increasing the allowance to 768 tokens still produced `word_limit`. The [diagnostic implementation](../workflow/implementations/admin-summary-live-rejection-diagnostics.md) used fixed rejection labels without logging response content or arbitrary provider metadata. Those labels identified the first failed gate, not exact response lengths or factual quality.
 
@@ -191,7 +191,7 @@ The November 13 implementation record predates my subsequent manual local testin
 
 The old 18/18 and 168/168 results still describe the earlier policy. In particular, acceptance of 151 words intentionally changed, so those results cannot validate the revised contract unchanged. The live failures changed my next question from whether the validator enforced the rule to whether the rule rejected otherwise useful summaries. I learned that tightening rejection can improve contract compliance while reducing availability. The six successes support trying the revised tolerance, but do not isolate the effect of the prompt, token allowance or word limit. I would test both safety properties and acceptance of representative useful outputs, recording policy versions and varying one factor at a time where practical.
 
-## 6. Resource tradeoffs, integration testing and improvements
+### 6. Resource tradeoffs, integration testing and improvements
 
 Mock-first testing let me exercise failures repeatedly with zero application-model calls during the recorded Task 1 implementation/review run. I could deliberately reproduce malformed replies and boundary cases instead of waiting for a live model to emit them. Its value was repeatability and control; the later failures showed why I also needed a separate compatibility check. The summary sends aggregates rather than student source code or identities, performs one handler-level generation and adds no repair loop. The shared client still permits two retries for 429/503, with two- and five-second delays, so one handler invocation is not necessarily one HTTP attempt. The 300-second default job deadline bounds waiting. I now distinguish these configured ceilings from measured consumption: neither a request cap nor a deadline tells me how many tokens were used, how long ordinary calls took or whether shared quotas were respected.
 
