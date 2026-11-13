@@ -269,7 +269,7 @@ The hint generator and its read-only tools receive only visible tests. The separ
 
 The executor container runs as a non-root user with a read-only root filesystem, writable tmpfs, dropped capabilities, `no-new-privileges`, PID/memory/CPU limits and an internal network without outbound internet. The child process does not inherit the executor token. Tests stop at the first failure to avoid unnecessary execution.
 
-The subprocess runner is not a separate container or OS user per submission. It does not establish complete isolation between mutually hostile programs sharing the executor container. Existing tests cover specific attacks, not arbitrary sandbox escape or cross-job access. Treat stronger sandbox isolation as a production security gap. CORS is currently permissive, authentication tokens are stored in browser local storage, and there is no application-wide login/AI rate limiter or audit trail.
+The subprocess runner is not a separate container or OS user per submission. It does not establish complete isolation between mutually hostile programs sharing the executor container. Existing tests cover specific attacks, not arbitrary sandbox escape or cross-job access. Treat stronger sandbox isolation as a production security gap. Backend CORS permits the hosted frontend and local development origins; executor CORS permits local development origins. Authentication tokens are stored in browser local storage, and there is no application-wide login/AI rate limiter or audit trail.
 
 ### Running checks
 
