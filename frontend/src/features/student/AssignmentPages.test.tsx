@@ -114,7 +114,7 @@ describe("student assignments", () => {
     const detail = render(<AssignmentPage />);
     expect(detail).toContain("0 / 1");
     expect(detail).toContain("Not solved");
-    expect(detail).toContain("medium");
+    expect(detail).toContain("Medium");
   });
   it("shows three questions in supplied order and counts only solved questions", () => {
     state.data = [
