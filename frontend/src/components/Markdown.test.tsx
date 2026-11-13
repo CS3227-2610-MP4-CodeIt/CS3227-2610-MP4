@@ -30,10 +30,14 @@ describe("Markdown", () => {
 
 describe("normalizeMathDelimiters", () => {
   it("rewrites \\(..\\) and \\[..\\] to dollar delimiters", () => {
-    expect(normalizeMathDelimiters("length \\(L_i\\) and \\(\\lfloor L_i / x \\rfloor\\)")).toBe(
-      "length $L_i$ and $\\lfloor L_i / x \\rfloor$",
+    expect(
+      normalizeMathDelimiters(
+        "length \\(L_i\\) and \\(\\lfloor L_i / x \\rfloor\\)",
+      ),
+    ).toBe("length $L_i$ and $\\lfloor L_i / x \\rfloor$");
+    expect(normalizeMathDelimiters("\\[\n1 \\le n\n\\]")).toBe(
+      "$$\n1 \\le n\n$$",
     );
-    expect(normalizeMathDelimiters("\\[\n1 \\le n\n\\]")).toBe("$$\n1 \\le n\n$$");
   });
 
   it("leaves code spans and fences untouched", () => {
@@ -42,7 +46,8 @@ describe("normalizeMathDelimiters", () => {
   });
 
   it("leaves existing $ / $$ math untouched (e.g. \\\\[2pt] line breaks)", () => {
-    const md = "$$\\begin{aligned} a \\\\[2pt] b \\end{aligned}$$ and $f\\(x\\)$ then \\[y\\]";
+    const md =
+      "$$\\begin{aligned} a \\\\[2pt] b \\end{aligned}$$ and $f\\(x\\)$ then \\[y\\]";
     expect(normalizeMathDelimiters(md)).toBe(
       "$$\\begin{aligned} a \\\\[2pt] b \\end{aligned}$$ and $f\\(x\\)$ then $$y$$",
     );
@@ -60,7 +65,9 @@ describe("normalizeMathDelimiters", () => {
   });
 
   it("renders \\(..\\) math with KaTeX", () => {
-    const html = renderToStaticMarkup(<Markdown>{"(\\(1 \\le n \\le 10^{5}\\))"}</Markdown>);
+    const html = renderToStaticMarkup(
+      <Markdown>{"(\\(1 \\le n \\le 10^{5}\\))"}</Markdown>,
+    );
     expect(html).toContain("katex");
     expect(html).toContain("≤");
   });

@@ -169,7 +169,7 @@ const assert = require("node:assert/strict");
   const first = page.locator("tbody tr").nth(0).getByRole("button");
   await first.focus();
   await page.keyboard.press("Enter");
-  await page.getByText(/Analyzing/).waitFor();
+  await page.locator("span.inline-flex").filter({ hasText: "Analyzing…" }).waitFor();
   assert.equal(
     await page
       .getByRole("button", { name: "Analyze", exact: true })
@@ -178,7 +178,7 @@ const assert = require("node:assert/strict");
   );
   await page.locator("tbody tr").nth(1).getByRole("button").click();
   await page.getByText('print("second snapshot")').waitFor();
-  assert.equal(await page.getByText(/Analyzing/).count(), 0);
+  assert.equal(await page.locator("span.inline-flex").filter({ hasText: "Analyzing…" }).count(), 0);
   console.log(
     "PASS: snapshots, isolated results, retry, in-progress switching, keyboard and mobile panel",
   );
