@@ -2,6 +2,33 @@
 
 This guide describes the implementation of CodeIt. It accompanies the [User Guide](UserGuide.md) and [Reflections](Reflections.md), and addresses the additional engineering requirements in the [assignment brief](../assignment-brief.md).
 
+## Contents
+
+1. [Product and scope](#1-product-and-scope)
+2. [Architecture](#2-architecture)
+3. [Design decisions and principles](#3-design-decisions-and-principles)
+4. [Local setup](#4-local-setup)
+5. [AI context, guardrails and resource use](#5-ai-context-guardrails-and-resource-use)
+6. [Security, verification and testing](#6-security-verification-and-testing)
+7. [Software engineering process](#7-software-engineering-process)
+8. [Deployment and development/production separation](#8-deployment-and-developmentproduction-separation)
+9. [Acknowledgements](#9-acknowledgements)
+
+### Where to verify each requirement
+
+| Requirement | Where to verify it |
+| --- | --- |
+| Shared-component design using SRP/DRY | [Section 2](#2-architecture) and [Section 3](#3-design-decisions-and-principles) |
+| AI feature for each role, using SoCLaaS | [Section 1](#1-product-and-scope) and [Section 5](#5-ai-context-guardrails-and-resource-use); [User Guide](UserGuide.md) |
+| AI security controls and tests | [Section 5](#5-ai-context-guardrails-and-resource-use) and [Section 6](#6-security-verification-and-testing) |
+| Context engineering and resource-aware use | [Section 5](#5-ai-context-guardrails-and-resource-use) and [Section 7](#7-software-engineering-process) |
+| Specialized-agent coordination and SDD evidence | [Section 7](#7-software-engineering-process) and the linked `workflow/` and `logs/` artifacts |
+| Description of the `workflow/` directory files | [Section 7](#7-software-engineering-process) — [Workflow directory](#workflow-directory-workflow) |
+| Tests and error handling | [Section 6](#6-security-verification-and-testing) |
+| Separate online deployment and development setup | [Section 4](#4-local-setup) and [Section 8](#8-deployment-and-developmentproduction-separation) |
+| Data persistence, backup and recovery | [Section 8](#8-deployment-and-developmentproduction-separation) |
+| Reused material and attributions | [Section 9](#9-acknowledgements) |
+
 ## 1. Product and scope
 
 CodeIt is a Python programming assignment platform with three roles.
@@ -49,8 +76,6 @@ The backend owns accounts, authorization, persistence, AI orchestration and subm
 | `frontend/src/components/` | Reusable layout, role guard, forms, Markdown, errors and status displays |
 | `frontend/src/features/` | Role-specific screens and API hooks |
 
-This separation applies SRP: routers authorize requests, repositories perform database access, and clients handle upstream services. DRY is especially important for the three role implementations: they share schemas, guards, repositories and one job runner instead of duplicating those mechanisms.
-
 ### Data model
 
 The authoritative schema is [backend-schema.sql](../backend/backend-schema.sql). Accounts have many sessions and belong to classes through `class_members`. Teachers own questions with ordered test cases. Assignments belong to classes and refer to one to three questions through `assignment_questions`. Submissions belong to a student and an assignment/question pair; jobs retain asynchronous inputs, results and status.
@@ -86,7 +111,22 @@ SSE carries identifiers rather than source code or results. The frontend refetch
 
 Jobs and the SSE hub execute in memory in one backend process, while job records persist in SQLite. Startup marks interrupted jobs failed; it does not resume them. Keep the backend at **one Uvicorn worker**. Multiple backend workers/replicas require a shared queue and event system before they are safe. The executor also uses one worker because its semaphore is process-local.
 
-## 3. Local setup
+## 3. Design decisions and principles
+
+This separation applies SRP: routers authorize requests, repositories perform database access, and clients handle upstream services. DRY is especially important for the three role implementations: they share schemas, guards, repositories and one job runner instead of duplicating those mechanisms.
+
+The following material decisions are described in context throughout this guide; they are collected here with their trade-offs so the design rationale is visible in one place.
+
+| Decision | Why it fits CodeIt | Trade-off and where it is enforced |
+| --- | --- | --- |
+| Keep the browser, backend, SoCLaaS and executor responsibilities separate, with only the backend holding the SoCLaaS key. | The backend owns authorization, persistence and all provider calls, keeping credentials and authoritative state out of the browser. | The frontend depends on documented API contracts; change a contract with its spec, implementation and tests. See [Section 2](#2-architecture). |
+| Use SQLite with one backend process and one Uvicorn worker. | Short transactions atomically check ownership, deduplicate jobs and persist results on one local database. | SQLite-local admission and the in-memory SSE hub do not support horizontal scaling; a shared queue/event system is required before adding workers. See [Section 2](#asynchronous-jobs-and-frontend-state). |
+| Run asynchronous jobs in memory with persisted job rows, rather than a durable queue. | Browser disconnects do not cancel accepted work, and the model stays simple. | A restart marks interrupted jobs failed rather than resuming them; notifications are best-effort with bounded queues. See [Section 2](#asynchronous-jobs-and-frontend-state). |
+| Have the private hint reviewer fail open on error, timeout or invalid output. | A reviewer outage still returns the already-guarded hint rather than blocking the student feature. | This is a mitigation, not guaranteed answer-leak prevention; residual risk is acknowledged. See [Section 5](#5-ai-context-guardrails-and-resource-use) and [Section 6](#6-security-verification-and-testing). |
+| Assignments reference editable question records rather than immutable snapshots. | Editing a question updates it everywhere it is assigned without copying data. | Existing submissions are not automatically rejudged; deletion/removal guards protect in-use questions. See [Section 2](#data-model). |
+| Offer an optional independent fallback backend origin rather than replicated storage. | A tab can keep working for safe reads when the primary origin fails. | Databases and sessions are independent; writes are never replayed automatically. See [Section 4](#backend-selection) and [Section 8](#8-deployment-and-developmentproduction-separation). |
+
+## 4. Local setup
 
 ### Docker Compose
 
@@ -167,7 +207,7 @@ With a fallback configured, the browser probes the primary `/api/health/ready`, 
 
 Additional executor limits are defined in [config.py](../code-execution/app/config.py). The concurrency default is a configuration value, not a demonstrated capacity guarantee; size it against available memory/CPU and load-test the chosen deployment.
 
-## 4. AI context, guardrails and resource use
+## 5. AI context, guardrails and resource use
 
 | Feature | Context and boundaries | Work budget before HTTP retries |
 | --- | --- | --- |
@@ -213,7 +253,7 @@ sequenceDiagram
 
 Frontend Markdown rendering disables raw HTML, filters unsafe URL schemes, opens links with protective attributes and renders images as links. Generated question outputs and reference solutions require human checking: generation validates structure but does not execute the reference solution against its tests before approval.
 
-## 5. Security and verification
+## 6. Security, verification and testing
 
 | Boundary | Implementation | Relevant tests |
 | --- | --- | --- |
@@ -272,7 +312,7 @@ Additional contracts are covered by `backend/tests/test_admin_summary_validation
 
 Historical logs report 130 backend tests at the end of backend implementation, 131 after the co-teacher endpoint, 57 executor tests, and 36 frontend tests at the teacher-page milestone. These are dated observations, not freshly verified totals for this documentation change. Re-run checks on the release commit and retain the actual results. Use the [User Guide walkthrough](UserGuide.md#7-reproducible-peer-testing-walkthrough) for manual integration checks, including all three AI roles. Also test a real tool-capable SoCLaaS completion: mocks cannot verify gateway/model compatibility.
 
-## 6. Spec-driven and multi-agent development
+## 7. Software engineering process
 
 The detailed contracts are [backend-spec.md](../specs/backend-spec.md), [code-execution-spec.md](../specs/code-execution-spec.md), and the [frontend specification](../specs/frontend/frontend-spec.md) with login/admin/teacher/student supplements. They define API contracts, access rules, job states, limits and test expectations before implementation. Approved clarifications are written back to the specs and then implemented and tested.
 
@@ -286,7 +326,25 @@ The current [implementation workflow](../.agents/skills/implement/SKILL.md) plan
 
 [Agent scope enforcement](../workflow/agent-scope/agent-scope.md) combines a Bash `PreToolUse` hook tripwire with an authoritative post-agent diff audit against human-authored scope policy. The hook does not observe `apply_patch`; it is not complete write isolation. Implementers and review writers have distinct intended file scopes, and secrets remain excluded. See [evaluation guidance](../workflow/evals/README.md) and [workflow scripts](../workflow/scripts/README.md) for process checks rather than assuming historical execution proves current enforcement.
 
-### Workflow artifact index
+### Workflow directory (`workflow/`)
+
+The brief requires consolidating development-workflow files under `workflow/` and describing them here. Each top-level subdirectory is summarized below; folders with a `README.md` document their own contents in more detail.
+
+| `workflow/` subdirectory | Contents and purpose |
+| --- | --- |
+| [`agent-scope/`](../workflow/agent-scope/) | Agent write-scope policy (`scope.toml`), the `PreToolUse` guard (`guard.py`), its tests and [agent-scope.md](../workflow/agent-scope/agent-scope.md) rationale |
+| [`backend-implementation/`](../workflow/backend-implementation/) | Shared backend [HANDOFF.md](../workflow/backend-implementation/HANDOFF.md): APIs, fixtures and examples for the role agents |
+| [`evals/`](../workflow/evals/) | Codex skill evaluation harness (`eval.py`), plan/implement/code-review/commit test cases, runs and reports |
+| [`implementations/`](../workflow/implementations/) | Dated per-feature implementation records (e.g. private hint reviewer, admin summary, student pages) |
+| [`live-ai/`](../workflow/live-ai/) | Manually run SoCLaaS provider probes and reports, distinguished from mocked tests; see its [README](../workflow/live-ai/README.md) |
+| [`planning/`](../workflow/planning/) | Pre-implementation planning notes |
+| [`prototypes/`](../workflow/prototypes/) | Throwaway UI/behavior exploration prototypes (complexity analysis, student login/pages) |
+| [`reviews/`](../workflow/reviews/) | Independent review and verification records per feature, including live reviewer findings |
+| [`scripts/`](../workflow/scripts/) | Grader/verification runner scripts; see its [README](../workflow/scripts/README.md) |
+| [`security/`](../workflow/security/) | [Security matrix](../workflow/security/security-matrix.md), [Semgrep instructions](../workflow/security/semgrep.md), scanner script and [setup validation](../workflow/security/setup-validation.md) |
+| [`tasks/`](../workflow/tasks/) | Approved task briefs that drive planning and implementation |
+
+### Agent and skill artifacts
 
 | Artifact | Purpose |
 | --- | --- |
@@ -309,7 +367,9 @@ Historical agent definitions remain in `.claude/agents/`; current Codex profiles
 
 The [live-AI index](../workflow/live-ai/README.md) distinguishes manually run provider probes from deterministic mocked tests. Relevant records include [hint model selection](../workflow/live-ai/hint-model-selection.md), [current hint pipeline](../workflow/live-ai/hint-current-pipeline-2026-11-09.md), [hint security](../workflow/live-ai/hint-security-report.md), [complexity model selection](../workflow/live-ai/complexity-model-selection.md) and [complexity security](../workflow/live-ai/complexity-security-report.md). Treat their model availability, latency, quality and security observations as dated evidence, not current runtime guarantees. Probe scripts can consume quota and write reports; consult their instructions before running them. The [reflections](Reflections.md) discuss recorded coordination/resource measurements and their limits; model usage fields or configured budgets alone do not establish actual cost, caching gains or quota compliance.
 
-## 7. Deployment and development/production separation
+## 8. Deployment and development/production separation
+
+### Deployment topology and promotion
 
 The base [Compose stack](../docker-compose.yml) remains a local development configuration with a localhost frontend API origin and HTTP executor traffic. Setting only `APP_ENV=prod` rejects that executor URL. The repository also contains [Pi shared settings](../docker-compose.pi.yml), [staging overrides](../docker-compose.pi.staging.yml), a [deployment script](../deploy/pi/deploy-pi.sh), [bootstrap script](../deploy/pi/bootstrap-pi.sh) and [Pi runbook](../deploy/pi/README.md).
 
@@ -317,13 +377,20 @@ The base [Compose stack](../docker-compose.yml) remains a local development conf
 
 Both Pi stacks apply the shared concurrency setting of eight executor jobs. Staging adds `APP_ENV=prod`, a separate database volume, staging token, private CA and Caddy HTTPS executor proxy; its backend is intended to bind to loopback port 8001 through the deploy environment. Production uses port 8000 and its separately supplied environment. Its base Compose executor URL is HTTP, so actual production `APP_ENV`/TLS settings must be checked on the host; the staging HTTPS proxy does not prove production HTTPS compliance.
 
+The public product frontend is served from Render. The browser loads that static frontend, which calls the primary backend on the Raspberry Pi; the Pi is exposed publicly through Tailscale Funnel rather than a direct port. The backend then reaches its SQLite database, the code executor and SoCLaaS. A separate Render-hosted backup backend with its own database provides the fallback origin described below. Deployment runs through [GitHub Actions](../.github/workflows/deploy-pi.yml): the deploy job authenticates into the private tailnet using GitHub OIDC through a Tailscale OAuth client (tagged `tag:github-actions`), then connects over SSH to the Pi and runs the staging/promotion command for the exact commit. The Render frontend host and the Tailscale Funnel ingress are provisioned once as part of the hosting setup; the per-commit deploy script rebuilds the Pi backend and executor rather than re-provisioning those.
+
 ```mermaid
 flowchart TB
-    Browser[Browser] -->|Primary readiness probe and normal API traffic| Primary[Pi public API origin]
-    Browser -.->|"Fallback after primary failure; safe reads may retry"| Backup[Render fallback API origin]
-    Primary --> ProdAPI
-    Backup --> BackupDB[(Independent fallback database)]
-    subgraph Pi["Pi: separate Compose projects"]
+    Browser[Browser]
+    subgraph Render["Render (external hosting)"]
+        FE[Static product frontend]
+        Backup[Fallback backend] --> BackupDB[(Independent fallback database)]
+    end
+    Browser -->|Load static frontend| FE
+    FE -->|"Primary API traffic via Tailscale Funnel"| Funnel[Tailscale Funnel ingress]
+    FE -.->|"Fallback after primary failure; safe reads may retry"| Backup
+    Funnel --> ProdAPI
+    subgraph Pi["Raspberry Pi: separate Compose projects"]
         subgraph Production[codeit production]
             ProdAPI[Backend on port 8000] --> ProdDB[(Production SQLite volume)]
             ProdAPI -->|"Base Compose HTTP; host settings require verification"| ProdExec[Executor]
@@ -334,11 +401,16 @@ flowchart TB
             Proxy --> StageExec[Staging executor]
         end
     end
-    Actions[Master push: checks then SSH deploy] --> StageAPI
+    ProdAPI -->|Server-side API key| SoCLaaS[SoCLaaS]
+    Actions[Master push: checks then OIDC tailnet join + SSH] --> StageAPI
     Actions -->|Production promotion before health checks| ProdAPI
 ```
 
-The primary/fallback roles follow [frontend configuration](../frontend/README.md); the topology does not establish that external origins or services are currently live. Writes are not automatically replayed, and databases/sessions are independent. The Pi script does not deploy the Render frontend or configure Tailscale Funnel. The [product website](../website/index.md) has a separate [GitHub Pages workflow](../.github/workflows/pages.yml); publishing that site does not deploy the application. Repository source/configuration and runbook statements are evidence of intended operations, not a fresh verification of host state, public URLs, secrets, successful Actions runs or deployed commits.
+### Data survival, backup and restore
+
+The primary/fallback roles follow [frontend configuration](../frontend/README.md); the topology does not establish that external origins or services are currently live. Writes are not automatically replayed, and databases/sessions are independent. The per-commit deploy script rebuilds the Pi backend and executor; it does not re-provision the Render frontend host or the Tailscale Funnel ingress, which are configured once as part of the hosting setup. The [product website](../website/index.md) has a separate [GitHub Pages workflow](../.github/workflows/pages.yml); publishing that site does not deploy the application. Repository source/configuration and runbook statements are evidence of intended operations, not a fresh verification of host state, public URLs, secrets, successful Actions runs or deployed commits.
+
+### Release verification checklist
 
 Before a release, verify the deployed configuration and operations against these requirements:
 
@@ -351,7 +423,7 @@ Before a release, verify the deployed configuration and operations against these
 
 The brief also requires a public organization repository named `CS3227-2610-MP4`, an up-to-date `master`, a GitHub Pages product website, workflow artifacts and interaction summaries. Current source lives in `backend/`, `frontend/` and `code-execution/`, whereas the brief requests `src/…`. Reconcile that layout with the submission requirements before grading. Team membership, individual contributions, previous-MP non-reuse and external deployment status cannot be established from these source files alone.
 
-## 8. Acknowledgements
+## 9. Acknowledgements
 
 The [CS3227 assignment brief](../assignment-brief.md) supplies the project requirements and reflection questions. The [backend development log](../logs/backend-implementation.md) credits the course's L8 Multi-Agent Coordination material for the orchestrator/subagent and generator/verifier patterns. [soclaas-docs.md](../backend/soclaas-docs.md) records the SoCLaaS API reference used for integration; it is reference material, not application-authored API documentation.
 
