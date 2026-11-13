@@ -110,7 +110,10 @@ export function LoginPage() {
             </p>
             <ErrorText
               error={mutation.error}
-              messages={{ 401: "Invalid username or password." }}
+              messages={{
+                401: "Invalid username or password.",
+                404: "Login is unavailable. Try again or contact your course administrator.",
+              }}
             />
           </div>
         </form>

@@ -39,4 +39,12 @@ describe("login feedback", () => {
     expect(html).toContain('role="alert"');
     expect(html).toContain("Invalid username or password.");
   });
+  it("explains an unavailable login endpoint without displaying a raw 404", () => {
+    state.error = new ApiError(404, "Not Found");
+    const html = renderToStaticMarkup(<LoginPage />);
+    expect(html).toContain(
+      "Login is unavailable. Try again or contact your course administrator.",
+    );
+    expect(html).not.toContain("Not Found");
+  });
 });
