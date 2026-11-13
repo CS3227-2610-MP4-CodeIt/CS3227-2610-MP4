@@ -64,7 +64,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_url="/openapi.json" if docs else None,
     )
     app.add_middleware(
-        CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
+        CORSMiddleware,
+        allow_origins=[
+            "https://codeit-b5xy.onrender.com",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://[::1]:5173",
+        ],
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     @app.get("/api/health", tags=["health"])

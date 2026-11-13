@@ -19,6 +19,8 @@ Demo accounts are not seeded when `APP_ENV=prod`; production Pi and Render datab
 independent unless accounts are created separately.
 
 Environment variables override `.env`, so an exported `SOCLAAS_BASE_URL` etc. in your shell wins.
+The API permits browser requests from the hosted CodeIt frontend and the local Vite origins
+`http://localhost:5173`, `http://127.0.0.1:5173`, and `http://[::1]:5173`.
 
 ## Tests
 

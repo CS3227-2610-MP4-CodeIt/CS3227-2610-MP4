@@ -138,10 +138,10 @@ Test-case content is stored in the DB as text (≤ 1 MiB each, the executor's li
 All paths are under `/api`. JSON in and out. Errors use FastAPI's `{"detail": ...}` shape.
 Validation errors → `422`. Ids in paths are integers.
 
-**CORS:** wide open, so the frontend can run on any origin/port without CORS errors:
-`CORSMiddleware(allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])`. This is safe
-because auth is a `Bearer` header the frontend adds itself, not a cookie the browser sends
-automatically, so `allow_credentials` stays `False` (it can't be combined with `"*"` anyway).
+**CORS:** allow only the hosted CodeIt frontend (`https://codeit-b5xy.onrender.com`) and the
+local Vite origins (`http://localhost:5173`, `http://127.0.0.1:5173`, and `http://[::1]:5173`). Other browser origins
+must not receive CORS permission. Auth remains a `Bearer` header added by the frontend, not a
+cookie sent automatically; `allow_credentials` remains `False`.
 
 ### 5.1 Auth
 

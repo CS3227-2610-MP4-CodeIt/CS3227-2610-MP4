@@ -48,9 +48,23 @@ async def test_validation(client, body):
     assert r.status_code == 422
 
 
-async def test_cors_is_open(client):
+async def test_cors_allows_local_frontend_origins(client):
+    for origin in ("http://localhost:5173", "http://127.0.0.1:5173", "http://[::1]:5173"):
+        r = await client.options(
+            "/v1/execute",
+            headers={"Origin": origin, "Access-Control-Request-Method": "POST"},
+        )
+        assert r.status_code == 200
+        assert r.headers["access-control-allow-origin"] == origin
+
+
+async def test_cors_rejects_unlisted_origins(client):
     r = await client.options(
         "/v1/execute",
-        headers={"Origin": "http://localhost:5173", "Access-Control-Request-Method": "POST"},
+        headers={
+            "Origin": "https://untrusted.example",
+            "Access-Control-Request-Method": "POST",
+        },
     )
-    assert r.headers["access-control-allow-origin"] in ("*", "http://localhost:5173")
+    assert r.status_code == 400
+    assert "access-control-allow-origin" not in r.headers

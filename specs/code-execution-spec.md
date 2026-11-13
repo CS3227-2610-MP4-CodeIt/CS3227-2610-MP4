@@ -90,9 +90,10 @@ backend ──HTTP POST /v1/execute──▶ FastAPI handler (async)
 All endpoints except `/health` require header `X-Internal-Token: <EXECUTOR_TOKEN>`
 (compared with `hmac.compare_digest`). Missing/invalid → `401`.
 
-**CORS:** wide open (`CORSMiddleware(allow_origins=["*"], allow_methods=["*"],
-allow_headers=["*"])`), so calling it from a browser during dev never hits CORS errors. The
-token check above is still what protects it.
+**CORS:** permit only the local Vite development origins `http://localhost:5173` and
+`http://127.0.0.1:5173`, and `http://[::1]:5173`. The hosted frontend calls the backend, which calls this service
+server-to-server; browsers should not call the executor directly in production. The internal
+token remains required independently of CORS.
 
 ### 3.1 `POST /v1/execute`
 

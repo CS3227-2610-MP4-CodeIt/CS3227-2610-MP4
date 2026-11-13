@@ -130,17 +130,36 @@ async def test_other_users_job_is_404(
     assert "input" not in own.json()
 
 
-async def test_cors_is_open(client: httpx.AsyncClient) -> None:
+async def test_cors_allows_hosted_and_local_frontends(client: httpx.AsyncClient) -> None:
+    for origin in (
+        "https://codeit-b5xy.onrender.com",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://[::1]:5173",
+    ):
+        response = await client.options(
+            "/api/auth/me",
+            headers={
+                "Origin": origin,
+                "Access-Control-Request-Method": "GET",
+                "Access-Control-Request-Headers": "authorization",
+            },
+        )
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == origin
+
+
+async def test_cors_rejects_unlisted_origins(client: httpx.AsyncClient) -> None:
     response = await client.options(
         "/api/auth/me",
         headers={
-            "Origin": "http://localhost:5173",
+            "Origin": "https://untrusted.example",
             "Access-Control-Request-Method": "GET",
             "Access-Control-Request-Headers": "authorization",
         },
     )
-    assert response.status_code == 200
-    assert response.headers["access-control-allow-origin"] == "*"
+    assert response.status_code == 400
+    assert "access-control-allow-origin" not in response.headers
 
 
 async def test_prod_disables_docs(client: httpx.AsyncClient) -> None:
