@@ -59,7 +59,7 @@ export function AssignmentPage() {
                           </p>
                         </div>
                         <span
-                          className={`col-start-2 w-fit rounded px-2 py-1 text-xs sm:col-start-auto ${q.solved ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-700"}`}
+                          className={`col-start-2 w-fit self-center rounded px-2 py-1 text-xs sm:col-start-auto ${q.solved ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-700"}`}
                         >
                           {q.solved ? "Solved" : "Not solved"}
                         </span>
