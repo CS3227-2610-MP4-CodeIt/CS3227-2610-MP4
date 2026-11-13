@@ -595,9 +595,17 @@ Stats (`submissions_repo.assignment_stats`):
 - *correct* = students with ≥1 `ACCEPTED` submission for it.
 - Only current students of the class are counted.
 
-`prompts/summary.md` (outline): summarise progress in ≤ 150 words of Markdown, point out the
-question students struggle with most and the most common failure verdict, use only the numbers
-given, do not invent any.
+`prompts/summary.md` targets 100–120 words of Markdown (instructing the model not to exceed
+120), describing participation and completion and highlighting the hardest question and common
+failure verdicts only where supported by the statistics. Do not invent statistics or unsupported
+conclusions. The preferred presentation remains ≤150 words; this is not a rejection threshold.
+
+Acceptance requires nonempty trimmed text, `finish_reason = stop`, no tool calls, at most
+250 whitespace-delimited words **and** 2,000 Python Unicode characters after trimming, including
+Markdown formatting. Check the full response for canary leakage before these checks. Reject
+invalid output without truncation or repair calls; preserve existing safe job errors and result
+shape. Admin generation uses `max_tokens = 768`; the shared retry policy is unchanged. This
+summary contract covers the supported 1–3 questions per assignment.
 
 **Result:** `{"stats": {...}, "summary_md": "..."}`. The frontend shows the stats table next to the
 summary, so the admin always sees the real numbers.
