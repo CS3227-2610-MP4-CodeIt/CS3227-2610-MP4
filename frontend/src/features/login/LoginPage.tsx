@@ -47,8 +47,18 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
-      <form onSubmit={onSubmit} className="card w-full max-w-sm space-y-4">
-        <h1 className="text-lg font-semibold">Log in</h1>
+      <form
+        aria-busy={mutation.isPending}
+        onSubmit={onSubmit}
+        className="card w-full max-w-sm space-y-4"
+      >
+        <div>
+          <p className="text-sm font-semibold text-blue-700">CodeIt</p>
+          <h1 className="text-xl font-semibold">Log in</h1>
+          <p className="mt-1 text-sm text-slate-600">
+            Use the account provided by your course administrator.
+          </p>
+        </div>
         <div>
           <label className="label" htmlFor="username">
             Username
@@ -73,6 +83,9 @@ export function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+        <p role="status" className="text-sm text-slate-600">
+          {mutation.isPending ? "Logging in…" : ""}
+        </p>
         <ErrorText
           error={mutation.error}
           messages={{ 401: "Invalid username or password." }}
@@ -82,7 +95,7 @@ export function LoginPage() {
           className="btn btn-primary w-full justify-center"
           disabled={mutation.isPending || !username || !password}
         >
-          Log in
+          {mutation.isPending ? "Logging in…" : "Log in"}
         </button>
       </form>
     </div>
