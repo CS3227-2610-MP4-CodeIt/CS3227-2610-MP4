@@ -6,3 +6,6 @@ to run
 ```bash
 docker compose up --build
 ```
+
+password for admin: `change-me`<br>
+password for teachers and students: `demo1234`
