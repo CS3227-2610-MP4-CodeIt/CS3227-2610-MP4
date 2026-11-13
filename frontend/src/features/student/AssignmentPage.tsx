@@ -1,3 +1,4 @@
+import { formatDifficulty } from "../../components/difficulty";
 import { Link, useParams } from "react-router";
 import { Markdown } from "../../components/Markdown";
 import { QueryView } from "../../components/QueryView";
@@ -54,11 +55,11 @@ export function AssignmentPage() {
                             {q.title}
                           </Link>
                           <p className="mt-1 text-sm text-slate-500">
-                            {q.difficulty}
+                            {formatDifficulty(q.difficulty)}
                           </p>
                         </div>
                         <span
-                          className={`col-start-2 w-fit rounded px-2 py-1 text-xs sm:col-start-auto ${q.solved ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-700"}`}
+                          className={`col-start-2 w-fit self-center rounded px-2 py-1 text-xs sm:col-start-auto ${q.solved ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-700"}`}
                         >
                           {q.solved ? "Solved" : "Not solved"}
                         </span>

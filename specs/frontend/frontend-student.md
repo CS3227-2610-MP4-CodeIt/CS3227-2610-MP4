@@ -54,11 +54,18 @@ contents after a confirm, since it overwrites the draft.
 
 | Path | Shows | Queries |
 |---|---|---|
-| `/student` | Assignments grouped by class: title, due date (and "closed" when past), solved and total question counts | `studentAssignments()` |
+| `/student` | Assignments grouped by class: title, due date (and "closed" when past), solved and total question counts; filters for All, To do, Completed and Closed | `studentAssignments()` |
 | `/student/assignments/:aid` | Class, description (`Markdown`), due date, solved/total progress, and ordered questions with difficulty and explicit solved or not-solved status | `studentAssignment(aid)` |
 | `/student/assignments/:aid/questions/:qid` | Question page (§3) | `studentQuestion(aid, qid)`, `studentSubmissions(aid, qid)`, three `jobCheck`s |
 
 `404` (e.g. removed from the class) → `NotFound`.
+
+The assignment filters keep the backend's newest-first order within each class.
+Completed means all questions are solved, even if the deadline has passed. Closed
+means the deadline has passed and at least one question is unsolved. To do means
+the assignment is open and has unsolved questions. A zero solved count does not
+imply the student has not attempted the work. Classes without matching assignments
+are hidden while a filter is active; an empty filter has a clear message.
 
 ---
 

@@ -43,6 +43,10 @@ describe("student assignments", () => {
     state.data = [assignment];
     const html = render(<AssignmentsPage />);
     expect(html).toContain("Algorithms");
+    expect(html).toContain('aria-label="Filter assignments"');
+    expect(html).toContain('aria-pressed="true"');
+    expect(html).toContain("To do");
+    expect(html).toContain("Closed");
     expect(html).toContain("No due date");
     expect(html).toContain("1 of 2 solved");
     expect(html).toContain("In progress");
@@ -114,7 +118,7 @@ describe("student assignments", () => {
     const detail = render(<AssignmentPage />);
     expect(detail).toContain("0 / 1");
     expect(detail).toContain("Not solved");
-    expect(detail).toContain("medium");
+    expect(detail).toContain("Medium");
   });
   it("shows three questions in supplied order and counts only solved questions", () => {
     state.data = [

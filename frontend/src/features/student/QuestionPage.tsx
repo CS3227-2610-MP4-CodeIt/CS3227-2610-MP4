@@ -1,3 +1,4 @@
+import { formatDifficulty } from "../../components/difficulty";
 import { python } from "@codemirror/lang-python";
 import type { UseQueryResult } from "@tanstack/react-query";
 import CodeMirror from "@uiw/react-codemirror";
@@ -382,7 +383,8 @@ function Statement({ question: q }: { question: StudentQuestion }) {
           )}
         </h1>
         <p className="text-sm text-slate-600">
-          {q.difficulty} · {q.time_limit_ms} ms · {q.memory_limit_mb} MB
+          {formatDifficulty(q.difficulty)} · {q.time_limit_ms} ms ·{" "}
+          {q.memory_limit_mb} MB
           {q.float_tolerance &&
             ` · tolerance abs ${q.float_tolerance.abs}, rel ${q.float_tolerance.rel}`}
         </p>
