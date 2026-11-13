@@ -36,6 +36,8 @@ A **class** brings teachers and students together. A teacher creates questions i
 
 Open the [hosted CodeIt application](https://codeit-b5xy.onrender.com/).
 
+When CodeIt switches to the Render backup, its backend or code executor may still be waking up after inactivity. The app may load before Run/Submit is ready, and the first request can take about a minute or longer ([Render service limits](https://render.com/docs/free)). If a page or action reports a temporary service error, wait briefly and retry. The Render backup may have different accounts and coursework data from the Pi deployment.
+
 For a local installation, open **http://localhost:5173** after following the [Developer Guide setup](DeveloperGuide.md#3-local-setup).
 
 Sign in with your username and password. Your role determines which navigation links you see. There is no public account registration: an administrator creates teacher and student accounts. Admin accounts are provisioned during server setup.
