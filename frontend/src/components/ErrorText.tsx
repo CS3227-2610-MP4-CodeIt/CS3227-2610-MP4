@@ -56,7 +56,10 @@ export function ErrorText({
   const lines = errorLines(error, fields, messages);
   if (lines === null) {
     return (
-      <div className="flex items-center gap-2 text-sm text-red-600">
+      <div
+        role="alert"
+        className="flex items-center gap-2 text-sm text-red-700"
+      >
         Could not reach the server. Try again.
         {onRetry && (
           <button type="button" className="btn" onClick={onRetry}>
@@ -68,7 +71,7 @@ export function ErrorText({
   }
   if (lines.length === 0) return null;
   return (
-    <div className="text-sm text-red-600">
+    <div role="alert" className="text-sm text-red-700">
       {lines.map((line, i) => (
         <p key={i}>{line}</p>
       ))}
