@@ -1,10 +1,12 @@
 # CodeIt User Guide
 
-CodeIt helps teachers create Python programming assignments, students solve them with automated judging and AI hints, and administrators manage classes and review progress. This guide describes the implemented interface as reviewed on 28 October 2026.
+CodeIt helps teachers create Python programming assignments, students solve them with automated judging and AI hints, and administrators manage classes and review progress.
 
 ## 1. Access and accounts
 
-For a local installation, open **http://localhost:5173** after following the [Developer Guide setup](DeveloperGuide.md#3-local-setup). A public deployment URL and hosted peer-test credentials are not recorded in the repository; use the address and accounts supplied by the team for a hosted installation.
+Open the [hosted CodeIt application](https://codeit-b5xy.onrender.com/).
+
+For a local installation, open **http://localhost:5173** after following the [Developer Guide setup](DeveloperGuide.md#3-local-setup).
 
 Sign in with your username and password. Your role determines which navigation links you see. There is no public account registration: an administrator creates teacher and student accounts. Admin accounts are provisioned during server setup.
 
@@ -58,17 +60,27 @@ Results appear in **Run result**, **Submit result**, **Hint** and **Submissions*
 
 Comparison normally preserves leading/internal spaces while ignoring trailing spaces on each line and trailing blank lines. A teacher can enable numerical tolerance for floating-point answers. Check the question's displayed limits and tolerance rather than assuming every problem uses the same settings.
 
+![Student workspace with an accepted submission](images/student-code-submission-accepted.png)
+
+*Student workspace after a submission is accepted.*
+
 ### Use AI hints
 
-Enter an optional specific question, such as “Why does this fail when the input is zero?”, and choose **Get hint**. The AI may retrieve the question's visible tests and your code. A “Looked at” note identifies which of those sources it used. It cannot retrieve hidden tests through the hint tools.
+Enter an optional specific question, such as “Why does this fail when the input is zero?”, and choose **Get hint**. Hints provide guidance rather than full or near-full solutions. The AI may retrieve the question's visible tests and your code. A “Looked at” note identifies which of those sources it used. It cannot retrieve hidden tests through the hint tools.
 
 Hints may be incomplete or incorrect. Check the suggestion against the statement and visible tests. Requests containing text that resembles instructions to override the AI's rules can be rejected; remove that text from your question or code comments and try again. A rejected hint request does not prevent using Run or Submit.
+
+![Student AI hint panel](images/student-ai-hint.png)
+
+*AI guidance in the Hint tab.*
 
 ### Save and revisit code
 
 Code edits are saved as a browser-local draft when browser storage is available. On reopening a question, CodeIt uses the draft first, otherwise your latest submitted code, otherwise an empty editor. Drafts are tied to your account, assignment, question and browser; they do not synchronize across devices and can be lost if browser storage is cleared or unavailable. Keep a separate copy of important work.
 
 Open **Submissions**, select a row and inspect its saved code, time, verdict and passed count. **Load into editor** asks for confirmation before replacing the current draft. Loading code does not run it or create a new submission.
+
+Below the selected submission's code, choose **Analyze** in **Complexity analysis**. Review the time and auxiliary-space estimates, explanation, and assumptions/caveats. Analysis uses that saved submission, not the current editor draft. Estimates are advisory, not proofs. If analysis fails, choose **Analyze** again to retry.
 
 At the due date, **Submit** becomes **Submissions closed**. The server also checks deadlines. Run, hints and viewing previous submissions remain available while you still have access to the assignment. Ask your teacher about a deadline extension if required.
 
@@ -104,6 +116,10 @@ Questions are shared by reference across your assignments. Editing a question up
 
 **Drafts this session** lets you select earlier generated drafts. Its navigation history is stored for the current browser tab session; closing the session can lose that list. Approval is allowed once per draft. Only one generation/revision can run per teacher at a time.
 
+![Teacher AI question generation page](images/teacher-ai-generation.png)
+
+*Generate and review a question draft before approval.*
+
 ### Create and manage assignments
 
 1. Open **Assignments** and choose **New assignment**.
@@ -111,6 +127,10 @@ Questions are shared by reference across your assignments. Editing a question up
 3. Enter a title, optional Markdown description and optional due date in your local time.
 4. Add one to three questions from your question bank and order them with the arrows.
 5. Choose **Create assignment**. It becomes available to students in that class immediately; there is no separate publish action.
+
+![Teacher assignment creation form](images/teacher-create-assignment.png)
+
+*Select a class and one to three ordered questions.*
 
 The assignment list can be filtered by class. Open an assignment to view its questions/description, edit its fields or clear its due date. Only the creating teacher can edit or delete it. Other teachers in the class can read it and open its questions in a read-only view, including test cases. Their personal question bank still contains only their own questions.
 
@@ -130,7 +150,7 @@ Open a user to change their username/display name or reset their password. Leave
 
 Open **Classes**, create a class with a unique name and optional description, then open its detail page. You can edit the name/description, inspect teacher and student rosters and open assignments.
 
-Under **Add members**, search by username or name, select teachers/students and choose **Add selected**. Existing members are excluded. Use **Remove** next to a member to remove their class access. Administrators cannot be class members.
+Under **Add members**, search by username or name, select teachers/students and choose **Add [count] selected** (for example, **Add 2 selected**). Existing members are excluded. Use **Remove** next to a member to remove their class access. Administrators cannot be class members.
 
 Deleting a class asks for confirmation and removes its memberships, assignments and those assignments' submissions. It does not delete the user accounts.
 
@@ -145,11 +165,19 @@ The table reports current students in the class, students who attempted any ques
 
 The AI receives aggregate statistics rather than student names or source code. Its narrative is advisory; use the displayed numbers to verify it. A completed summary remains a snapshot until regenerated.
 
+When regenerating an AI summary, CodeIt keeps the previous successful statistics and summary visible until a new result is available. If regeneration fails, the previous result remains visible alongside the error.
+
+Limitation: This fallback is available only while you remain on the page. Refreshing or navigating away may remove access to the previous result.
+
+![Admin statistics and AI summary for a three-question assignment](images/admin-ai-summary-three-questions.png)
+
+*Compare the AI performance summary with the three-question statistics.*
+
 ## 5. Long-running actions and connection recovery
 
 AI requests may take several minutes; the default server deadline is five minutes. Running actions show status indicators and complete through live updates. You can leave a page and return to inspect the latest job while it is retained by the server.
 
-If live updates disconnect, **Reconnecting live updates…** appears after a short delay. Check your connection and allow reconnection. Refresh the page if needed to retrieve the latest server state. A server restart fails unfinished jobs rather than resuming them; submit the action again after service recovery.
+If live updates disconnect, **Reconnecting live updates…** appears after a short delay. Check your connection and allow reconnection. Refresh the page if needed to retrieve the latest server state, remembering that this loses the Admin summary's previous-result fallback described in Section 4. A server restart fails unfinished jobs rather than resuming them; submit the action again after service recovery.
 
 ## 6. Troubleshooting
 
@@ -168,9 +196,11 @@ If live updates disconnect, **Reconnecting live updates…** appears after a sho
 
 ## 7. Reproducible peer-testing walkthrough
 
-Use a disposable development installation with the seeded accounts. This walkthrough creates real assignment/submission data; use uniquely named records on a shared test installation.
+Note: The screenshots throughout this guide illustrate a separate demonstration using different questions and submissions. The walkthrough below is an independent test scenario, so its data and results will differ from the screenshots.
 
-1. **Teacher setup:** sign in as `teacher1`. Under Questions, create `Peer test: integer square`, difficulty `easy`, topic `arithmetic`, time limit `2000`, memory `256`. Set the statement to “Read one integer n from standard input and print n squared.” Keep float tolerance off. Add a visible test with input `3` and expected output `9`, and a hidden test with input `0` and expected output `0`. Enter the digits in the input/output fields without surrounding quotes. Save.
+Use a disposable development installation with the seeded accounts. This walkthrough creates real assignment/submission data; use uniquely named records on a shared test installation. For hosted testing, the deployment teammate must first confirm evaluator accounts and class memberships, including accounts in separate classes for the access-boundary check; substitute those for the development names below. The expected counts in step 7 apply to the seeded development class.
+
+1. **Teacher setup:** sign in as `teacher1`. Under Questions, create `Peer test: integer square`, difficulty `easy`, topic `arithmetic`, time limit `2000`, memory `256`. Set the statement to “Read one integer n from standard input and print n squared.” Keep float tolerance off. Add a visible test with input `3` and expected output `9`, and a hidden test with input `0` and expected output `0`. Enter the digits in the input/output fields without surrounding quotes. Choose **Create question**.
 2. **Assign:** create `Peer test: squares` for Demo Class A with that one question and no due date. Students in the class should see it immediately.
 3. **Visible-test check:** sign out and sign in as `student01`. Open the assignment/question and Run `print(9)`. The visible test should pass. Submit the same code: it should receive Wrong answer on the hidden test, with no hidden input/output preview. Run has not created a submission; Submit has.
 4. **Correct submission:** replace the editor content with the following program, then Run and Submit. Both should be Accepted, and the question should be marked solved.
@@ -181,7 +211,7 @@ Use a disposable development installation with the seeded accounts. This walkthr
    ```
 
 5. **History and draft:** open Submissions to see both attempts. Select the first attempt and use Load into editor, accepting the replacement confirmation. Refresh and check that the draft is retained when browser storage is available. Restore the correct code afterward.
-6. **Student AI:** enter “How should I handle zero?” and choose Get hint. Expect a hint or a clear AI service error. A service error tests failure handling but does not establish a successful AI integration; retry after service recovery to complete that check.
+6. **Student AI:** enter “How should I handle zero?” and choose Get hint. Expect a hint or a clear AI service error. In Submissions, select the accepted attempt and choose **Analyze** under **Complexity analysis**; inspect its estimates and assumptions for the saved code. A service error tests failure handling but does not establish a successful AI integration; retry after service recovery to complete that check.
 7. **Admin AI:** sign in as the configured admin. Open Classes → Demo Class A → Peer test: squares and generate a summary. On an otherwise untouched class, expect 10 students, 1 attempted, 1 solved all, 2 submissions, 1 WA and 1 AC. Check the narrative against those numbers.
 8. **Teacher AI:** sign in as `teacher1`, generate an easy arithmetic question, inspect the reference solution/tests, revise it with “Include a negative input example,” then approve the revised draft. Verify that it appears in Questions with an AI badge. AI content varies; verify validity rather than expecting exact wording.
 9. **Access boundaries:** sign in as `student11` and confirm the Demo Class A assignment is absent. As admin, temporarily add `teacher2` to Demo Class A; as `teacher2`, confirm the assignment and its question are readable but assignment editing/deletion is unavailable. Remove that temporary membership afterward.

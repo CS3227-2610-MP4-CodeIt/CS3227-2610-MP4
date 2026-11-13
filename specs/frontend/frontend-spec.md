@@ -471,3 +471,7 @@ Library).
 - Offline support, service workers, i18n, dark mode.
 - Logging, analytics, error reporting services.
 - UI and end-to-end tests (§9).
+
+Shared loading indicators respect reduced-motion preferences. Errors, reconnecting and job state
+changes provide programmatic feedback without repeatedly announcing elapsed seconds or result bodies.
+The shared navigation wraps and contains long account names at narrow widths.

@@ -86,7 +86,7 @@ function TestRow({
     return (
       <li className="flex flex-wrap items-center gap-x-3 px-3 py-1.5 text-sm">
         {summary}
-        <span className="ml-auto text-xs text-slate-400">Hidden test</span>
+        <span className="ml-auto text-xs text-slate-600">Hidden test</span>
       </li>
     );
   }
@@ -99,7 +99,7 @@ function TestRow({
         aria-expanded={open}
       >
         {summary}
-        <span className="ml-auto text-xs text-slate-400">
+        <span className="ml-auto text-xs text-slate-600">
           {open ? "▾" : "▸"} details
         </span>
       </button>

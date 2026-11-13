@@ -24,16 +24,27 @@ export function JobStatusBadge({
   const now = useNow(job.status === "in_process");
   if (job.status === "in_process") {
     return (
-      <Spinner
-        label={`${runningLabel} ${formatElapsed(job.created_at, now)}`}
-      />
+      <span>
+        <span role="status" className="sr-only">
+          {runningLabel}
+        </span>
+        <span aria-hidden="true">
+          <Spinner
+            label={`${runningLabel} ${formatElapsed(job.created_at, now)}`}
+          />
+        </span>
+      </span>
     );
   }
   if (job.status === "failed") {
-    return <p className="text-sm text-red-600">{job.error ?? "Failed."}</p>;
+    return (
+      <p role="status" className="text-sm text-red-700">
+        {job.error ?? "Failed."}
+      </p>
+    );
   }
   return (
-    <p className="text-xs text-slate-500">
+    <p role="status" className="text-xs text-slate-600">
       finished {formatRelative(job.finished_at ?? job.created_at, now)}
     </p>
   );

@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { draftKey, initialCode, loadDraft, saveDraft } from "./drafts";
+import {
+  draftKey,
+  initialCode,
+  initialEditorContext,
+  loadDraft,
+  saveDraft,
+} from "./drafts";
 
 const store = new Map<string, string>();
 let full = false;
@@ -59,5 +65,30 @@ describe("initialCode", () => {
     expect(initialCode(null, { status: "loaded", code: "sub" })).toBe("sub");
     expect(initialCode(null, { status: "none" })).toBe("");
     expect(initialCode(null, { status: "error" })).toBe("");
+  });
+});
+
+describe("initial editor context", () => {
+  it("reports the selected source, including empty and failed loads", () => {
+    expect(initialEditorContext("draft", { status: "pending" })).toEqual({
+      code: "draft",
+      origin: "Started from your device draft.",
+    });
+    expect(
+      initialEditorContext(null, { status: "loaded", code: "submitted" }),
+    ).toEqual({
+      code: "submitted",
+      origin: "Started from your latest submission.",
+    });
+    expect(initialEditorContext(null, { status: "none" })).toEqual({
+      code: "",
+      origin: "Started with an empty editor.",
+    });
+    expect(initialEditorContext(null, { status: "error" })).toEqual({
+      code: "",
+      origin:
+        "Started with an empty editor because your latest submission could not be loaded.",
+    });
+    expect(initialEditorContext(null, { status: "pending" })).toBeNull();
   });
 });

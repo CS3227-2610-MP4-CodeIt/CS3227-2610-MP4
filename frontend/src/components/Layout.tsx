@@ -30,7 +30,10 @@ function ReconnectingBar() {
   }, [status]);
   if (status !== "reconnecting" || !late) return null;
   return (
-    <div className="bg-amber-100 px-4 py-1 text-center text-xs text-amber-800">
+    <div
+      role="status"
+      className="bg-amber-100 px-4 py-1 text-center text-xs text-amber-800"
+    >
       Reconnecting live updates…
     </div>
   );
@@ -44,18 +47,18 @@ export function Layout() {
   return (
     <div className="min-h-screen">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-2">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 sm:gap-4 px-4 py-2">
           <span className="font-semibold">CodeIt</span>
-          <nav className="flex gap-1">
+          <nav className="flex flex-wrap gap-1" aria-label="Main navigation">
             {NAV[auth.user.role].map((item) => (
               <NavLink key={item.to} to={item.to} className={navClass}>
                 {item.label}
               </NavLink>
             ))}
           </nav>
-          <span className="ml-auto text-sm text-slate-600">
+          <span className="ml-auto min-w-0 max-w-full break-words text-sm text-slate-600">
             {auth.user.display_name}{" "}
-            <span className="text-slate-400">({auth.user.role})</span>
+            <span className="text-slate-600">({auth.user.role})</span>
           </span>
           <button type="button" className="btn" onClick={() => void logout()}>
             Log out
