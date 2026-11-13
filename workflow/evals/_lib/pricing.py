@@ -44,6 +44,11 @@ PRICING: dict[str, dict[str, tuple[float, float | None, float | None, float]]] =
         "short": (2.00, 0.10, 2.50, 10.00),
         "long": (4.00, 0.20, 5.00, 15.00),
     },
+    # Terra rates checked 2026-11-13; other table entries retain their pinned date.
+    "gpt-6.1-terra": {
+        "short": (1.00, 0.05, 1.25, 5.00),
+        "long": (2.00, 0.10, 2.50, 7.50),
+    },
     "gpt-6-luna": {
         "short": (0.10, 0.01, 0.125, 0.50),
         "long": (0.20, 0.02, 0.25, 0.75),
